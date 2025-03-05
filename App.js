@@ -107,6 +107,7 @@ function Homescreen({navigation}) {
 
 function GrossMotor({navigation}) {
   return <Text> "This is a new page" </Text>;
+  
 }
 
 export default function App() {
