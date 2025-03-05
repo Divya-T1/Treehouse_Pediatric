@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 /*Creating an array of circles*/
 //new comment
 
-
+//comment2
 
 function Homescreen({navigation}) {
   return (
