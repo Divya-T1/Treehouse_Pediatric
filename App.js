@@ -107,10 +107,10 @@ function Homescreen({navigation}) {
   );
 }
 
-function GrossMotor({navigation}) {
-  return <Text> "This is a new page" </Text>;
+// function GrossMotor({navigation}) {
+//   return <Text> "This is a new page" </Text>;
   
-}
+// }
 
 export default function App() {
   return (
@@ -120,7 +120,11 @@ export default function App() {
           name = 'Home'
           component = {Homescreen}
         />
-        <Stack.Screen name = "Gross Motor" component={GrossMotor}/>
+
+        <Stack.Screen name = "Gross Motor" 
+        component={GrossMotorScreen}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   )
