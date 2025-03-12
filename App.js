@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity
 import {NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import GrossMotorScreen from './screens/GrossMotorScreen';
 
 const Stack = createNativeStackNavigator();
 
