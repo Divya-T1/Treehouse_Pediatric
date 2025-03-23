@@ -5,6 +5,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
+import FineMotorScreen from './screens/FineMotorScreen';
+import RoomSpacesScreen from './screens/RoomSpacesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,7 +41,7 @@ function Homescreen({navigation}) {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity = {0.6}
-            onPress={() => console.log("HIIII")}>
+            onPress={() => navigation.navigate('Fine Motor')}>
               <View style = {styles.circle3}>
                 <Image
                     source = {require('./Arts.png')}
@@ -48,7 +50,7 @@ function Homescreen({navigation}) {
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
-            onPress={() => console.log("HIIII")}>
+            onPress={() => navigation.navigate('Room Spaces')}>
               <View style = {styles.circle4}>
                 <Image
                     source = {require('./Door.png')}
@@ -123,6 +125,12 @@ export default function App() {
 
         <Stack.Screen name = "Gross Motor" 
         component={GrossMotorScreen}
+        />
+        <Stack.Screen name = "Fine Motor" 
+        component={FineMotorScreen}
+        />
+        <Stack.Screen name = "Room Spaces" 
+        component={RoomSpacesScreen}
         />
 
       </Stack.Navigator>
