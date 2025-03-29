@@ -11,14 +11,16 @@ import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity
 export default function RoomSpacesScreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/RoomSpacesPictures/Component.png';
-  const act2 = '../assets/RoomSpacesPictures/Group.png';
-  const act3 = '../assets/RoomSpacesPictures/Group1.png';
-  const act4 = '../assets/RoomSpacesPictures/surface1.png';
-  const act5 = '../assets/RoomSpacesPictures/Vector.png';
-  const act6 = '../assets/RoomSpacesPictures/Vector1.png';
-  const act7 = '../assets/RoomSpacesPictures/Vector2.png';
-  const act8 = '../assets/RoomSpacesPictures/Vector3.png';
+  const act1 = '../assets/RoomSpacesPictures/horse.png';
+  const act2 = '../assets/RoomSpacesPictures/house.png';
+  const act3 = '../assets/RoomSpacesPictures/mask.png';
+  const act4 = '../assets/RoomSpacesPictures/puzzle.png';
+  const act5 = '../assets/RoomSpacesPictures/sitting.png';
+  const act6 = '../assets/RoomSpacesPictures/talking.png';
+  const act7 = '../assets/RoomSpacesPictures/toilet.png';
+  const act8 = '../assets/RoomSpacesPictures/treehouse.png';
+  const act9 = '../assets/RoomSpacesPictures/utensils.png';
+  const act10 = '../assets/RoomSpacesPictures/weight.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -71,6 +73,16 @@ export default function RoomSpacesScreen() {
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
             <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
               <Image source={require(act8)} style={styles.circleImage} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act9)}>
+            <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
+              <Image source={require(act9)} style={styles.circleImage} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act10)}>
+            <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
+              <Image source={require(act10)} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
         </View>
@@ -145,6 +157,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 20,
     backgroundColor: 'rgb(195, 229, 236)',
+    paddingLeft: 10,
   },
 
   circle5: {
@@ -168,6 +181,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     backgroundColor: 'rgb(195, 229, 236)',
   },
+  
 
   selectedCircle: {
     borderWidth: 3,

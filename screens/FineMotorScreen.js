@@ -11,14 +11,14 @@ import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity
 export default function FineMotorScreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/FineMotorPictures/CRAFT.png';
-  const act2 = '../assets/FineMotorPictures/CUTTING.png';
-  const act3 = '../assets/FineMotorPictures/DOT_MARKERS.png';
-  const act4 = '../assets/FineMotorPictures/DRAWING.png';
-  const act5 = '../assets/FineMotorPictures/Frame_2.png';
-  const act6 = '../assets/FineMotorPictures/Group_18.png';
-  const act7 = '../assets/FineMotorPictures/TWEEZERS.png';
-  const act8 = '../assets/FineMotorPictures/WRITING.png';
+  const act1 = '../assets/FineMotorPictures/coloring.png';
+  const act2 = '../assets/FineMotorPictures/cutting.png';
+  const act3 = '../assets/FineMotorPictures/dot_markers.png';
+  const act4 = '../assets/FineMotorPictures/drawing.png';
+  const act5 = '../assets/FineMotorPictures/craft.png';
+  const act6 = '../assets/FineMotorPictures/painting.png';
+  const act7 = '../assets/FineMotorPictures/tweezers.png';
+  const act8 = '../assets/FineMotorPictures/writing.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -105,13 +105,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circleImage: {
     width: 80,
     height: 80,
     resizeMode: 'contain',
+    //resizeMode: 'cover',
   },
 
   circle2: {
@@ -122,7 +124,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle3: {
@@ -133,7 +136,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle4: {
@@ -144,7 +148,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle5: {
@@ -155,7 +160,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle6: {
@@ -166,7 +172,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   selectedCircle: {
