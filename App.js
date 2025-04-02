@@ -9,6 +9,7 @@ import ToyAndActScreen from './screens/ToysAndActScreen';
 import FineMotorScreen from './screens/FineMotorScreen';
 import RoomSpacesScreen from './screens/RoomSpacesScreen';
 import Regulation from './screens/Regulation';
+import SensoryScreen from './screens/SensoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,7 +62,7 @@ function Homescreen({navigation}) {
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
-            onPress={() => console.log("HIIII")}>
+            onPress={() => navigation.navigate('Sensory Screen')}>
               <View style = {styles.circle5}>
                 <Image
                     source = {require('./PlayDoh.png')}
@@ -139,6 +140,9 @@ export default function App() {
         />
         <Stack.Screen name = "Regulation" 
         component={Regulation}
+        />
+        <Stack.Screen name = "Sensory Screen" 
+        component={SensoryScreen}
         />
 
 

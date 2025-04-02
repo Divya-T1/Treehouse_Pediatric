@@ -8,7 +8,7 @@ import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity
 
 //comment2
 
-export default function FineMotorScreen() {
+export default function ToysAndActScreen() {
 
   const pathName = '../Logo.png';
   const act1 = '../assets/TOYS/Group 16.png';
