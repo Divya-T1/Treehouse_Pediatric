@@ -11,14 +11,16 @@ import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity
 export default function FineMotorScreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/FineMotorPictures/coloring.png';
-  const act2 = '../assets/FineMotorPictures/CUTTING.png';
-  const act3 = '../assets/FineMotorPictures/DOT_MARKERS.png';
-  const act4 = '../assets/FineMotorPictures/DRAWING.png';
-  const act5 = '../assets/FineMotorPictures/CRAFT.png';
-  const act6 = '../assets/FineMotorPictures/painting.png';
-  const act7 = '../assets/FineMotorPictures/TWEEZERS.png';
-  const act8 = '../assets/FineMotorPictures/WRITING.png';
+  const act1 = '../assets/TOYS/Group 16.png';
+  const act2 = '../assets/TOYS/Group-1.png';
+  const act3 = '../assets/TOYS/Group-2.png';
+  const act4 = '../assets/TOYS/Group.png';
+  const act5 = '../assets/TOYS/Vector-1.png';
+  const act6 = '../assets/TOYS/Vector-2.png';
+  const act7 = '../assets/TOYS/Vector-3.png';
+  const act8 = '../assets/TOYS/Vector-4.png';
+  const act9 = '../assets/TOYS/Vector-5.png';
+  const act10 = '../assets/TOYS/Vector.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -71,6 +73,16 @@ export default function FineMotorScreen() {
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
             <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
               <Image source={require(act8)} style={styles.circleImage} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act9)}>
+            <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
+              <Image source={require(act9)} style={styles.circleImage} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act10)}>
+            <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
+              <Image source={require(act10)} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
         </View>
