@@ -6,7 +6,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
 import ToyAndActScreen from './screens/ToysAndActScreen';
-import ToyScreen from './screens/ToyScreen';
 import FineMotorScreen from './screens/FineMotorScreen';
 import RoomSpacesScreen from './screens/RoomSpacesScreen';
 import Regulation from './screens/Regulation';
