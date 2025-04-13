@@ -190,4 +190,14 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
 
+  activityText: {
+    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: "center", 
+    fontWeight: '600', 
+    color: '#333', 
+    textAlign: 'center',
+  },
+
 });
