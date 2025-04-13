@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
+import BottomNavBar from './NavigationOptions.js';
 
 /*Creating an array of circles*/
 //new comment
@@ -35,35 +36,42 @@ export default function GrossMotorScreen() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Rock Climbing</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
               <Image source={require(act2)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Sliding</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
               <Image source={require(act3)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Yoga</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
               <Image source={require(act4)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Balancing Beam</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
               <Image source={require(act5)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Trampoline</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
             <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
               <Image source={require(act6)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Obstacle Course</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
       <StatusBar style="auto" />
+      <BottomNavBar />
     </SafeAreaView>
   );
 }
@@ -161,6 +169,16 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     backgroundColor: 'rgb(211,211,211)',
     borderWidth: 0,
+  },
+
+  activityText: {
+    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: "center", 
+    fontWeight: '600', 
+    color: '#333', 
+    textAlign: 'center', 
   },
 
 });

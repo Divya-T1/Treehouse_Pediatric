@@ -8,16 +8,16 @@ import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity
 
 //comment2
 
-export default function Regulation() {
+export default function ADLScreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/Regulation/image 1.png';
-  const act2 = '../assets/Regulation/image 2.png';
-  const act3 = '../assets/Regulation/image 3.png';
-  const act4 = '../assets/Regulation/image 4.png';
-  const act5 = '../assets/Regulation/image 5.png';
-  const act6 = '../assets/Regulation/image 6.png';
-  const act7 = '../assets/Regulation/image 20.png';
+  const act1 = '../assets/ADL/button.png';
+  const act2 = '../assets/ADL/pants.png';
+  const act3 = '../assets/ADL/running_shoes.png';
+  const act4 = '../assets/ADL/socks_.png';
+  const act5 = '../assets/ADL/t-shirt.png';
+  const act6 = '../assets/ADL/toothbrush.png';
+  const act7 = '../assets/ADL/zipper.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -36,43 +36,36 @@ export default function Regulation() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Breathing</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
-            <View style={[styles.circle1, selectedActivities.includes(act2) && styles.selectedCircle]}>
+            <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
               <Image source={require(act2)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Light Off</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
-            <View style={[styles.circle1, selectedActivities.includes(act3) && styles.selectedCircle]}>
+            <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
               <Image source={require(act3)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Light Off</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
-            <View style={[styles.circle1, selectedActivities.includes(act4) && styles.selectedCircle]}>
+            <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
               <Image source={require(act4)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Hugging</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
-            <View style={[styles.circle1, selectedActivities.includes(act5) && styles.selectedCircle]}>
+            <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
               <Image source={require(act5)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Relaxing</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
-            <View style={[styles.circle1, selectedActivities.includes(act6) && styles.selectedCircle]}>
+            <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
               <Image source={require(act6)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Weighted Blanket</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
-            <View style={[styles.circle1, selectedActivities.includes(act7) && styles.selectedCircle]}>
+            <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
               <Image source={require(act7)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Music</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -100,12 +93,12 @@ const styles = StyleSheet.create({
   circle1: {
     width: 100,
     height: 100,
-    padding: 0,
+    padding: 20,
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 5,
-    marginVertical: 5,
+    marginHorizontal: 20,
+    marginVertical: 20,
     backgroundColor: 'rgb(218, 188, 188)',
     overflow: 'hidden',
   },
@@ -181,16 +174,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     backgroundColor: 'rgb(211,211,211)',
     borderWidth: 0,
-  },
-
-  activityText: {
-    fontSize: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: "center", 
-    fontWeight: '600', 
-    color: '#333', 
-    textAlign: 'center',
   },
 
 });

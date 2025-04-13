@@ -6,10 +6,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
 import ToyAndActScreen from './screens/ToysAndActScreen';
+import ToyScreen from './screens/ToyScreen';
 import FineMotorScreen from './screens/FineMotorScreen';
 import RoomSpacesScreen from './screens/RoomSpacesScreen';
 import Regulation from './screens/Regulation';
 import SensoryScreen from './screens/SensoryScreen';
+import ADLScreen from './screens/ADLScreen.js';
+import BottomNavBar from './screens/NavigationOptions.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +35,7 @@ function Homescreen({navigation}) {
                     source = {require('./Running.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Gross Motor</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity = {0.6}
@@ -41,6 +45,7 @@ function Homescreen({navigation}) {
                     source = {require('./TeddyBear.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Fun Activities</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity = {0.6}
@@ -50,6 +55,7 @@ function Homescreen({navigation}) {
                     source = {require('./Arts.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Fine Motor</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
@@ -59,6 +65,7 @@ function Homescreen({navigation}) {
                     source = {require('./Door.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Room Spaces</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
@@ -68,15 +75,17 @@ function Homescreen({navigation}) {
                     source = {require('./PlayDoh.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Sensory Screen</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
-            onPress={() => console.log("HIIII")}>
+            onPress={() => navigation.navigate('ADL Screen')}>
               <View style = {styles.circle6}>
                 <Image
                     source = {require('./Brushing.png')}
                 />
               </View>
+              <Text style={styles.activityText}>ADL</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
@@ -86,28 +95,23 @@ function Homescreen({navigation}) {
                     source = {require('./Headphones.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Regulation</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
-            onPress={() => console.log("HIIII")}>
+            onPress={() => navigation.navigate('Toy Screen')}>
               <View style = {styles.circle8}>
                 <Image
-                    style = {styles.a}
-                    source = {require('./mynaui_letter-a-solid.png')}
-                />
-                <Image
-                    style = {styles.l1}
-                    source = {require('./mynaui_letter-l-solid.png')}
-                />
-                <Image
-                    style = {styles.l2}
-                    source = {require('./mynaui_letter-l-solid.png')}
+                    style = {styles.circle7}
+                    source = {require('./assets/toy.png')}
                 />
               </View>
+              <Text style={styles.activityText}>Toys/Games</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
       <StatusBar style="auto" />
+      <BottomNavBar />
     </SafeAreaView>
   );
 }
@@ -125,7 +129,6 @@ export default function App() {
           name = 'Home'
           component = {Homescreen}
         />
-
         <Stack.Screen name = "Gross Motor" 
         component={GrossMotorScreen}
         />
@@ -143,6 +146,12 @@ export default function App() {
         />
         <Stack.Screen name = "Sensory Screen" 
         component={SensoryScreen}
+        />
+        <Stack.Screen name = "ADL Screen" 
+        component={ADLScreen}
+        />
+        <Stack.Screen name = "Toy Screen" 
+        component={ToyScreen}
         />
 
 
@@ -268,5 +277,15 @@ const styles = StyleSheet.create({
 
   l2: {
     marginHorizontal: -15,
-  }
+  },
+
+  activityText: {
+    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: "center", 
+    fontWeight: '600', 
+    color: '#333', 
+    textAlign: 'center',
+  },
 });
