@@ -12,13 +12,13 @@ export default function FineMotorScreen() {
 
   const pathName = '../Logo.png';
   const act1 = '../assets/FineMotorPictures/coloring.png';
-  const act2 = '../assets/FineMotorPictures/CUTTING.png';
-  const act3 = '../assets/FineMotorPictures/DOT_MARKERS.png';
-  const act4 = '../assets/FineMotorPictures/DRAWING.png';
-  const act5 = '../assets/FineMotorPictures/CRAFT.png';
+  const act2 = '../assets/FineMotorPictures/cutting.png';
+  const act3 = '../assets/FineMotorPictures/dot_markers.png';
+  const act4 = '../assets/FineMotorPictures/drawing.png';
+  const act5 = '../assets/FineMotorPictures/craft.png';
   const act6 = '../assets/FineMotorPictures/painting.png';
-  const act7 = '../assets/FineMotorPictures/TWEEZERS.png';
-  const act8 = '../assets/FineMotorPictures/WRITING.png';
+  const act7 = '../assets/FineMotorPictures/tweezers.png';
+  const act8 = '../assets/FineMotorPictures/writing.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -188,16 +188,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     backgroundColor: 'rgb(211,211,211)',
     borderWidth: 0,
-  },
-
-  activityText: {
-    fontSize: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: "center", 
-    fontWeight: '600', 
-    color: '#333', 
-    textAlign: 'center',
   },
 
 });
