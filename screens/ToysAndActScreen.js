@@ -39,51 +39,61 @@ export default function ToysAndActScreen() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Animals</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
               <Image source={require(act2)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Toy Cars</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
               <Image source={require(act3)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Work Table</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
               <Image source={require(act4)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Toy Food</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
               <Image source={require(act5)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Reading</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
             <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
               <Image source={require(act6)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Watch Video</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
               <Image source={require(act7)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Puzzles</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
             <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
               <Image source={require(act8)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>IPad Time</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act9)}>
             <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
               <Image source={require(act9)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Instrument</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act10)}>
             <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
               <Image source={require(act10)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Toy Train</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -194,4 +204,13 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
 
+  activityText: {
+    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: "center", 
+    fontWeight: '600', 
+    color: '#333', 
+    textAlign: 'center',
+  },
 });

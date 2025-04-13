@@ -13,12 +13,12 @@ export default function FineMotorScreen() {
   const pathName = '../Logo.png';
   const act1 = '../assets/FineMotorPictures/coloring.png';
   const act2 = '../assets/FineMotorPictures/CUTTING.png';
-  const act3 = '../assets/FineMotorPictures/dot_markers.png';
-  const act4 = '../assets/FineMotorPictures/drawing.png';
+  const act3 = '../assets/FineMotorPictures/DOT_MARKERS.png';
+  const act4 = '../assets/FineMotorPictures/DRAWING.png';
   const act5 = '../assets/FineMotorPictures/CRAFT.png';
   const act6 = '../assets/FineMotorPictures/painting.png';
-  const act7 = '../assets/FineMotorPictures/tweezers.png';
-  const act8 = '../assets/FineMotorPictures/writing.png';
+  const act7 = '../assets/FineMotorPictures/TWEEZERS.png';
+  const act8 = '../assets/FineMotorPictures/WRITING.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -195,6 +195,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: "center", 
+    fontWeight: '600', 
+    color: '#333', 
+    textAlign: 'center',
   },
 
 });

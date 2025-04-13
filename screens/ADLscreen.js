@@ -3,17 +3,22 @@ import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
 
-export default function ADLscreen() {
+/*Creating an array of circles*/
+//new comment
+
+//comment2
+
+export default function ToysAndActScreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/ADL/pants.png';
-  const act2 = '../assets/ADL/shoes.png';
-  const act3 = '../assets/ADL/socks.png';
-  const act4 = '../assets/ADL/toothbrush.png';
-  const act5 = '../assets/ADL/tshirt.png';
-  const act6 = '../assets/ADL/zipper.png';
-  const act7 = '../assets/ADL/xbutton.png';
-  
+  const act1 = '../assets/TOYS/Group 6.png';
+  const act2 = '../assets/TOYS/Group 9.png';
+  const act3 = '../assets/TOYS/Group 10.png';
+  const act4 = '../assets/TOYS/fig 1.png';
+  const act5 = '../assets/TOYS/eat 3.png';
+  const act6 = '../assets/TOYS/blicks 1.png';
+  const act7 = '../assets/TOYS/balcar 2.png';
+  const act8 = '../assets/TOYS/teddy 1.png';
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -32,7 +37,7 @@ export default function ADLscreen() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Pants</Text>
+            <Text style={styles.activityText}>Train</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
@@ -68,7 +73,11 @@ export default function ADLscreen() {
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
               <Image source={require(act7)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>X</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
+            <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
+              <Image source={require(act8)} style={styles.circleImage} />
+            </View>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -102,13 +111,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circleImage: {
     width: 80,
     height: 80,
     resizeMode: 'contain',
+    //resizeMode: 'cover',
   },
 
   circle2: {
@@ -119,7 +130,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle3: {
@@ -130,7 +142,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle4: {
@@ -141,7 +154,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle5: {
@@ -152,7 +166,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   circle6: {
@@ -163,7 +178,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(218, 188, 188)',
+    overflow: 'hidden',
   },
 
   selectedCircle: {
@@ -177,6 +193,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: "center", 
+    fontWeight: '600', 
+    color: '#333', 
+    textAlign: 'center',
   },
-
 });
