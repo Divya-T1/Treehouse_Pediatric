@@ -13,6 +13,7 @@ import Regulation from './screens/Regulation';
 import SensoryScreen from './screens/SensoryScreen';
 import ADLScreen from './screens/ADLScreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
+import Schedule from './screens/Schedule.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -152,6 +153,9 @@ export default function App() {
         />
         <Stack.Screen name = "Toy Screen" 
         component={ToyScreen}
+        />
+        <Stack.Screen name = "Schedule" 
+        component={Schedule}
         />
 
 
