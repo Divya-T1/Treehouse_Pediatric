@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
+import BottomNavBar from './NavigationOptions.js';
 
 /*Creating an array of circles*/
 //new comment
@@ -98,6 +99,7 @@ export default function ToysAndActScreen() {
         </View>
       </ScrollView>
       <StatusBar style="auto" />
+      <BottomNavBar />
     </SafeAreaView>
   );
 }

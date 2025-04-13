@@ -11,14 +11,6 @@ import BottomNavBar from './NavigationOptions.js';
 
 export default function Schedule() {
 
-    const pathName = '../Logo.png';
-    const act1 = '../assets/Group_11.png';
-    const act2 = '../assets/Group_12.png';
-    const act3 = '../assets/image_6.png';
-    const act4 = '../assets/image_7.png';
-    const act5 = '../assets/image_9.png';
-    const act6 = '../assets/image_10.png';
-  
     const [selectedActivities, setSelectedActivities] = useState([]);
   
     const toggleSelection = (id) => {
