@@ -3,19 +3,17 @@ import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
 
-export default function ToyScreen() {
+export default function ADLscreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/ToyFood.png';
-  const act2 = '../assets/CarToy.png';
-  const act3 = '../assets/Train.png';
-  const act4 = '../assets/AnimalToy.png';
-  const act5 = '../assets/BookToy.png';
-  const act6 = '../assets/VideoToy.png';
-  const act7 = '../assets/TOYS/Vector-3.png'
-  const act8 = '../assets/TOYS/Vector-4.png'
-  const act9 = '../assets/TOYS/Vector-5.png'
-  const act10 = '../assets/TOYS/Group-2.png'
+  const act1 = '../assets/ADL/pants.png';
+  const act2 = '../assets/ADL/shoes.png';
+  const act3 = '../assets/ADL/socks.png';
+  const act4 = '../assets/ADL/toothbrush.png';
+  const act5 = '../assets/ADL/tshirt.png';
+  const act6 = '../assets/ADL/zipper.png';
+  const act7 = '../assets/ADL/xbutton.png';
+  
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -62,22 +60,7 @@ export default function ToyScreen() {
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
-                <Image source={require(act7)} style={styles.circleImage} />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
-            <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
-               <Image source={require(act8)} style={styles.circleImage} />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
-            <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
-                <Image source={require(act7)} style={styles.circleImage} />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
-            <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
-               <Image source={require(act8)} style={styles.circleImage} />
+              <Image source={require(act7)} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
         </View>
