@@ -12,7 +12,7 @@ export default function BottomNavBar() {
       <TouchableOpacity onPress={() => navigation.navigate('Gross Motor')}>
         <Text style={styles.navText}>← Back</Text>
       </TouchableOpacity>
-      <TouchableOpacity onClick={() => navigate(-1)}>
+      <TouchableOpacity onClick={() => navigation.navigate('Home')}>
         <Text style={styles.navText}>⌂ Home</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Schedule')}>

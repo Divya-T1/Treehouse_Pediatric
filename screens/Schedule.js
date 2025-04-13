@@ -29,47 +29,7 @@ export default function Schedule() {
   
     return (
       <SafeAreaView style={styles.container}>
-        <Image source = {require(pathName)} />
-        <ScrollView>
-          <View style = {styles.grid}>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act1)}>
-              <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
-                <Image source={require(act1)} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>Rock Climbing</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
-              <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
-                <Image source={require(act2)} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>Sliding</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
-              <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
-                <Image source={require(act3)} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>Yoga</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
-              <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
-                <Image source={require(act4)} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>Balancing Beam</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
-              <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
-                <Image source={require(act5)} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>Trampoline</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
-              <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
-                <Image source={require(act6)} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>Obstacle Course</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        <Text>Schedule</Text>
         <StatusBar style="auto" />
         <BottomNavBar />
       </SafeAreaView>
