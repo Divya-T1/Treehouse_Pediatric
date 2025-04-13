@@ -29,6 +29,12 @@ export default function RoomSpacesScreen() {
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
+  //Icons in Room Space left to match:
+// OT room
+// Toy Closet
+// ABA Gym
+// ABA treatment room
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,61 +45,61 @@ export default function RoomSpacesScreen() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Placeholder</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
               <Image source={require(act2)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Cutting</Text>
+            <Text style={styles.activityText}>Placeholder</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
               <Image source={require(act3)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Placeholder</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
               <Image source={require(act4)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Placeholder</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
               <Image source={require(act5)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Waiting Room</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
             <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
               <Image source={require(act6)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Speech Room</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
               <Image source={require(act7)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Bathroom</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
             <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
               <Image source={require(act8)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Treetop Room</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act9)}>
             <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
               <Image source={require(act9)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Kitchen</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act10)}>
             <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
               <Image source={require(act10)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Coloring</Text>
+            <Text style={styles.activityText}>Gym</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

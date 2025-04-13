@@ -195,9 +195,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: "center", 
-    fontWeight: '600', 
-    color: '#333', 
-    textAlign: 'center',
   },
 
 });
