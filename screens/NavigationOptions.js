@@ -9,7 +9,7 @@ export default function BottomNavBar() {
 
   return (
     <View style={styles.navBar}>
-      <TouchableOpacity onPress={() => navigation.navigate(-1)}>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
         <Text style={styles.navText}>← Back</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Home')}>
