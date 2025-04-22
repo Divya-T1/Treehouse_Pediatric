@@ -46,25 +46,25 @@ export default function RoomSpacesScreen() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Placeholder</Text>
+            <Text style={styles.activityText}>Rocking Chair</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
               <Image source={require(act2)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Placeholder</Text>
+            <Text style={styles.activityText}>Nurse</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
               <Image source={require(act3)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Placeholder</Text>
+            <Text style={styles.activityText}>Auditory Room</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
               <Image source={require(act4)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Placeholder</Text>
+            <Text style={styles.activityText}>Puzzle Room</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
@@ -216,5 +216,6 @@ const styles = StyleSheet.create({
     color: '#333', 
     textAlign: 'center',
   },
+  
 
 });
