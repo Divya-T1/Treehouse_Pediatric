@@ -4,21 +4,19 @@ import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
 
-/*Creating an array of circles*/
-//new comment
-
-//comment2
-
-export default function ADLScreen() {
+export default function ToyScreen() {
 
   const pathName = '../Logo.png';
-  const act1 = '../assets/ADL/button.png';
-  const act2 = '../assets/ADL/pants.png';
-  const act3 = '../assets/ADL/running_shoes.png';
-  const act4 = '../assets/ADL/socks_.png';
-  const act5 = '../assets/ADL/t-shirt.png';
-  const act6 = '../assets/ADL/toothbrush.png';
-  const act7 = '../assets/ADL/zipper.png';
+  const act1 = '../ToyFood.png';
+  const act2 = '../assets/CarToy.png';
+  const act3 = '../assets/Train.png';
+  const act4 = '../assets/AnimalToy.png';
+  const act5 = '../assets/BookToy.png';
+  const act6 = '../assets/VideoToy.png';
+  const act7 = '../assets/TOYS/Vector-3.png'
+  const act8 = '../assets/TOYS/Vector-4.png'
+  const act9 = '../assets/TOYS/Vector-5.png'
+  const act10 = '../assets/TOYS/Group-2.png'
 
   const [selectedActivities, setSelectedActivities] = useState([]);
 
@@ -37,36 +35,61 @@ export default function ADLScreen() {
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={require(act1)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Toy Food</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
               <Image source={require(act2)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Toy Car</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
               <Image source={require(act3)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Toy Train</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
               <Image source={require(act4)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Stuffed Animal</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
               <Image source={require(act5)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Reading</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
             <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
               <Image source={require(act6)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Video</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
-              <Image source={require(act7)} style={styles.circleImage} />
+                <Image source={require(act7)} style={styles.circleImage} />
             </View>
+            <Text style={styles.activityText}>Puzzle</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
+            <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
+               <Image source={require(act8)} style={styles.circleImage} />
+            </View>
+            <Text style={styles.activityText}>IPad</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act9)}>
+            <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
+                <Image source={require(act9)} style={styles.circleImage} />
+            </View>
+            <Text style={styles.activityText}>Card Game</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act10)}>
+            <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
+               <Image source={require(act10)} style={styles.circleImage} />
+            </View>
+            <Text style={styles.activityText}>Table Work</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -101,15 +124,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(218, 188, 188)',
-    overflow: 'hidden',
+    backgroundColor: 'rgb(195, 229, 236)',
   },
 
   circleImage: {
     width: 80,
     height: 80,
     resizeMode: 'contain',
-    //resizeMode: 'cover',
   },
 
   circle2: {
@@ -120,8 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(218, 188, 188)',
-    overflow: 'hidden',
+    backgroundColor: 'rgb(195, 229, 236)',
   },
 
   circle3: {
@@ -132,8 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(218, 188, 188)',
-    overflow: 'hidden',
+    backgroundColor: 'rgb(195, 229, 236)',
   },
 
   circle4: {
@@ -144,8 +163,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(218, 188, 188)',
-    overflow: 'hidden',
+    backgroundColor: 'rgb(195, 229, 236)',
   },
 
   circle5: {
@@ -156,8 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(218, 188, 188)',
-    overflow: 'hidden',
+    backgroundColor: 'rgb(195, 229, 236)',
   },
 
   circle6: {
@@ -168,8 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(218, 188, 188)',
-    overflow: 'hidden',
+    backgroundColor: 'rgb(195, 229, 236)',
   },
 
   selectedCircle: {

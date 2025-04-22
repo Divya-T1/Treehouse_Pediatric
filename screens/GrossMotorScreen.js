@@ -27,6 +27,11 @@ export default function GrossMotorScreen() {
     );
   };
 
+  const handleConfirm = () => {
+    const selected = activities.filter((act) => selectedActivities.includes(act.id));
+    navigation.navigate('ScheduleScreen', { selectedActivities: selected });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Image source = {require(pathName)} />
@@ -178,7 +183,7 @@ const styles = StyleSheet.create({
     textAlign: "center", 
     fontWeight: '600', 
     color: '#333', 
-    textAlign: 'center', 
+    textAlign: 'center',
   },
 
 });

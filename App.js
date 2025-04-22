@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
 import ToyAndActScreen from './screens/ToysAndActScreen';
-//import ToyScreen from './screens/ToyScreen';
+import ToyScreen from './screens/ToyScreen';
 import FineMotorScreen from './screens/FineMotorScreen';
 import RoomSpacesScreen from './screens/RoomSpacesScreen';
 import Regulation from './screens/Regulation';
@@ -30,7 +30,8 @@ function Homescreen({navigation}) {
         <View style = {styles.grid}>
           <TouchableOpacity 
             activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Gross Motor')}>
+            onPress={() => navigation.navigate('Gross Motor')
+            }>
               <View style = {styles.circle1}>
                 <Image
                     source = {require('./Running.png')}
@@ -100,7 +101,7 @@ function Homescreen({navigation}) {
           </TouchableOpacity>
           <TouchableOpacity 
             activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Toy Screen')}>
+            onPress={() => navigation.navigate('ToyScreen')}>
               <View style = {styles.circle8}>
                 <Image
                     style = {styles.circle7}
@@ -149,6 +150,9 @@ export default function App() {
         />
         <Stack.Screen name = "ADLScreen" 
         component={ADLScreen}
+        />
+        <Stack.Screen name = "ToyScreen" 
+        component={ToyScreen}
         />
         <Stack.Screen name = "Schedule" 
         component={Schedule}
