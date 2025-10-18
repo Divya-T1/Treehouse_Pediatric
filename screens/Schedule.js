@@ -11,6 +11,12 @@ import BottomNavBar from './NavigationOptions.js';
 
 export default function Schedule() {
 
+    const pathName = '../Logo.png';
+
+    const act1 = '../assets/FineMotorPictures/cutting.png';
+    const act2 = '../assets/FineMotorPictures/writing.png';
+    const act3 = '../assets/FineMotorPictures/tweezers.png';
+
     const [selectedActivities, setSelectedActivities] = useState([]);
   
     const toggleSelection = (id) => {
@@ -18,17 +24,75 @@ export default function Schedule() {
         prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
       );
     };
-  
+      //make a class that has a function that does the below - so that i can add a new object each time new thing added to schedule
+  //click it again, gets removed from the list
+
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Schedule</Text>
+        <Image source = {require(pathName)} />
+
+        <Text style={styles.headtext}>Schedule</Text>
+        <View style={{height: 1, backgroundColor: '#000000ff', width: '80%', marginVertical: 10,}}/>
+
+        <ScrollView>
+          <View style = {styles.grid}>
+
+            <Text style = {styles.text1}>Activity 1:</Text>
+            <TouchableOpacity activeOpacity ={0.6} onPress={(act1) => toggleSelection()}>
+              <View style = {[styles.scheduleback, selectedActivities.includes(act1) && styles.selectedCircle]}>
+                <Image source = {require(act1)} style={styles.circleImage}/>
+                </View>
+              </TouchableOpacity>
+
+        <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
+            <Text style = {styles.text1}>Activity 2:</Text>
+            <TouchableOpacity activeOpacity ={0.6} onPress={(act2) => toggleSelection()}>
+              <View style = {[styles.scheduleback, selectedActivities.includes(act2) && styles.selectedCircle]}>
+                <Image source = {require(act2)} style={styles.circleImage}/>
+                </View>
+              </TouchableOpacity>
+
+        <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
+            <Text style = {styles.text1}>Activity 3:</Text>
+            <TouchableOpacity activeOpacity ={0.6} onPress={(act3) => toggleSelection()}>
+              <View style = {[styles.scheduleback, selectedActivities.includes(act3) && styles.selectedCircle]}>
+                <Image source = {require(act3)} style={styles.circleImage}/>
+                </View>
+              </TouchableOpacity>
+              
+       <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
+            <Text style = {styles.text1}>Activity 4:</Text>
+            <TouchableOpacity activeOpacity ={0.6} onPress={(act3) => toggleSelection()}>
+              <View style = {[styles.scheduleback, selectedActivities.includes(act3) && styles.selectedCircle]}>
+                <Image source = {require(act3)} style={styles.circleImage}/>
+                </View>
+              </TouchableOpacity>  
+
+                     <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
+            <Text style = {styles.text1}>Activity 5:</Text>
+            <TouchableOpacity activeOpacity ={0.6} onPress={(act3) => toggleSelection()}>
+              <View style = {[styles.scheduleback, selectedActivities.includes(act3) && styles.selectedCircle]}>
+                <Image source = {require(act3)} style={styles.circleImage}/>
+                </View>
+              </TouchableOpacity>            
+              
+            </View>
+        </ScrollView>
+
         <StatusBar style="auto" />
         <BottomNavBar />
       </SafeAreaView>
     );
+
+
+
+
+
   }
   
   const styles = StyleSheet.create({
+
+    
     container: {
       flex: 1,
       backgroundColor: '#fff',
@@ -43,7 +107,33 @@ export default function Schedule() {
       justifyContent: 'space-evenly',
       width: '300px',
     },
-  
+
+    headtext:{
+      fontSize: '45px',
+    },
+
+    text1:{
+      fontSize: '30px',
+      padding: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginVertical: 40,
+    },
+
+    scheduleback:{
+      width: 100,
+      height: 100,
+      padding: 20,
+      borderRadius: 50,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: 20,
+      marginVertical: 20,
+      backgroundColor: 'rgba(159, 197, 162, 1)',
+    },
+
+    
+
     circle1: {
       width: 100,
       height: 100,
