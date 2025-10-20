@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
 
 export default function BottomNavBar() {
   const navigation = useNavigation();

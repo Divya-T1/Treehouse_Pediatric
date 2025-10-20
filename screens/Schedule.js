@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
 
 /*Creating an array of circles*/
 //new comment

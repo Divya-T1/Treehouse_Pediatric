@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
 
 /*Creating an array of circles*/
 //new comment
@@ -20,12 +21,15 @@ export default function Regulation() {
   const act6 = '../assets/Regulation/image 6.png';
   const act7 = '../assets/Regulation/image 20.png';
 
-  const [selectedActivities, setSelectedActivities] = useState([]);
-
-  const toggleSelection = (id) => {
-    setSelectedActivities((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const [selectedActivities, setSelectedActivities] = useState(GetActivities());
+    
+      function toggleSelection(id) {
+        var prev = GetActivities();
+        prev = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+        //console.log('toggleSelection');
+        //console.log(JSON.stringify(prev));
+        SaveActivities(prev);
+        setSelectedActivities(prev);
   };
 
   return (

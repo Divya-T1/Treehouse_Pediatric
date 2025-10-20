@@ -11,7 +11,7 @@ import FineMotorScreen from './screens/FineMotorScreen';
 import RoomSpacesScreen from './screens/RoomSpacesScreen';
 import Regulation from './screens/Regulation';
 import SensoryScreen from './screens/SensoryScreen';
-import ADLScreen from './screens/ADLscreen.js';
+import ADLScreen from './screens/ADLScreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 
