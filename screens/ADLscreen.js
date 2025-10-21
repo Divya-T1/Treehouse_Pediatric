@@ -21,15 +21,12 @@ export default function ADLScreen() {
   const act6 = '../assets/ADL/toothbrush.png';
   const act7 = '../assets/ADL/zipper.png';
 
-  const [selectedActivities, setSelectedActivities] = useState(GetActivities());
-  
-    function toggleSelection(id) {
-      var prev = GetActivities();
-      prev = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
-      //console.log('toggleSelection');
-      //console.log(JSON.stringify(prev));
-      SaveActivities(prev);
-      setSelectedActivities(prev);
+  const [selectedActivities, setSelectedActivities] = useState([]);
+
+  const toggleSelection = (id) => {
+    setSelectedActivities((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
   };
 
   return (

@@ -18,15 +18,22 @@ export default function Schedule() {
     const act2 = '../assets/FineMotorPictures/writing.png';
     const act3 = '../assets/FineMotorPictures/tweezers.png';
 
-    const [selectedActivities, setSelectedActivities] = useState([]);
-  
-    const toggleSelection = (id) => {
-      setSelectedActivities((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-      );
-    };
+    const [selectedActivities, setSelectedActivities] = useState(GetActivities());
+   
+     function toggleSelection(id) {
+       var prev = GetActivities();
+       prev = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+       //console.log('toggleSelection');
+       //console.log(JSON.stringify(prev));
+       SaveActivities(prev);
+       setSelectedActivities(prev);
+     };
       //make a class that has a function that does the below - so that i can add a new object each time new thing added to schedule
   //click it again, gets removed from the list
+
+    const activities = GetActivities();
+
+ 
 
     return (
       <SafeAreaView style={styles.container}>
@@ -38,39 +45,29 @@ export default function Schedule() {
         <ScrollView>
           <View style = {styles.grid}>
 
+          {activities.map((activity, index) =>(
+            <View key = {index}>
+
+              <Text style = {styles.text1}>Activity {index + 1}:</Text>
+              <TouchableOpacity>
+              <View style={[
+                styles.scheduleback,
+                selectedActivities.includes(index) && styles.selectedCircle,
+              ]}>
+              <Image source={{ uri: activity }} style={styles.circleImage} />
+            </View>
+            </TouchableOpacity>
+            <View style={styles.horizontalLine} />
+
+
+            </View>
+          ))}
+            
+
+            {/* how it's supposed to be:: */}
+
+
             <Text style = {styles.text1}>Activity 1:</Text>
-            <TouchableOpacity activeOpacity ={0.6} onPress={(act1) => toggleSelection()}>
-              <View style = {[styles.scheduleback, selectedActivities.includes(act1) && styles.selectedCircle]}>
-                <Image source = {require(act1)} style={styles.circleImage}/>
-                </View>
-              </TouchableOpacity>
-
-        <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
-            <Text style = {styles.text1}>Activity 2:</Text>
-            <TouchableOpacity activeOpacity ={0.6} onPress={(act2) => toggleSelection()}>
-              <View style = {[styles.scheduleback, selectedActivities.includes(act2) && styles.selectedCircle]}>
-                <Image source = {require(act2)} style={styles.circleImage}/>
-                </View>
-              </TouchableOpacity>
-
-        <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
-            <Text style = {styles.text1}>Activity 3:</Text>
-            <TouchableOpacity activeOpacity ={0.6} onPress={(act3) => toggleSelection()}>
-              <View style = {[styles.scheduleback, selectedActivities.includes(act3) && styles.selectedCircle]}>
-                <Image source = {require(act3)} style={styles.circleImage}/>
-                </View>
-              </TouchableOpacity>
-              
-       <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
-            <Text style = {styles.text1}>Activity 4:</Text>
-            <TouchableOpacity activeOpacity ={0.6} onPress={(act3) => toggleSelection()}>
-              <View style = {[styles.scheduleback, selectedActivities.includes(act3) && styles.selectedCircle]}>
-                <Image source = {require(act3)} style={styles.circleImage}/>
-                </View>
-              </TouchableOpacity>  
-
-                     <View style={{height: 1, backgroundColor: '#000000ff', width: '100%', marginVertical: 10,}}/>
-            <Text style = {styles.text1}>Activity 5:</Text>
             <TouchableOpacity activeOpacity ={0.6} onPress={(act3) => toggleSelection()}>
               <View style = {[styles.scheduleback, selectedActivities.includes(act3) && styles.selectedCircle]}>
                 <Image source = {require(act3)} style={styles.circleImage}/>
@@ -106,7 +103,7 @@ export default function Schedule() {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'space-evenly',
-      width: '300px',
+      width: '400px',
     },
 
     headtext:{
