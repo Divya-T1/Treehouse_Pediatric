@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight, Button} from 'react-native';
@@ -24,16 +24,29 @@ export default function ToysAndActScreen() {
   const act9 = '../assets/TOYS/Vector-5.png';
   const act10 = '../assets/TOYS/Vector.png';
 
-  const [selectedActivities, setSelectedActivities] = useState(GetActivities());
-    
-      function toggleSelection(id) {
-        var prev = GetActivities();
-        prev = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
-        //console.log('toggleSelection');
-        //console.log(JSON.stringify(prev));
-        SaveActivities(prev);
-        setSelectedActivities(prev);
+  const [selectedActivities, setSelectedActivities] = useState([]);
+  
+  useEffect(() => {
+    GetActivities().then((prev) => {
+      setSelectedActivities(prev);
+    });
+  }, []);
+  
+  console.log(selectedActivities);
+
+
+  function toggleSelection(id) {
+    GetActivities().then(success);
+
+    function success(prev) {
+      prev = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      //console.log('toggleSelection');
+      //console.log(JSON.stringify(prev));
+      SaveActivities(prev);
+      setSelectedActivities(prev);
+    }
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <Image source = {require(pathName)} />
