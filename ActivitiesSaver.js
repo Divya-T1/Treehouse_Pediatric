@@ -1,18 +1,37 @@
-const SaveActivities = (addval) => {
-    // Initialize state from local storage or use a default value
-  console.log('SaveActivities');
-  localStorage.setItem('SavedActivities', JSON.stringify(addval));
-  console.log(JSON.stringify(addval));
-};
-const GetActivities = () => {
-    // Initialize state from local storage or use a default value
-  const storedValue = localStorage.getItem('SavedActivities');
-  console.log('GetActivities');
-  console.log(JSON.stringify(storedValue));
-  if(!storedValue)
-    return [];
-  else
-    return JSON.parse(storedValue);
+// ActivitiesSaver.js
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const STORAGE_KEY = 'SavedActivities';
+
+// Overwrite with full list
+export const SaveActivities = async (activitiesArray) => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(activitiesArray || []));
+  } catch (e) {
+    console.warn('SaveActivities error:', e);
+  }
 };
 
-export { SaveActivities, GetActivities };
+// Read full list
+export const GetActivities = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn('GetActivities error:', e);
+    return [];
+  }
+};
+
+// Append one key (optional helper)
+export const AddActivity = async (key) => {
+  const current = await GetActivities();
+  const next = [...current, key];
+  await SaveActivities(next);
+  return next;
+};
+
+// Clear all (optional helper)
+export const ClearActivities = async () => {
+  await SaveActivities([]);
+};
