@@ -103,7 +103,9 @@ export default function Schedule() {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Button onPress={() => navigation.navigate("NotesModal")}>Notes</Button>
+        <View style={styles.notesButton}>
+          <Button onPress={() => navigation.navigate("Notes")} title="Notes" ></Button>
+        </View>
       ),
     });
   }, [navigation])
@@ -219,5 +221,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 24,
   },
+  notesButton: {
+    paddingHorizontal: 20,
+  }
 });
 

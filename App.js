@@ -14,7 +14,7 @@ import SensoryScreen from './screens/SensoryScreen';
 import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
-import notesModal from './screens/NotesModal.js';
+import NotesModal from './screens/NotesModal.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -161,7 +161,7 @@ export default function App() {
           />
         </Stack.Group>
         <Stack.Group screenOptions={{ presentation: 'modal' }}>
-          <Stack.Screen name = "NotesModal" component = {notesModal} />
+          <Stack.Screen name = "Notes" component = {NotesModal} />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
