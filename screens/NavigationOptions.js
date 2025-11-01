@@ -22,6 +22,7 @@ export default function BottomNavBar() {
   );
 }
 
+
 const styles = StyleSheet.create({
   navBar: {
     position: 'absolute',

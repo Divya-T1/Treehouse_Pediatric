@@ -8,10 +8,12 @@ import {
   Text,
   Image,
   FlatList,
+  Button
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities } from '../ActivitiesSaver.js';
+import { useNavigation } from '@react-navigation/native';
 
 // Icon registry: map the saved string IDs -> static require(...)
 const ICONS = {
@@ -92,8 +94,19 @@ const ICONS = {
   '../assets/VideoToy.png': require('../assets/VideoToy.png'),
 };
 
+
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button onPress={() => navigation.navigate("NotesModal")}>Notes</Button>
+      ),
+    });
+  }, [navigation])
 
   // Load once on mount
   useEffect(() => {

@@ -14,6 +14,7 @@ import SensoryScreen from './screens/SensoryScreen';
 import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
+import notesModal from './screens/NotesModal.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -127,37 +128,41 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name = 'Home'
-          component = {Homescreen}
-        />
-        <Stack.Screen name = "Gross Motor" 
-        component={GrossMotorScreen}
-        />
-        <Stack.Screen name = "Toys And Activities" 
-        component={ToyAndActScreen}
-        />
-        <Stack.Screen name = "Fine Motor" 
-        component={FineMotorScreen}
-        />
-        <Stack.Screen name = "Room Spaces" 
-        component={RoomSpacesScreen}
-        />
-        <Stack.Screen name = "Regulation" 
-        component={Regulation}
-        />
-        <Stack.Screen name = "SensoryScreen" 
-        component={SensoryScreen}
-        />
-        <Stack.Screen name = "ADLScreen" 
-        component={ADLScreen}
-        />
-        <Stack.Screen name = "ToyScreen" 
-        component={ToyScreen}
-        />
-        <Stack.Screen name = "Schedule" 
-        component={Schedule}
-        />
-    
+        <Stack.Group>
+          <Stack.Screen name = 'Home'
+            component = {Homescreen}
+          />
+          <Stack.Screen name = "Gross Motor" 
+          component={GrossMotorScreen}
+          />
+          <Stack.Screen name = "Toys And Activities" 
+          component={ToyAndActScreen}
+          />
+          <Stack.Screen name = "Fine Motor" 
+          component={FineMotorScreen}
+          />
+          <Stack.Screen name = "Room Spaces" 
+          component={RoomSpacesScreen}
+          />
+          <Stack.Screen name = "Regulation" 
+          component={Regulation}
+          />
+          <Stack.Screen name = "SensoryScreen" 
+          component={SensoryScreen}
+          />
+          <Stack.Screen name = "ADLScreen" 
+          component={ADLScreen}
+          />
+          <Stack.Screen name = "ToyScreen" 
+          component={ToyScreen}
+          />
+          <Stack.Screen name = "Schedule" 
+          component={Schedule}
+          />
+        </Stack.Group>
+        <Stack.Group screenOptions={{ presentation: 'modal' }}>
+          <Stack.Screen name = "NotesModal" component = {notesModal} />
+        </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
   )
