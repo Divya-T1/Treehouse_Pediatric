@@ -16,6 +16,7 @@
     "@react-navigation/native-stack": "^7.1.10",
     "expo": "^54.0.15",
     "expo-status-bar": "~3.0.8",
+    "jspdf": "^3.0.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",

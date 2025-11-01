@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, TextInput, Button, Dimensions} from 'react-nati
 import React, { useState, useEffect } from 'react';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../NotesSaver.js';
+import {createPDF} from '../PDFSaver.js';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -24,7 +25,7 @@ export default function NotesModal() {
         headerRight: () => (
         <View style={styles.saveButton}>
             <Button onPress={() => { SaveActivities(text) }} title="Save" > </Button>
-            <Button onPress={() => {} } title="Create PDF"> </Button>
+            <Button onPress={() => { createPDF(text) } } title="Create PDF"> </Button>
         </View>
         ),
     });
