@@ -8,7 +8,7 @@ import {
   Text,
   Image,
   FlatList,
-  Button
+  TouchableOpacity
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
@@ -104,7 +104,9 @@ export default function Schedule() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.notesButton}>
-          <Button onPress={() => navigation.navigate("Notes")} title="Notes" ></Button>
+          <TouchableOpacity style={styles.saveButton} onPress={() => navigation.navigate("Notes")}>
+              <Text style={styles.saveButtonText}>Notes</Text>
+          </TouchableOpacity>
         </View>
       ),
     });
@@ -223,6 +225,17 @@ const styles = StyleSheet.create({
   },
   notesButton: {
     paddingHorizontal: 20,
+  },
+  saveButton: {
+      backgroundColor: 'transparent', // transparent background
+      borderWidth: 1,
+      padding: 5,
+      borderColor: '#333', // optional border
+  },
+  saveButtonText: {
+      color: '#333', // custom text color
+      textTransform: 'none', // keep lowercase
+      fontSize: 16,
   }
 });
 

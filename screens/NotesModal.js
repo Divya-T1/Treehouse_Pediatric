@@ -1,8 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import { View, StyleSheet, Text, TextInput, Button, Dimensions} from 'react-native';
+import { View, StyleSheet, Text, TextInput, Button, Dimensions, TouchableOpacity} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../NotesSaver.js';
+import { clearData } from '../ActivitiesSaver.js';
 import {createPDF} from '../PDFSaver.js';
 
 const windowWidth = Dimensions.get('window').width;
@@ -23,13 +24,17 @@ export default function NotesModal() {
     useEffect(() => {
     navigation.setOptions({
         headerRight: () => (
-        <View style={styles.saveButton}>
-            <Button onPress={() => { SaveActivities(text) }} title="Save" > </Button>
-            <Button onPress={() => { createPDF(text) } } title="Create PDF"> </Button>
+        <View style={styles.saveButtonContainer}>
+            <TouchableOpacity style={styles.saveButton} onPress={() => { SaveActivities(text) }}>
+                <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveButton} onPress={() => { createPDF(text) } } >
+                <Text style={styles.saveButtonText}>Create PDF</Text>
+            </TouchableOpacity>
         </View>
         ),
     });
-    }, [navigation, text])
+    }, [navigation, text]);
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>
@@ -49,13 +54,28 @@ const styles = StyleSheet.create({
         
     },
     textBox: {
-        flex: 1,
-        width: windowWidth-20,
-        height : windowHeight-200,
+        width: '90%',
+        height: '90%',
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
     },
-    saveButton: {
+    saveButtonContainer: {
         flexDirection: 'row',
         gap: 20,
         padding:20,
     },
+    saveButton: {
+        backgroundColor: 'transparent', // transparent background
+        borderWidth: 1,
+        padding: 5,
+        borderColor: '#333', // optional border
+    },
+    saveButtonText: {
+        color: '#333', // custom text color
+        textTransform: 'none', // keep lowercase
+        fontSize: 16,
+    }
 });
