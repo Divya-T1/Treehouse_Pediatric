@@ -4,7 +4,7 @@ import { jsPDF } from "jspdf";
 const doc = new jsPDF();
 
 const createPDF = (text) => {
-    doc.text(text, 10, 10);
+    doc.text("\n" + text, 10, 10);
     doc.save("notes.pdf");
 }
 

@@ -23,6 +23,16 @@ export const GetActivities = async () => {
   }
 };
 
+export const clearData = async () => {
+  try {
+    await AsyncStorage.clear()
+  } catch(e) {
+    // clear error
+  }
+
+  console.log('Done.')
+}
+
 // Append one key (optional helper)
 export const AddActivity = async (key) => {
   const current = await GetActivities();

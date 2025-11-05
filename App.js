@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import {ScrollView} from 'react-native';
+import {ScrollView, AppState} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,6 +15,9 @@ import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
+import { clearData } from './ActivitiesSaver.js';
+import { useEffect } from 'react';
+import {useAppState} from '@react-native-community/hooks'
 
 const Stack = createNativeStackNavigator();
 
@@ -23,7 +26,22 @@ const Stack = createNativeStackNavigator();
 
 //comment2
 
+
 function Homescreen({navigation}) {
+
+  var currentAppState = useAppState();
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', function (e) {
+
+        clearData();
+        // Cancel the event to trigger the browser's confirmation dialog
+        e.preventDefault();
+        // Modern browsers often require returnValue to be set for the prompt to appear
+        e.returnValue = ''; 
+    });
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <Image source = {require('./Logo.png')} />
@@ -125,6 +143,7 @@ function Homescreen({navigation}) {
 // }
 
 export default function App() {
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
