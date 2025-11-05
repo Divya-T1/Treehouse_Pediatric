@@ -5,7 +5,7 @@ import {
   StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
-import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
+import { SaveActivities, GetActivities } from './ActivitiesSaver.js';
 
 export default function Regulation() {
   // static requires for RN bundler (filenames contain spaces; static require is important)

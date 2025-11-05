@@ -3,6 +3,8 @@ import {ScrollView} from 'react-native';
 import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { Modal, TextInput, Button } from 'react-native';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
 import ToyAndActScreen from './screens/ToysAndActScreen';
@@ -14,109 +16,14 @@ import SensoryScreen from './screens/SensoryScreen';
 import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
-
+import HomeScreen from './screens/HomeScreen.js';
+import CategoryScreen from './screens/CategoryScreen.js';
 const Stack = createNativeStackNavigator();
 
 /*Creating an array of circles*/
 //new comment
 
 //comment2
-
-function Homescreen({navigation}) {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Image source = {require('./Logo.png')} />
-      <ScrollView>
-        <View style = {styles.grid}>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Gross Motor')
-            }>
-              <View style = {styles.circle1}>
-                <Image
-                    source = {require('./Running.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Gross Motor</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Toys And Activities')}>
-              <View style = {styles.circle2}>
-                <Image
-                    source = {require('./TeddyBear.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Fun Activities</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Fine Motor')}>
-              <View style = {styles.circle3}>
-                <Image
-                    source = {require('./Arts.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Fine Motor</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Room Spaces')}>
-              <View style = {styles.circle4}>
-                <Image
-                    source = {require('./Door.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Room Spaces</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('SensoryScreen')}>
-              <View style = {styles.circle5}>
-                <Image
-                    source = {require('./PlayDoh.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Sensory Screen</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('ADLScreen')}>
-              <View style = {styles.circle6}>
-                <Image
-                    source = {require('./Brushing.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>ADL</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Regulation')}>
-              <View style = {styles.circle7}>
-                <Image
-                    source = {require('./Headphones.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Regulation</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('ToyScreen')}>
-              <View style = {styles.circle8}>
-                <Image
-                    style = {styles.circle7}
-                    source = {require('./assets/toy.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Toys/Games</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-      <StatusBar style="auto" />
-      <BottomNavBar />
-    </SafeAreaView>
-  );
-}
 
 // function GrossMotor({navigation}) {
 //   return <Text> "This is a new page" </Text>;
@@ -127,13 +34,19 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name = 'Home'
-          component = {Homescreen}
-        />
+        
+        <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ headerShown: false }}/>
+
+        <Stack.Screen name="CategoryScreen" 
+        component={CategoryScreen} />
+
         <Stack.Screen name = "Gross Motor" 
         component={GrossMotorScreen}
         />
-        <Stack.Screen name = "Toys And Activities" 
+        <Stack.Screen name = "Fun Activities" 
         component={ToyAndActScreen}
         />
         <Stack.Screen name = "Fine Motor" 
@@ -148,10 +61,10 @@ export default function App() {
         <Stack.Screen name = "SensoryScreen" 
         component={SensoryScreen}
         />
-        <Stack.Screen name = "ADLScreen" 
+        <Stack.Screen name = "ADL" 
         component={ADLScreen}
         />
-        <Stack.Screen name = "ToyScreen" 
+        <Stack.Screen name = "Toys and Games" 
         component={ToyScreen}
         />
         <Stack.Screen name = "Schedule" 
@@ -165,6 +78,42 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  addContainer:{
+    width: 100,
+    height: 100,
+    padding: 20,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 20,
+    backgroundColor: 'rgba(108, 126, 107, 1)',
+ 
+  },
+  addButton:{
+    width: 100,
+    height: 100,
+    padding: 20,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 20,
+    backgroundColor: 'rgba(108, 126, 107, 1)',
+ 
+  },
+  addButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  separator: {
+    height: 1,
+    backgroundColor: '#ccc',
+    width: '100%',
+    marginVertical: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

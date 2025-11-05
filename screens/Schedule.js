@@ -1,155 +1,126 @@
 // screens/Schedule.js
-import React, { useEffect, useState, useCallback } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  FlatList,
-} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import BottomNavBar from './NavigationOptions.js';
-import { GetActivities } from '../ActivitiesSaver.js';
-
-// Icon registry: map the saved string IDs -> static require(...)
-const ICONS = {
-  // ADL
-  '../assets/ADL/button.png': require('../assets/ADL/button.png'),
-  '../assets/ADL/pants.png': require('../assets/ADL/pants.png'),
-  '../assets/ADL/running_shoes.png': require('../assets/ADL/running_shoes.png'),
-  '../assets/ADL/socks_.png': require('../assets/ADL/socks_.png'),
-  '../assets/ADL/t-shirt.png': require('../assets/ADL/t-shirt.png'),
-  '../assets/ADL/toothbrush.png': require('../assets/ADL/toothbrush.png'),
-  '../assets/ADL/zipper.png': require('../assets/ADL/zipper.png'),
-
-  // Fine Motor
-  '../assets/FineMotorPictures/coloring.png': require('../assets/FineMotorPictures/coloring.png'),
-  '../assets/FineMotorPictures/cutting.png': require('../assets/FineMotorPictures/cutting.png'),
-  '../assets/FineMotorPictures/dot_markers.png': require('../assets/FineMotorPictures/dot_markers.png'),
-  '../assets/FineMotorPictures/drawing.png': require('../assets/FineMotorPictures/drawing.png'),
-  '../assets/FineMotorPictures/craft.png': require('../assets/FineMotorPictures/craft.png'),
-  '../assets/FineMotorPictures/painting.png': require('../assets/FineMotorPictures/painting.png'),
-  '../assets/FineMotorPictures/tweezers.png': require('../assets/FineMotorPictures/tweezers.png'),
-  '../assets/FineMotorPictures/writing.png': require('../assets/FineMotorPictures/writing.png'),
-
-  // Gross Motor
-  '../assets/Group_11.png': require('../assets/Group_11.png'),
-  '../assets/Group_12.png': require('../assets/Group_12.png'),
-  '../assets/image_6.png': require('../assets/image_6.png'),
-  '../assets/image_7.png': require('../assets/image_7.png'),
-  '../assets/image_9.png': require('../assets/image_9.png'),
-  '../assets/image_10.png': require('../assets/image_10.png'),
-
-  // Regulation (note the spaces in filenames)
-  '../assets/Regulation/image 1.png': require('../assets/Regulation/image 1.png'),
-  '../assets/Regulation/image 2.png': require('../assets/Regulation/image 2.png'),
-  '../assets/Regulation/image 3.png': require('../assets/Regulation/image 3.png'),
-  '../assets/Regulation/image 4.png': require('../assets/Regulation/image 4.png'),
-  '../assets/Regulation/image 5.png': require('../assets/Regulation/image 5.png'),
-  '../assets/Regulation/image 6.png': require('../assets/Regulation/image 6.png'),
-  '../assets/Regulation/image 20.png': require('../assets/Regulation/image 20.png'),
-
-  // Room Spaces
-  '../assets/RoomSpacesPictures/horse.png': require('../assets/RoomSpacesPictures/horse.png'),
-  '../assets/RoomSpacesPictures/house.png': require('../assets/RoomSpacesPictures/house.png'),
-  '../assets/RoomSpacesPictures/mask.png': require('../assets/RoomSpacesPictures/mask.png'),
-  '../assets/RoomSpacesPictures/puzzle.png': require('../assets/RoomSpacesPictures/puzzle.png'),
-  '../assets/RoomSpacesPictures/sitting.png': require('../assets/RoomSpacesPictures/sitting.png'),
-  '../assets/RoomSpacesPictures/talking.png': require('../assets/RoomSpacesPictures/talking.png'),
-  '../assets/RoomSpacesPictures/toilet.png': require('../assets/RoomSpacesPictures/toilet.png'),
-  '../assets/RoomSpacesPictures/treehouse.png': require('../assets/RoomSpacesPictures/treehouse.png'),
-  '../assets/RoomSpacesPictures/utensils.png': require('../assets/RoomSpacesPictures/utensils.png'),
-  '../assets/RoomSpacesPictures/weight.png': require('../assets/RoomSpacesPictures/weight.png'),
-
-  // Sensory
-  '../assets/Sensory/imageS.png': require('../assets/Sensory/imageS.png'),
-  '../assets/Sensory/peanutball.png': require('../assets/Sensory/peanutball.png'),
-  '../assets/Sensory/PlayDoh.png': require('../assets/Sensory/PlayDoh.png'),
-  '../assets/Sensory/putty.png': require('../assets/Sensory/putty.png'),
-  '../assets/Sensory/sandpit.png': require('../assets/Sensory/sandpit.png'),
-  '../assets/Sensory/swing.png': require('../assets/Sensory/swing.png'),
-
-  // Toys & Activities (TOYS)
-  '../assets/TOYS/Group 16.png': require('../assets/TOYS/Group 16.png'),
-  '../assets/TOYS/Group-1.png': require('../assets/TOYS/Group-1.png'),
-  '../assets/TOYS/Group-2.png': require('../assets/TOYS/Group-2.png'),
-  '../assets/TOYS/Group.png': require('../assets/TOYS/Group.png'),
-  '../assets/TOYS/Vector-1.png': require('../assets/TOYS/Vector-1.png'),
-  '../assets/TOYS/Vector-2.png': require('../assets/TOYS/Vector-2.png'),
-  '../assets/TOYS/Vector-3.png': require('../assets/TOYS/Vector-3.png'),
-  '../assets/TOYS/Vector-4.png': require('../assets/TOYS/Vector-4.png'),
-  '../assets/TOYS/Vector-5.png': require('../assets/TOYS/Vector-5.png'),
-  '../assets/TOYS/Vector.png': require('../assets/TOYS/Vector.png'),
-
-  // ToyScreen extras
-  '../ToyFood.png': require('../ToyFood.png'),
-  '../assets/CarToy.png': require('../assets/CarToy.png'),
-  '../assets/Train.png': require('../assets/Train.png'),
-  '../assets/AnimalToy.png': require('../assets/AnimalToy.png'),
-  '../assets/BookToy.png': require('../assets/BookToy.png'),
-  '../assets/VideoToy.png': require('../assets/VideoToy.png'),
-};
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, SafeAreaView } from 'react-native';
+import { GetActivities, ICONS } from './ActivitiesSaver';
+import BottomNavBar from './NavigationOptions'; // import the nav bar
 
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
 
-  // Load once on mount
+  // Activity names mapping directly in this file
+  const ActivityNames = {
+    // ADL
+    '../assets/ADL/button.png': 'Button',
+    '../assets/ADL/pants.png': 'Pants',
+    '../assets/ADL/running_shoes.png': 'Running Shoes',
+    '../assets/ADL/socks_.png': 'Socks',
+    '../assets/ADL/t-shirt.png': 'T-Shirt',
+    '../assets/ADL/toothbrush.png': 'Toothbrush',
+    '../assets/ADL/zipper.png': 'Zipper',
+
+    // Fine Motor
+    '../assets/FineMotorPictures/coloring.png': 'Coloring',
+    '../assets/FineMotorPictures/cutting.png': 'Cutting',
+    '../assets/FineMotorPictures/dot_markers.png': 'Dot Markers',
+    '../assets/FineMotorPictures/drawing.png': 'Drawing',
+    '../assets/FineMotorPictures/craft.png': 'Craft',
+    '../assets/FineMotorPictures/painting.png': 'Painting',
+    '../assets/FineMotorPictures/tweezers.png': 'Tweezers',
+    '../assets/FineMotorPictures/writing.png': 'Writing',
+
+    // Gross Motor
+    '../assets/Group_11.png': 'Gross Motor 1',
+    '../assets/Group_12.png': 'Gross Motor 2',
+    '../assets/image_6.png': 'Gross Motor 3',
+    '../assets/image_7.png': 'Gross Motor 4',
+    '../assets/image_9.png': 'Gross Motor 5',
+    '../assets/image_10.png': 'Gross Motor 6',
+
+    // Regulation
+    '../assets/Regulation/image 1.png': 'Regulation 1',
+    '../assets/Regulation/image 2.png': 'Regulation 2',
+    '../assets/Regulation/image 3.png': 'Regulation 3',
+    '../assets/Regulation/image 4.png': 'Regulation 4',
+    '../assets/Regulation/image 5.png': 'Regulation 5',
+    '../assets/Regulation/image 6.png': 'Regulation 6',
+    '../assets/Regulation/image 20.png': 'Regulation 20',
+
+    // Room Spaces
+    '../assets/RoomSpacesPictures/horse.png': 'Rocking Chair',
+    '../assets/RoomSpacesPictures/house.png': 'Nurse',
+    '../assets/RoomSpacesPictures/mask.png': 'Auditory Room',
+    '../assets/RoomSpacesPictures/puzzle.png': 'Puzzle Room',
+    '../assets/RoomSpacesPictures/sitting.png': 'Waiting Room',
+    '../assets/RoomSpacesPictures/talking.png': 'Speech Room',
+    '../assets/RoomSpacesPictures/toilet.png': 'Bathroom',
+    '../assets/RoomSpacesPictures/treehouse.png': 'Treetop Room',
+    '../assets/RoomSpacesPictures/utensils.png': 'Kitchen',
+    '../assets/RoomSpacesPictures/weight.png': 'Gym',
+
+    // Sensory
+    '../assets/Sensory/imageS.png': 'Sensory 1',
+    '../assets/Sensory/peanutball.png': 'Peanut Ball',
+    '../assets/Sensory/PlayDoh.png': 'PlayDoh',
+    '../assets/Sensory/putty.png': 'Putty',
+    './assets/Sensory/sandpit.png': 'Sandpit',
+    '../assets/Sensory/swing.png': 'Swing',
+
+    // TOYS
+    '../assets/TOYS/Group 16.png': 'Toy Group 16',
+    '../assets/TOYS/Group-1.png': 'Toy Group 1',
+    '../assets/TOYS/Group-2.png': 'Toy Group 2',
+    '../assets/TOYS/Group.png': 'Toy Group',
+    '../assets/TOYS/Vector-1.png': 'Vector 1',
+    '../assets/TOYS/Vector-2.png': 'Vector 2',
+    '../assets/TOYS/Vector-3.png': 'Vector 3',
+    '../assets/TOYS/Vector-4.png': 'Vector 4',
+    '../assets/TOYS/Vector-5.png': 'Vector 5',
+    '../assets/TOYS/Vector.png': 'Vector',
+
+    // Extras
+    '../ToyFood.png': 'Toy Food',
+    '../assets/CarToy.png': 'Car Toy',
+    '../assets/Train.png': 'Train',
+    '../assets/AnimalToy.png': 'Animal Toy',
+    '../assets/BookToy.png': 'Book Toy',
+    '../assets/VideoToy.png': 'Video Toy',
+  };
+
   useEffect(() => {
-    (async () => {
+    const loadSchedule = async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
-    })();
+    };
+    loadSchedule();
   }, []);
 
-  // Refresh every time the screen gets focus
-  useFocusEffect(
-    useCallback(() => {
-      let alive = true;
-      (async () => {
-        const saved = await GetActivities();
-        if (alive) setActivities(saved || []);
-      })();
-      return () => { alive = false; };
-    }, [])
-  );
+const renderItem = ({ item, index }) => {
+  // If no imageUri, fall back to ICONS registry
+  let src = item.imageUri
+    ? { uri: item.imageUri }
+    : ICONS[item.key] || require('../assets/default.png');
+  let name = item.name || ActivityNames[item.key] || `Activity ${index + 1}`;
 
-  const renderItem = ({ item, index }) => {
-    const src = ICONS[item]; // item is the saved string ID
-    return (
-      <View style={styles.row}>
-        <Text style={styles.label}>Activity {index + 1}:</Text>
-        <View style={styles.iconCircle}>
-          {src ? (
-            <Image source={src} style={styles.iconImage} />
-          ) : (
-            <Text style={styles.fallback}>?</Text>
-          )}
-        </View>
-      </View>
-    );
-  };
+  return (
+    <View style={styles.row}>
+      <Image source={src} style={styles.iconImage} />
+      <Text style={styles.label}>{name}</Text>
+    </View>
+  );
+};
+
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Schedule</Text>
-
       <FlatList
-        data={activities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No activities selected yet. Pick some on ADL, Fine Motor, etc.
-          </Text>
-        }
-        contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
-        style={{ width: '100%' }}
-      />
+  data={activities}
+  keyExtractor={(item, idx) => item.key || (item + idx)}
+  renderItem={renderItem}
+  contentContainerStyle={{ paddingBottom: 100 }}
+/>
 
-      <StatusBar style="auto" />
-      <BottomNavBar />
+      <BottomNavBar /> 
     </SafeAreaView>
   );
 }
@@ -169,42 +140,19 @@ const styles = StyleSheet.create({
   },
   row: {
     width: '90%',
-    marginHorizontal: '5%',
-    paddingVertical: 16,
+    marginBottom: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
   },
   label: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,        // push icon downward
     textAlign: 'center',
-  },
-  iconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#E8CACA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
+    marginTop: 4,
   },
   iconImage: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
     resizeMode: 'contain',
   },
-  fallback: {
-    fontSize: 16,
-    color: '#888',
-  },
-  empty: {
-    textAlign: 'center',
-    color: '#666',
-    fontSize: 16,
-    paddingHorizontal: 24,
-  },
 });
-

@@ -6,7 +6,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
-import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
+import { SaveActivities, GetActivities } from './ActivitiesSaver.js';
 
 export default function FineMotorScreen() {
   // Use static requires (safe for RN bundler)
