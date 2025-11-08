@@ -38,17 +38,19 @@ export default function RoomSpacesScreen() {
   useEffect(() => {
     (async () => {
       const saved = await GetActivities();
-      setSelectedActivities(saved || []);
+      const savedFilePaths = saved.map(item => item.filePath);
+      setSelectedActivities(savedFilePaths || []);
     })();
   }, []);
 
   async function toggleSelection(id) {
     const prev = await GetActivities();
-    const next = prev.includes(id)
-      ? prev.filter(item => item !== id)
-      : [...prev, id];
+    const prevFilePaths = prev.map(item => item.filePath);
+    const next = prevFilePaths.includes(id)
+      ? prev.filter(item => item.filePath !== id)
+      : [...prev, {filePath: id, notes: ''}];
     await SaveActivities(next);
-    setSelectedActivities(next);
+    setSelectedActivities(next.map(item => item.filePath));
   }
 
   return (

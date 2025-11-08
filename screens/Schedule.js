@@ -8,11 +8,12 @@ import {
   Text,
   Image,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
+  TextInput
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
-import { GetActivities } from '../ActivitiesSaver.js';
+import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
 
 // Icon registry: map the saved string IDs -> static require(...)
@@ -95,29 +96,47 @@ const ICONS = {
 };
 
 
+function combineListsAndSave(filePaths, notes){
+  console.log(filePaths);
+  console.log(notes);
+  const newActivities = filePaths.map((path, index) => ({
+    
+    filePath: path,
+    notes: notes[index] || '' // fallback to blank if no note
+  }));
+  SaveActivities(newActivities);
+}
+
+
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
+  const [filePaths, setFilePaths] = useState([]);
+  const [notes, setNotes] = useState([]);
 
   const navigation = useNavigation();
+
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.notesButton}>
-          <TouchableOpacity style={styles.saveButton} onPress={() => navigation.navigate("Notes")}>
-              <Text style={styles.saveButtonText}>Notes</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {combineListsAndSave(filePaths, notes)}}>
+              <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation])
+  }, [navigation, filePaths, notes])
 
   // Load once on mount
   useEffect(() => {
     (async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
+      setFilePaths(saved.map(item => item.filePath));
+      setNotes(saved.map(item => item.notes));
     })();
+    //console.log(activities);
   }, []);
 
   // Refresh every time the screen gets focus
@@ -126,23 +145,49 @@ export default function Schedule() {
       let alive = true;
       (async () => {
         const saved = await GetActivities();
-        if (alive) setActivities(saved || []);
+        if (alive){
+          setActivities(saved || []);
+          setFilePaths(saved.map(item => item.filePath));
+          setNotes(saved.map(item => item.notes));
+        } 
       })();
       return () => { alive = false; };
     }, [])
   );
 
   const renderItem = ({ item, index }) => {
-    const src = ICONS[item]; // item is the saved string ID
+    const src = ICONS[item.filePath]; // item is the saved string ID
+    //console.log(item);
     return (
       <View style={styles.row}>
         <Text style={styles.label}>Activity {index + 1}:</Text>
-        <View style={styles.iconCircle}>
-          {src ? (
-            <Image source={src} style={styles.iconImage} />
-          ) : (
-            <Text style={styles.fallback}>?</Text>
-          )}
+        <View style={styles.iconAndTextInput}>
+          <View style={styles.iconCircle}>
+            {src ? (
+              <Image source={src} style={styles.iconImage} />
+            ) : (
+              <Text style={styles.fallback}>?</Text>
+            )}
+          </View>
+          
+          <TextInput
+            multiline     // Allow multiple lines
+            style={styles.textBox}
+            value={notes[index]}  // Controlled value
+            onChangeText={newText => {
+              setNotes((prev) => {
+                const newNotes = prev.map((value, i) => {
+                  if(i == index){
+                    return newText;
+                  }
+                  return value;
+                })
+                //console.log(newNotes);
+                return newNotes;
+              });
+            }}
+          />
+          
         </View>
       </View>
     );
@@ -236,6 +281,15 @@ const styles = StyleSheet.create({
       color: '#333', // custom text color
       textTransform: 'none', // keep lowercase
       fontSize: 16,
+  },
+  iconAndTextInput: {
+      flexDirection: 'row',
+      gap: 20,
+      padding:20,
+      width: '100%',
+  }, 
+  textBox: {
+    width: '100%',
   }
 });
 
