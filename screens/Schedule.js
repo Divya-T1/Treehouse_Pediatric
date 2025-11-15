@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
+import {createPDF} from '../PDFSaver.js';
 
 // Icon registry: map the saved string IDs -> static require(...)
 const ICONS = {
@@ -119,9 +120,12 @@ export default function Schedule() {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View style={styles.notesButton}>
+        <View style={styles.notesButtonContainer}>
           <TouchableOpacity style={styles.saveButton} onPress={() => {combineListsAndSave(filePaths, notes)}}>
               <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton}>
+              <Text onPress={() => {createPDF()}} style={styles.saveButtonText}>Create PDF</Text>
           </TouchableOpacity>
         </View>
       ),
@@ -186,6 +190,7 @@ export default function Schedule() {
                 return newNotes;
               });
             }}
+
           />
           
         </View>
@@ -268,7 +273,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 24,
   },
-  notesButton: {
+  notesButtonContainer: {
+    flexDirection: 'row',
+    gap: 20,
+    padding:20,
     paddingHorizontal: 20,
   },
   saveButton: {
@@ -290,6 +298,7 @@ const styles = StyleSheet.create({
   }, 
   textBox: {
     width: '100%',
+    fontSize: '20px',
   }
 });
 
