@@ -1,21 +1,21 @@
 // ActivitiesSaver.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_KEY = 'SavedActivities';
+const STORAGE_KEY_ACTIVITIES = 'SavedActivities';
+const STORAGE_KEY_CATEGORIES = 'CustomCategories';
 
-// Overwrite with full list
+// Save regular activities
 export const SaveActivities = async (activitiesArray) => {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(activitiesArray || []));
+    await AsyncStorage.setItem(STORAGE_KEY_ACTIVITIES, JSON.stringify(activitiesArray || []));
   } catch (e) {
     console.warn('SaveActivities error:', e);
   }
 };
 
-// Read full list
 export const GetActivities = async () => {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_ACTIVITIES);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     console.warn('GetActivities error:', e);
@@ -23,25 +23,50 @@ export const GetActivities = async () => {
   }
 };
 
+// Clear all data
 export const clearData = async () => {
   try {
-    await AsyncStorage.clear()
-  } catch(e) {
-    // clear error
+    await AsyncStorage.clear();
+  } catch (e) {}
+  console.log('Done.');
+};
+
+// Custom Categories
+export const GetCustomCategories = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_CATEGORIES);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn('GetCustomCategories error:', e);
+    return [];
   }
+};
 
-  console.log('Done.')
-}
+export const SaveCustomCategories = async (categoriesArray) => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categoriesArray || []));
+  } catch (e) {
+    console.warn('SaveCustomCategories error:', e);
+  }
+};
 
-// Append one key (optional helper)
-export const AddActivity = async (key) => {
-  const current = await GetActivities();
-  const next = [...current, key];
-  await SaveActivities(next);
+// Add new category
+export const AddCategory = async (categoryName, icon) => {
+  const cats = await GetCustomCategories();
+  const next = [...cats, { categoryName, icon, activities: [] }];
+  await SaveCustomCategories(next);
   return next;
 };
 
-// Clear all (optional helper)
-export const ClearActivities = async () => {
-  await SaveActivities([]);
+// Add activity to custom category
+export const AddActivityToCategory = async (categoryName, activity) => {
+  const cats = await GetCustomCategories();
+  const updated = cats.map(c => {
+    if (c.categoryName === categoryName) {
+      return { ...c, activities: [...c.activities, activity] };
+    }
+    return c;
+  });
+  await SaveCustomCategories(updated);
+  return updated;
 };

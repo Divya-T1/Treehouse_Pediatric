@@ -1,7 +1,7 @@
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {ScrollView, AppState} from 'react-native';
-import { StyleSheet, Text, View, Image, SafeAreaView, FlatList, TouchableOpacity, TouchableHighlight} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import { ScrollView, SafeAreaView, View, Text, Image, TouchableOpacity, Modal, TextInput, Button, StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
@@ -15,120 +15,151 @@ import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
-import { clearData } from './ActivitiesSaver.js';
-import { useEffect } from 'react';
-import useAppState from './useAppState.js'
+import { AddCategory, GetCustomCategories } from './ActivitiesSaver.js';
+import useAppState from './useAppState.js';
+import CustomCategoryScreen from './screens/CustomCategoryScreen';
 
 const Stack = createNativeStackNavigator();
 
-/*Creating an array of circles*/
-//new comment
+function Homescreen({ navigation }) {
+  const currentAppState = useAppState();
 
-//comment2
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('');
+  const [customCategories, setCustomCategories] = useState([]);
 
-
-function Homescreen({navigation}) {
-
-  var currentAppState = useAppState();
-
+  // Load custom categories
   useEffect(() => {
-    window.addEventListener('beforeunload', function (e) {
-
-        clearData();
-        // Cancel the event to trigger the browser's confirmation dialog
-        e.preventDefault();
-        // Modern browsers often require returnValue to be set for the prompt to appear
-        e.returnValue = ''; 
-    });
+    (async () => {
+      const cats = await GetCustomCategories();
+      setCustomCategories(cats);
+    })();
   }, []);
+
+  // Add new category
+  const addCategory = async () => {
+    if (!newCatName || !newCatIcon) return;
+    const updated = await AddCategory(newCatName, newCatIcon);
+    setCustomCategories(updated);
+    setModalVisible(false);
+    setNewCatName('');
+    setNewCatIcon('');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source = {require('./Logo.png')} />
+      <Image source={require('./Logo.png')} />
+
+      {/* Add Category Button */}
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.addButtonText}>+ Add Category</Text>
+      </TouchableOpacity>
+      <View style={styles.divider} />
+
+      {/* Add Category Modal */}
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={{ fontWeight: '600' }}>Category Name:</Text>
+            <TextInput style={styles.modalInput} value={newCatName} onChangeText={setNewCatName} />
+            <Text style={{ fontWeight: '600' }}>Category Icon (path or URL):</Text>
+            <TextInput style={styles.modalInput} value={newCatIcon} onChangeText={setNewCatIcon} />
+            <Button title="Add" onPress={addCategory} />
+            <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView>
-        <View style = {styles.grid}>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('Gross Motor')
-            }>
-              <View style = {styles.circle1}>
-                <Image
-                    source = {require('./Running.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Gross Motor</Text>
-          </TouchableOpacity>
+        <View style={styles.grid}>
+          {/* Existing categories */}
           <TouchableOpacity
-            activeOpacity = {0.6}
+            activeOpacity={0.6}
+            onPress={() => navigation.navigate('Gross Motor')}>
+            <View style={styles.circle}>
+              <Image source={require('./Running.png')} />
+            </View>
+            <Text style={styles.activityText}>Gross Motor</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.6}
             onPress={() => navigation.navigate('Toys And Activities')}>
-              <View style = {styles.circle2}>
-                <Image
-                    source = {require('./TeddyBear.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Fun Activities</Text>
+            <View style={styles.circle}>
+              <Image source={require('./TeddyBear.png')} />
+            </View>
+            <Text style={styles.activityText}>Fun Activities</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            activeOpacity = {0.6}
+            activeOpacity={0.6}
             onPress={() => navigation.navigate('Fine Motor')}>
-              <View style = {styles.circle3}>
-                <Image
-                    source = {require('./Arts.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Fine Motor</Text>
+            <View style={styles.circle}>
+              <Image source={require('./Arts.png')} />
+            </View>
+            <Text style={styles.activityText}>Fine Motor</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
+
+          <TouchableOpacity
+            activeOpacity={0.6}
             onPress={() => navigation.navigate('Room Spaces')}>
-              <View style = {styles.circle4}>
-                <Image
-                    source = {require('./Door.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Room Spaces</Text>
+            <View style={styles.circle}>
+              <Image source={require('./Door.png')} />
+            </View>
+            <Text style={styles.activityText}>Room Spaces</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('SensoryScreen')}>
-              <View style = {styles.circle5}>
-                <Image
-                    source = {require('./PlayDoh.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Sensory Screen</Text>
+
+          <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={() => navigation.navigate('Sensory Screen')}>
+            <View style={styles.circle}>
+              <Image source={require('./PlayDoh.png')} />
+            </View>
+            <Text style={styles.activityText}>Sensory Screen</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
-            onPress={() => navigation.navigate('ADLScreen')}>
-              <View style = {styles.circle6}>
-                <Image
-                    source = {require('./Brushing.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>ADL</Text>
+
+          <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={() => navigation.navigate('ADL Screen')}>
+            <View style={styles.circle}>
+              <Image source={require('./Brushing.png')} />
+            </View>
+            <Text style={styles.activityText}>ADL</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
+
+          <TouchableOpacity
+            activeOpacity={0.6}
             onPress={() => navigation.navigate('Regulation')}>
-              <View style = {styles.circle7}>
-                <Image
-                    source = {require('./Headphones.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Regulation</Text>
+            <View style={styles.circle}>
+              <Image source={require('./Headphones.png')} />
+            </View>
+            <Text style={styles.activityText}>Regulation</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            activeOpacity = {0.6}
+
+          <TouchableOpacity
+            activeOpacity={0.6}
             onPress={() => navigation.navigate('ToyScreen')}>
-              <View style = {styles.circle8}>
-                <Image
-                    style = {styles.circle7}
-                    source = {require('./assets/toy.png')}
-                />
-              </View>
-              <Text style={styles.activityText}>Toys/Games</Text>
+            <View style={styles.circle}>
+              <Image source={require('./assets/toy.png')} />
+            </View>
+            <Text style={styles.activityText}>Toys/Games</Text>
           </TouchableOpacity>
+
+          
+
+          {/* Render custom categories dynamically */}
+          {customCategories.map((cat, i) => (
+            <TouchableOpacity
+              key={i}
+              activeOpacity={0.6}
+              onPress={() => navigation.navigate('CustomCategory', { categoryName: cat.categoryName })}>
+              <View style={styles.circle}>
+                <Image source={{ uri: cat.icon }} style={{ width: 80, height: 80 }} />
+              </View>
+              <Text style={styles.activityText}>{cat.categoryName}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
       <StatusBar style="auto" />
@@ -137,86 +168,35 @@ function Homescreen({navigation}) {
   );
 }
 
-// function GrossMotor({navigation}) {
-//   return <Text> "This is a new page" </Text>;
-  
-// }
-
 export default function App() {
-
   return (
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Group>
-          <Stack.Screen name = 'Home'
-            component = {Homescreen}
-          />
-          <Stack.Screen name = "Gross Motor" 
-          component={GrossMotorScreen}
-          />
-          <Stack.Screen name = "Toys And Activities" 
-          component={ToyAndActScreen}
-          />
-          <Stack.Screen name = "Fine Motor" 
-          component={FineMotorScreen}
-          />
-          <Stack.Screen name = "Room Spaces" 
-          component={RoomSpacesScreen}
-          />
-          <Stack.Screen name = "Regulation" 
-          component={Regulation}
-          />
-          <Stack.Screen name = "SensoryScreen" 
-          component={SensoryScreen}
-          />
-          <Stack.Screen name = "ADLScreen" 
-          component={ADLScreen}
-          />
-          <Stack.Screen name = "ToyScreen" 
-          component={ToyScreen}
-          />
-          <Stack.Screen name = "Schedule" 
-          component={Schedule}
-          />
+          <Stack.Screen name="Home" component={Homescreen} />
+          <Stack.Screen name="Gross Motor" component={GrossMotorScreen} />
+          <Stack.Screen name="Toys And Activities" component={ToyAndActScreen} />
+          <Stack.Screen name="Fine Motor" component={FineMotorScreen} />
+          <Stack.Screen name="Room Spaces" component={RoomSpacesScreen} />
+          <Stack.Screen name="Regulation" component={Regulation} />
+          <Stack.Screen name="SensoryScreen" component={SensoryScreen} />
+          <Stack.Screen name="ADLScreen" component={ADLScreen} />
+          <Stack.Screen name="ToyScreen" component={ToyScreen} />
+          <Stack.Screen name="Schedule" component={Schedule} />
+          <Stack.Screen name="CustomCategory" component={CustomCategoryScreen} />
         </Stack.Group>
         <Stack.Group screenOptions={{ presentation: 'modal' }}>
-          <Stack.Screen name = "Notes" component = {NotesModal} />
+          <Stack.Screen name="Notes" component={NotesModal} />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
-  )
-
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'top',
-    width: '100%',
-  },
-
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-evenly',
-    width: '300px',
-  },
-
-  circle1: {
-    width: 100,
-    height: 100,
-    padding: 20,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
-  },
-
-  circle2: {
+  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: 300 },
+  circle: {
     width: 100,
     height: 100,
     borderRadius: 50,
@@ -226,93 +206,18 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     backgroundColor: 'rgb(211,211,211)',
   },
-
-  circle3: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
+  activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },
+  addButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 6,
+    alignSelf: 'center',
   },
-
-  circle4: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
-  },
-
-  circle5: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
-  },
-
-  circle6: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
-  },
-
-  circle7: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
-  },
-
-  circle8: {
-    width: 100,
-    height: 100,
-    flexDirection: 'row',
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
-  },
-
-  a: {
-    marginHorizontal: -15,
-  },
-
-  l1: {
-    marginHorizontal: -15,
-  },
-
-  l2: {
-    marginHorizontal: -15,
-  },
-
-  activityText: {
-    fontSize: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: "center", 
-    fontWeight: '600', 
-    color: '#333', 
-    textAlign: 'center',
-  },
+  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
+  divider: { height: 1, backgroundColor: '#333', width: '90%', alignSelf: 'center', marginVertical: 10 },
+  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContainer: { backgroundColor: '#fff', padding: 20, borderRadius: 8, width: '80%' },
+  modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginVertical: 10, paddingHorizontal: 8, height: 40 },
 });
