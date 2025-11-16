@@ -15,9 +15,9 @@ import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
+import ChoiceBoard from './screens/ChoiceBoard.js';
 import { clearData } from './ActivitiesSaver.js';
 import { useEffect } from 'react';
-import {useAppState} from '@react-native-community/hooks'
 
 const Stack = createNativeStackNavigator();
 
@@ -28,8 +28,6 @@ const Stack = createNativeStackNavigator();
 
 
 function Homescreen({navigation}) {
-
-  var currentAppState = useAppState();
 
   useEffect(() => {
     window.addEventListener('beforeunload', function (e) {
@@ -177,6 +175,9 @@ export default function App() {
           />
           <Stack.Screen name = "Schedule" 
           component={Schedule}
+          />
+          <Stack.Screen name = "ChoiceBoard" 
+          component={ChoiceBoard}
           />
         </Stack.Group>
         <Stack.Group screenOptions={{ presentation: 'modal' }}>
