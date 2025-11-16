@@ -11,13 +11,13 @@ import FineMotorScreen from './screens/FineMotorScreen';
 import RoomSpacesScreen from './screens/RoomSpacesScreen';
 import Regulation from './screens/Regulation';
 import SensoryScreen from './screens/SensoryScreen';
-import ADLScreen from './screens/ADLScreen.js';
+import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
 import { clearData } from './ActivitiesSaver.js';
 import { useEffect } from 'react';
-import {useAppState} from '@react-native-community/hooks'
+import useAppState from './useAppState.js'
 
 const Stack = createNativeStackNavigator();
 
