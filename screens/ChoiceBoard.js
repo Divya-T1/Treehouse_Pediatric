@@ -9,7 +9,8 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  Alert
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
@@ -119,6 +120,10 @@ export default function ChoiceBoard() {
 
   const toggleSelection = (filePath) => {
     //saves to filepaths to choiceBoardActivities
+    if(choiceBoardActivities.length >= 3 && !choiceBoardActivities.includes(filePath)) {
+        createMax3Alert();
+        return;
+    }
     if (choiceBoardActivities.includes(filePath)) {
         setChoiceBoardActivities(choiceBoardActivities.filter(item => item !== filePath));
         console.log("removed " + filePath);
@@ -126,6 +131,15 @@ export default function ChoiceBoard() {
         setChoiceBoardActivities([...choiceBoardActivities, filePath]);
         console.log("added " + filePath);
     }
+  };
+
+  const createMax3Alert = () => {
+    alert("You can only select up to 3 activities.");
+    Alert.alert(
+      "Maximum Selection Reached",
+      "You can only select up to 3 activities.",
+      [{ text: "OK" }]
+    );
   };
 
   useEffect(() => {
@@ -176,7 +190,7 @@ export default function ChoiceBoard() {
     return (
       <View style={styles.row}>
         <Text style={styles.label}>Fine Motor</Text>
-        <View style={styles.iconAndTextInput}>
+        <View style={[styles.iconAndTextInput]}>
           <View style={styles.iconCircle}>
             <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item.filePath)}}>
                 <View style={[styles.normalCircle, choiceBoardActivities.includes(item.filePath) && styles.selectedCircle]}>
@@ -196,6 +210,15 @@ export default function ChoiceBoard() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Choice Board</Text>
+
+      <FlatList
+        data={choiceBoardActivities.map(path => ({ filePath: path }))}
+        keyExtractor={(it, idx) => `${it}-${idx}`}
+        renderItem={renderItem}
+        contentContainerStyle={choiceBoardActivities.length === 0 && { flex: 1, justifyContent: 'center' }}
+        style={styles.MainFlatListStyle}
+        horizontal={true}
+      />
 
       <FlatList
         data={activities}
@@ -227,6 +250,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#000000ff',
   },
+  MainFlatListStyle: {
+    display: 'flex',
+    position: 'absolute',
+    top: 70,
+  },
   title: {
     fontSize: 22,
     fontWeight: '700',
@@ -238,8 +266,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    borderWidth: 1,
   },
   label: {
     fontSize: 18,
