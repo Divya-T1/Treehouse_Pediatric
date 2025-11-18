@@ -15,9 +15,9 @@ import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
+import CustomCategoryScreen from './screens/CustomCategoryScreen';
 import { AddCategory, GetCustomCategories } from './ActivitiesSaver.js';
 import useAppState from './useAppState.js';
-import CustomCategoryScreen from './screens/CustomCategoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -73,87 +73,58 @@ function Homescreen({ navigation }) {
 
       <ScrollView>
         <View style={styles.grid}>
-          {/* Existing categories */}
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('Gross Motor')}>
-            <View style={styles.circle}>
-              <Image source={require('./Running.png')} />
-            </View>
+          {/* ORIGINAL CATEGORIES */}
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Gross Motor')}>
+            <View style={styles.circle}><Image source={require('./Running.png')} /></View>
             <Text style={styles.activityText}>Gross Motor</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('Toys And Activities')}>
-            <View style={styles.circle}>
-              <Image source={require('./TeddyBear.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Toys And Activities')}>
+            <View style={styles.circle}><Image source={require('./TeddyBear.png')} /></View>
             <Text style={styles.activityText}>Fun Activities</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('Fine Motor')}>
-            <View style={styles.circle}>
-              <Image source={require('./Arts.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Fine Motor')}>
+            <View style={styles.circle}><Image source={require('./Arts.png')} /></View>
             <Text style={styles.activityText}>Fine Motor</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('Room Spaces')}>
-            <View style={styles.circle}>
-              <Image source={require('./Door.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Room Spaces')}>
+            <View style={styles.circle}><Image source={require('./Door.png')} /></View>
             <Text style={styles.activityText}>Room Spaces</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('Sensory Screen')}>
-            <View style={styles.circle}>
-              <Image source={require('./PlayDoh.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('SensoryScreen')}>
+            <View style={styles.circle}><Image source={require('./PlayDoh.png')} /></View>
             <Text style={styles.activityText}>Sensory Screen</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('ADL Screen')}>
-            <View style={styles.circle}>
-              <Image source={require('./Brushing.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('ADLScreen')}>
+            <View style={styles.circle}><Image source={require('./Brushing.png')} /></View>
             <Text style={styles.activityText}>ADL</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('Regulation')}>
-            <View style={styles.circle}>
-              <Image source={require('./Headphones.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Regulation')}>
+            <View style={styles.circle}><Image source={require('./Headphones.png')} /></View>
             <Text style={styles.activityText}>Regulation</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('ToyScreen')}>
-            <View style={styles.circle}>
-              <Image source={require('./assets/toy.png')} />
-            </View>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('ToyScreen')}>
+            <View style={styles.circle}><Image
+  source={require('./assets/toy.png')}
+  style={{ width: 60, height: 60, resizeMode: 'contain' }}
+/>
+</View>
             <Text style={styles.activityText}>Toys/Games</Text>
           </TouchableOpacity>
 
-          
-
-          {/* Render custom categories dynamically */}
+          {/* CUSTOM CATEGORIES */}
           {customCategories.map((cat, i) => (
             <TouchableOpacity
               key={i}
               activeOpacity={0.6}
-              onPress={() => navigation.navigate('CustomCategory', { categoryName: cat.categoryName })}>
+              onPress={() => navigation.navigate('CustomCategory', { categoryName: cat.categoryName })}
+            >
               <View style={styles.circle}>
                 <Image source={{ uri: cat.icon }} style={{ width: 80, height: 80 }} />
               </View>
@@ -162,6 +133,7 @@ function Homescreen({ navigation }) {
           ))}
         </View>
       </ScrollView>
+
       <StatusBar style="auto" />
       <BottomNavBar />
     </SafeAreaView>
@@ -207,14 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(211,211,211)',
   },
   activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },
-  addButton: {
-    backgroundColor: '#ccc',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 10,
-    borderRadius: 6,
-    alignSelf: 'center',
-  },
+  addButton: { backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, marginTop: 10, borderRadius: 6, alignSelf: 'center' },
   addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
   divider: { height: 1, backgroundColor: '#333', width: '90%', alignSelf: 'center', marginVertical: 10 },
   modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
