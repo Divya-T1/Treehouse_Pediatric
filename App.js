@@ -17,7 +17,7 @@ import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
 import CustomCategoryScreen from './screens/CustomCategoryScreen';
-import { AddCategory, GetCategories } from './ActivitiesSaver.js';
+import { AddCategory, GetCustomCategories } from './ActivitiesSaver.js';
 import useAppState from './useAppState.js';
 
 const Stack = createNativeStackNavigator();
@@ -33,7 +33,7 @@ function Homescreen({ navigation }) {
   // Load custom categories
   useEffect(() => {
     (async () => {
-      const cats = await GetCategories();
+      const cats = await GetCustomCategories();
       setCustomCategories(cats);
     })();
   }, []);

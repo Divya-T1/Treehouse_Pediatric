@@ -17,7 +17,7 @@ import BottomNavBar from './NavigationOptions.js';
 import {
   SaveActivities,
   GetActivities,
-  GetCategories,
+  GetCustomCategories,
   AddActivityToCategory,
   AddCategory
 } from '../ActivitiesSaver.js';
@@ -26,7 +26,7 @@ import * as ImagePicker from 'expo-image-picker';
 export default function GrossMotorScreen() {
   const categoryName = "Gross Motor";
 
-  // static image requires
+  // static requires
   const logo = require('../Logo.png');
   const img1 = require('../assets/Group_11.png');
   const img2 = require('../assets/Group_12.png');
@@ -35,7 +35,7 @@ export default function GrossMotorScreen() {
   const img5 = require('../assets/image_9.png');
   const img6 = require('../assets/image_10.png');
 
-  // keep original IDs
+  // hardcoded filePath IDs
   const act1 = '../assets/Group_11.png';
   const act2 = '../assets/Group_12.png';
   const act3 = '../assets/image_6.png';
@@ -46,39 +46,46 @@ export default function GrossMotorScreen() {
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [customActivities, setCustomActivities] = useState([]);
 
-  // modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [newActName, setNewActName] = useState('');
   const [newActIcon, setNewActIcon] = useState('');
 
-  // load saved selected activities + custom activities
+  // -------------------------
+  // LOAD SAVED DATA
+  // -------------------------
   useEffect(() => {
     (async () => {
+
       // Load selected activities
       const saved = await GetActivities();
-      const savedFilePaths = saved.map(item => item.filePath);
-      setSelectedActivities(savedFilePaths || []);
+      const savedFiles = saved.map(a => a.filePath);
+      setSelectedActivities(savedFiles || []);
 
       // Load custom activities for this category
-      const categories = await GetCategories();
+      const categories = await GetCustomCategories();
       const found = categories?.find(c => c.categoryName === categoryName);
       setCustomActivities(found ? found.activities : []);
     })();
   }, []);
 
+  // -------------------------
+  // SELECTION TOGGLER
+  // -------------------------
   async function toggleSelection(id) {
     const prev = await GetActivities();
-    const prevFilePaths = prev.map(item => item.filePath);
+    const prevIds = prev.map(a => a.filePath);
 
-    const next = prevFilePaths.includes(id)
-      ? prev.filter(item => item.filePath !== id)
+    const next = prevIds.includes(id)
+      ? prev.filter(a => a.filePath !== id)
       : [...prev, { filePath: id, notes: '' }];
 
     await SaveActivities(next);
-    setSelectedActivities(next.map(item => item.filePath));
+    setSelectedActivities(next.map(a => a.filePath));
   }
 
-  // image picker
+  // -------------------------
+  // PICK IMAGE FOR CUSTOM ACTIVITY
+  // -------------------------
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -91,11 +98,14 @@ export default function GrossMotorScreen() {
       if (!result.canceled && result.assets?.length > 0) {
         setNewActIcon(result.assets[0].uri);
       }
-    } catch (err) {
+    } catch (e) {
       Alert.alert("Error selecting image.");
     }
   };
 
+  // -------------------------
+  // ADD CUSTOM ACTIVITY
+  // -------------------------
   const addActivity = async () => {
     if (!newActName || !newActIcon) {
       Alert.alert("Please enter a name and choose an image.");
@@ -105,34 +115,38 @@ export default function GrossMotorScreen() {
     const activity = { name: newActName, icon: newActIcon, notes: '' };
 
     try {
-      let categories = await GetCategories();
+      let categories = await GetCustomCategories();
 
-      // Create category if not present
+      // If category does not exist → create it first
       if (!categories.find(c => c.categoryName === categoryName)) {
         await AddCategory(categoryName, newActIcon);
-        categories = await GetCategories();
+        categories = await GetCustomCategories();
       }
 
-      // Add activity
+      // Add the activity to the category
       const updated = await AddActivityToCategory(categoryName, activity);
 
+      // Update UI
       const cat = updated.find(c => c.categoryName === categoryName);
       setCustomActivities(cat?.activities || []);
 
-      // reset modal
-      setModalVisible(false);
+      // Reset modal
       setNewActName('');
       setNewActIcon('');
+      setModalVisible(false);
+
     } catch (err) {
       Alert.alert("Error saving activity.");
     }
   };
 
+  // -------------------------
+  // UI
+  // -------------------------
   return (
     <SafeAreaView style={styles.container}>
       <Image source={logo} />
 
-      {/* Add Activity Button */}
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.addButtonText}>+ Add Activity</Text>
       </TouchableOpacity>
@@ -183,9 +197,9 @@ export default function GrossMotorScreen() {
             <Text style={styles.activityText}>Obstacle Course</Text>
           </TouchableOpacity>
 
-          {/* Custom Activities */}
-          {customActivities.map((act, index) => (
-            <TouchableOpacity key={index} activeOpacity={0.6} onPress={() => toggleSelection(act.icon)}>
+          {/* Custom activities */}
+          {customActivities.map((act, i) => (
+            <TouchableOpacity key={i} activeOpacity={0.6} onPress={() => toggleSelection(act.icon)}>
               <View style={[styles.circle1, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
                 <Image source={{ uri: act.icon }} style={styles.circleImage} />
               </View>
@@ -203,6 +217,7 @@ export default function GrossMotorScreen() {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
+
             <Text style={{ fontWeight: '600' }}>Activity Name:</Text>
             <TextInput
               style={styles.modalInput}
@@ -222,16 +237,15 @@ export default function GrossMotorScreen() {
 
             <Button title="Add Activity" onPress={addActivity} />
             <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+
           </View>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 }
 
-// -------------------------- styles --------------------------
-
+// ------------------- styles -------------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
 
@@ -242,11 +256,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 6,
   },
-  addButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333'
-  },
+  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
 
   grid: {
     flexDirection: 'row',
@@ -259,13 +269,13 @@ const styles = StyleSheet.create({
     width: 100, height: 100, padding: 20, borderRadius: 50,
     alignItems: 'center', justifyContent: 'center',
     marginHorizontal: 20, marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(195,229,236)',
   },
-  circle2: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195, 229, 236)' },
-  circle3: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195, 229, 236)' },
-  circle4: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195, 229, 236)' },
-  circle5: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195, 229, 236)' },
-  circle6: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195, 229, 236)' },
+  circle2: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195,229,236)' },
+  circle3: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195,229,236)' },
+  circle4: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195,229,236)' },
+  circle5: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195,229,236)' },
+  circle6: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(195,229,236)' },
 
   circleImage: { width: 80, height: 80, resizeMode: 'contain' },
 
@@ -279,7 +289,9 @@ const styles = StyleSheet.create({
   },
 
   modalBackground: {
-    flex: 1, justifyContent: 'center', alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContainer: {
@@ -289,7 +301,8 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   modalInput: {
-    borderWidth: 1, borderColor: '#ccc',
+    borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 6,
     paddingHorizontal: 8,
     height: 40,

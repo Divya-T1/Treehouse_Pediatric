@@ -17,7 +17,7 @@ import BottomNavBar from './NavigationOptions.js';
 import {
   SaveActivities,
   GetActivities,
-  GetCategories,
+  GetCustomCategories,
   AddActivityToCategory,
   AddCategory
 } from '../ActivitiesSaver.js';
@@ -66,7 +66,7 @@ export default function ToyScreen() {
       setSelectedActivities(savedFilePaths || []);
 
       // Load custom activities for this category
-      const categories = await GetCategories();
+      const categories = await GetCustomCategories();
       const found = categories?.find(c => c.categoryName === categoryName);
       setCustomActivities(found ? found.activities : []);
     })();
@@ -111,12 +111,12 @@ export default function ToyScreen() {
     const activity = { name: newActName, icon: newActIcon, notes: '' };
 
     try {
-      let categories = await GetCategories();
+      let categories = await GetCustomCategories();
 
       // Create category if not present
       if (!categories.find(c => c.categoryName === categoryName)) {
         await AddCategory(categoryName, newActIcon);
-        categories = await GetCategories();
+        categories = await GetCustomCategories();
       }
 
       // Add activity

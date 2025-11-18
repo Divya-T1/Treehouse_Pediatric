@@ -17,7 +17,7 @@ import BottomNavBar from './NavigationOptions.js';
 import {
   SaveActivities,
   GetActivities,
-  GetCategories,
+  GetCustomCategories,
   AddActivityToCategory,
   AddCategory
 } from '../ActivitiesSaver.js';
@@ -39,17 +39,25 @@ export default function ToysAndActScreen() {
   const img9 = require('../assets/TOYS/Vector-5.png');
   const img10 = require('../assets/TOYS/Vector.png');
 
-  // original IDs
-  const act1 = '../assets/TOYS/Group 16.png';
-  const act2 = '../assets/TOYS/Group-1.png';
-  const act3 = '../assets/TOYS/Group-2.png';
-  const act4 = '../assets/TOYS/Group.png';
-  const act5 = '../assets/TOYS/Vector-1.png';
-  const act6 = '../assets/TOYS/Vector-2.png';
-  const act7 = '../assets/TOYS/Vector-3.png';
-  const act8 = '../assets/TOYS/Vector-4.png';
-  const act9 = '../assets/TOYS/Vector-5.png';
-  const act10 = '../assets/TOYS/Vector.png';
+  // original IDs (used for selection)
+  const actIds = [
+    '../assets/TOYS/Group 16.png',
+    '../assets/TOYS/Group-1.png',
+    '../assets/TOYS/Group-2.png',
+    '../assets/TOYS/Group.png',
+    '../assets/TOYS/Vector-1.png',
+    '../assets/TOYS/Vector-2.png',
+    '../assets/TOYS/Vector-3.png',
+    '../assets/TOYS/Vector-4.png',
+    '../assets/TOYS/Vector-5.png',
+    '../assets/TOYS/Vector.png'
+  ];
+
+  const images = [img1,img2,img3,img4,img5,img6,img7,img8,img9,img10];
+  const names = [
+    "Animals","Toy Cars","Work Table","Toy Food","Reading",
+    "Watch Video","Puzzles","iPad Time","Instrument","Toy Train"
+  ];
 
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [customActivities, setCustomActivities] = useState([]);
@@ -58,25 +66,25 @@ export default function ToysAndActScreen() {
   const [newActName, setNewActName] = useState('');
   const [newActIcon, setNewActIcon] = useState('');
 
+  // LOAD SAVED DATA
   useEffect(() => {
     (async () => {
-      // Load selected activities
       const saved = await GetActivities();
-      const savedFilePaths = saved.map(item => item.filePath);
-      setSelectedActivities(savedFilePaths || []);
+      const savedIds = saved.map(item => item.filePath);
+      setSelectedActivities(savedIds || []);
 
-      // Load custom activities
-      const categories = await GetCategories();
+      const categories = await GetCustomCategories();
       const found = categories?.find(c => c.categoryName === categoryName);
       setCustomActivities(found ? found.activities : []);
     })();
   }, []);
 
+  // TOGGLE SELECTION
   async function toggleSelection(id) {
     const prev = await GetActivities();
-    const prevFilePaths = prev.map(item => item.filePath);
+    const prevIds = prev.map(item => item.filePath);
 
-    const next = prevFilePaths.includes(id)
+    const next = prevIds.includes(id)
       ? prev.filter(item => item.filePath !== id)
       : [...prev, { filePath: id, notes: '' }];
 
@@ -84,7 +92,7 @@ export default function ToysAndActScreen() {
     setSelectedActivities(next.map(item => item.filePath));
   }
 
-  // Image picker
+  // PICK IMAGE
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -102,6 +110,7 @@ export default function ToysAndActScreen() {
     }
   };
 
+  // ADD CUSTOM ACTIVITY
   const addActivity = async () => {
     if (!newActName || !newActIcon) {
       Alert.alert("Please enter a name and choose an image.");
@@ -111,20 +120,24 @@ export default function ToysAndActScreen() {
     const activity = { name: newActName, icon: newActIcon, notes: '' };
 
     try {
-      let categories = await GetCategories();
+      let categories = await GetCustomCategories();
 
+      // Create category if missing
       if (!categories.find(c => c.categoryName === categoryName)) {
         await AddCategory(categoryName, newActIcon);
-        categories = await GetCategories();
+        categories = await GetCustomCategories();
       }
 
+      // Add activity
       const updated = await AddActivityToCategory(categoryName, activity);
       const cat = updated.find(c => c.categoryName === categoryName);
       setCustomActivities(cat?.activities || []);
 
+      // Reset fields
       setModalVisible(false);
       setNewActName('');
       setNewActIcon('');
+
     } catch (err) {
       Alert.alert("Error saving activity.");
     }
@@ -141,21 +154,17 @@ export default function ToysAndActScreen() {
       <ScrollView>
         <View style={styles.grid}>
 
-          {/* Built-in activities */}
-          {[img1,img2,img3,img4,img5,img6,img7,img8,img9,img10].map((img, index) => {
-            const actId = [act1,act2,act3,act4,act5,act6,act7,act8,act9,act10][index];
-            const names = ["Animals","Toy Cars","Work Table","Toy Food","Reading","Watch Video","Puzzles","iPad Time","Instrument","Toy Train"];
-            return (
-              <TouchableOpacity key={index} activeOpacity={0.6} onPress={() => toggleSelection(actId)}>
-                <View style={[styles.circle, selectedActivities.includes(actId) && styles.selectedCircle]}>
-                  <Image source={img} style={styles.circleImage} />
-                </View>
-                <Text style={styles.activityText}>{names[index]}</Text>
-              </TouchableOpacity>
-            )
-          })}
+          {/* Built-in items */}
+          {images.map((img, index) => (
+            <TouchableOpacity key={index} activeOpacity={0.6} onPress={() => toggleSelection(actIds[index])}>
+              <View style={[styles.circle, selectedActivities.includes(actIds[index]) && styles.selectedCircle]}>
+                <Image source={img} style={styles.circleImage} />
+              </View>
+              <Text style={styles.activityText}>{names[index]}</Text>
+            </TouchableOpacity>
+          ))}
 
-          {/* Custom activities */}
+          {/* Custom items */}
           {customActivities.map((act, index) => (
             <TouchableOpacity key={index} activeOpacity={0.6} onPress={() => toggleSelection(act.icon)}>
               <View style={[styles.circle, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
@@ -175,6 +184,7 @@ export default function ToysAndActScreen() {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
+
             <Text style={{ fontWeight: '600' }}>Activity Name:</Text>
             <TextInput
               style={styles.modalInput}
@@ -194,6 +204,7 @@ export default function ToysAndActScreen() {
 
             <Button title="Add Activity" onPress={addActivity} />
             <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+
           </View>
         </View>
       </Modal>
@@ -211,11 +222,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 6,
   },
-  addButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333'
-  },
+  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
 
   grid: {
     flexDirection: 'row',

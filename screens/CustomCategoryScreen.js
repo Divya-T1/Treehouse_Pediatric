@@ -15,14 +15,16 @@ import {
   Alert,
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+
 import {
-  GetCategories,
   GetCustomCategories,
+  SaveCustomCategories,    // ⭐ ADDED: Needed for persistence
   AddCategory,
   AddActivityToCategory,
   GetActivities,
   SaveActivities,
 } from '../ActivitiesSaver.js';
+
 import * as ImagePicker from 'expo-image-picker';
 
 export default function CustomCategoryScreen({ route }) {
@@ -34,20 +36,12 @@ export default function CustomCategoryScreen({ route }) {
   const [newActIcon, setNewActIcon] = useState('');
   const [selectedActivities, setSelectedActivities] = useState([]);
 
-  // Load category activities (prefer custom categories, fallback to originals)
+  // Load activities for this category
   useEffect(() => {
     (async () => {
       try {
-        // first check custom categories (where writes happen)
         const custom = await GetCustomCategories();
-        let cat = custom.find(c => c.categoryName === categoryName);
-
-        // if not custom, fall back to combined categories (originals + customs)
-        if (!cat) {
-          const all = await GetCategories();
-          cat = all.find(c => c.categoryName === categoryName);
-        }
-
+        const cat = custom?.find(c => c.categoryName === categoryName);
         setActivities(cat?.activities ? [...cat.activities] : []);
       } catch (err) {
         console.log('load activities error', err);
@@ -56,7 +50,7 @@ export default function CustomCategoryScreen({ route }) {
     })();
   }, [categoryName]);
 
-  // Load selected activities (for notes toggle)
+  // Load selected activities
   useEffect(() => {
     (async () => {
       try {
@@ -83,12 +77,15 @@ export default function CustomCategoryScreen({ route }) {
     })();
   }, []);
 
-  // Toggle selection (save to schedule)
+  // Toggle activity selection
   async function toggleSelection(iconPath) {
     try {
       const prev = await GetActivities();
       const exists = prev.find(item => item.filePath === iconPath);
-      const next = exists ? prev.filter(item => item.filePath !== iconPath) : [...prev, { filePath: iconPath, notes: '' }];
+      const next = exists
+        ? prev.filter(item => item.filePath !== iconPath)
+        : [...prev, { filePath: iconPath, notes: '' }];
+
       await SaveActivities(next);
       setSelectedActivities(next.map(item => item.filePath));
     } catch (err) {
@@ -96,7 +93,7 @@ export default function CustomCategoryScreen({ route }) {
     }
   }
 
-  // Pick image (works with modern Expo return format)
+  // Pick image
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -106,12 +103,8 @@ export default function CustomCategoryScreen({ route }) {
         quality: 1,
       });
 
-      // new expo returns result.assets[0].uri
-      if (!result.canceled && result.assets && result.assets.length > 0) {
+      if (!result.canceled && result.assets?.length > 0) {
         setNewActIcon(result.assets[0].uri);
-      } else if (!result.canceled && result.uri) {
-        // older format compatibility
-        setNewActIcon(result.uri);
       }
     } catch (err) {
       console.log('Image picker error', err);
@@ -122,51 +115,52 @@ export default function CustomCategoryScreen({ route }) {
   // Add new activity
   const addActivity = async () => {
     if (!newActName || !newActIcon) {
-      Alert.alert('Please provide both a name and an icon for the activity.');
+      Alert.alert('Please provide both a name and an icon.');
       return;
     }
 
     const activity = { name: newActName.trim(), icon: newActIcon, notes: '' };
 
     try {
-      // Try to add to custom categories (AddActivityToCategory operates on custom categories)
-      // AddActivityToCategory returns updated custom categories (per your existing implementation)
-      let updatedCustoms = await AddActivityToCategory(categoryName, activity);
+      // --- Load all custom categories ---
+      let allCategories = await GetCustomCategories();
+      if (!Array.isArray(allCategories)) allCategories = [];
 
-      // If AddActivityToCategory didn't find the category (i.e. categoryName is an original),
-      // then updatedCustoms will not include the category; create a new custom category and then add.
-      let cat = updatedCustoms && updatedCustoms.find(c => c.categoryName === categoryName);
-
-      if (!cat) {
-        // create a custom category with this name (use the newActIcon as its icon)
-        await AddCategory(categoryName, newActIcon);
-        // now add activity to that newly created custom category
-        updatedCustoms = await AddActivityToCategory(categoryName, activity);
-        cat = updatedCustoms.find(c => c.categoryName === categoryName);
+      // --- Find or create this category ---
+      let thisCat = allCategories.find(c => c.categoryName === categoryName);
+      if (!thisCat) {
+        thisCat = { categoryName, icon: newActIcon, activities: [] };
+        allCategories.push(thisCat);
       }
 
-      // Update local state with a cloned array so React re-renders
-      setActivities(cat?.activities ? [...cat.activities] : []);
+      // --- Add activity ---
+      thisCat.activities.push(activity);
 
-      // Reset & close modal
+      // --- ⭐ SAVE THE UPDATED LIST so it persists ---
+      await SaveCustomCategories(allCategories);
+
+      // Update UI
+      setActivities([...thisCat.activities]);
+
+      // Reset modal
       setModalVisible(false);
       setNewActName('');
       setNewActIcon('');
     } catch (err) {
       console.log('addActivity error', err);
-      Alert.alert('Error', 'Could not add activity. See console for details.');
+      Alert.alert('Error', 'Could not add activity.');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Add Activity Button */}
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.addButtonText}>+ Add Activity</Text>
       </TouchableOpacity>
+
       <View style={styles.divider} />
 
-      {/* Add Activity Modal */}
+      {/* Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
@@ -175,9 +169,10 @@ export default function CustomCategoryScreen({ route }) {
 
             <Text style={{ fontWeight: '600', marginTop: 8 }}>Activity Icon:</Text>
             <Button title={newActIcon ? "Change Image" : "Pick Image"} onPress={pickImage} />
-            {newActIcon ? (
+
+            {newActIcon && (
               <Image source={{ uri: newActIcon }} style={{ width: 80, height: 80, marginVertical: 10, alignSelf: 'center' }} />
-            ) : null}
+            )}
 
             <Button title="Add" onPress={addActivity} />
             <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
@@ -185,13 +180,12 @@ export default function CustomCategoryScreen({ route }) {
         </View>
       </Modal>
 
-      {/* Activity Grid */}
+      {/* Activities Grid */}
       <ScrollView>
         <View style={styles.grid}>
           {activities.map((act, i) => (
-            <TouchableOpacity key={i} activeOpacity={0.6} onPress={() => toggleSelection(act.icon)}>
+            <TouchableOpacity key={i} onPress={() => toggleSelection(act.icon)}>
               <View style={[styles.circleCustom, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
-                {/* activity.icon may be a local uri or remote uri */}
                 <Image source={{ uri: act.icon }} style={styles.circleImage} />
               </View>
               <Text style={styles.activityText}>{act.name}</Text>
@@ -206,7 +200,7 @@ export default function CustomCategoryScreen({ route }) {
   );
 }
 
-// Styles (kept as before)
+// ------------------- Styles -------------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: 300 },
@@ -237,32 +231,9 @@ const styles = StyleSheet.create({
   },
   addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
 
-  divider: {
-    height: 1,
-    backgroundColor: '#333',
-    width: '90%',
-    alignSelf: 'center',
-    marginVertical: 10,
-  },
+  divider: { height: 1, backgroundColor: '#333', width: '90%', alignSelf: 'center', marginVertical: 10 },
 
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    width: '80%',
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    marginVertical: 10,
-    paddingHorizontal: 8,
-    height: 40,
-  },
+  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContainer: { backgroundColor: '#fff', padding: 20, borderRadius: 8, width: '80%' },
+  modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginVertical: 10, paddingHorizontal: 8, height: 40 },
 });

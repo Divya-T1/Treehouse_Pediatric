@@ -2,145 +2,269 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView } from 'react-native';
 import {
-  StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity
+  StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity,
+  Modal, TextInput, Button, Alert
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
-import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
+import {
+  SaveActivities,
+  GetActivities,
+  GetCustomCategories,
+  AddActivityToCategory,
+  AddCategory
+} from '../ActivitiesSaver.js';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function RoomSpacesScreen() {
-  // static requires for RN bundler
+  // CATEGORY NAME (exact)
+  const categoryName = "RoomSpaces";
+
+  // static assets (RN requires)
   const logo = require('../Logo.png');
-  const img1 = require('../assets/RoomSpacesPictures/horse.png');
-  const img2 = require('../assets/RoomSpacesPictures/house.png');
-  const img3 = require('../assets/RoomSpacesPictures/mask.png');
-  const img4 = require('../assets/RoomSpacesPictures/puzzle.png');
-  const img5 = require('../assets/RoomSpacesPictures/sitting.png');
-  const img6 = require('../assets/RoomSpacesPictures/talking.png');
-  const img7 = require('../assets/RoomSpacesPictures/toilet.png');
-  const img8 = require('../assets/RoomSpacesPictures/treehouse.png');
-  const img9 = require('../assets/RoomSpacesPictures/utensils.png');
-  const img10 = require('../assets/RoomSpacesPictures/weight.png');
+  const images = [
+    require('../assets/RoomSpacesPictures/horse.png'),
+    require('../assets/RoomSpacesPictures/house.png'),
+    require('../assets/RoomSpacesPictures/mask.png'),
+    require('../assets/RoomSpacesPictures/puzzle.png'),
+    require('../assets/RoomSpacesPictures/sitting.png'),
+    require('../assets/RoomSpacesPictures/talking.png'),
+    require('../assets/RoomSpacesPictures/toilet.png'),
+    require('../assets/RoomSpacesPictures/treehouse.png'),
+    require('../assets/RoomSpacesPictures/utensils.png'),
+    require('../assets/RoomSpacesPictures/weight.png'),
+  ];
 
-  // string IDs matching file paths
-  const act1 = '../assets/RoomSpacesPictures/horse.png';
-  const act2 = '../assets/RoomSpacesPictures/house.png';
-  const act3 = '../assets/RoomSpacesPictures/mask.png';
-  const act4 = '../assets/RoomSpacesPictures/puzzle.png';
-  const act5 = '../assets/RoomSpacesPictures/sitting.png';
-  const act6 = '../assets/RoomSpacesPictures/talking.png';
-  const act7 = '../assets/RoomSpacesPictures/toilet.png';
-  const act8 = '../assets/RoomSpacesPictures/treehouse.png';
-  const act9 = '../assets/RoomSpacesPictures/utensils.png';
-  const act10 = '../assets/RoomSpacesPictures/weight.png';
+  // matching ID strings for saving/selection (must match other screens)
+  const ids = [
+    '../assets/RoomSpacesPictures/horse.png',
+    '../assets/RoomSpacesPictures/house.png',
+    '../assets/RoomSpacesPictures/mask.png',
+    '../assets/RoomSpacesPictures/puzzle.png',
+    '../assets/RoomSpacesPictures/sitting.png',
+    '../assets/RoomSpacesPictures/talking.png',
+    '../assets/RoomSpacesPictures/toilet.png',
+    '../assets/RoomSpacesPictures/treehouse.png',
+    '../assets/RoomSpacesPictures/utensils.png',
+    '../assets/RoomSpacesPictures/weight.png',
+  ];
 
+  const names = [
+    "Rocking Chair",
+    "Nurse",
+    "Auditory Room",
+    "Puzzle Room",
+    "Waiting Room",
+    "Speech Room",
+    "Bathroom",
+    "Treetop Room",
+    "Kitchen",
+    "Gym",
+  ];
+
+  // selection state
   const [selectedActivities, setSelectedActivities] = useState([]);
 
+  // custom activities for this category
+  const [customActivities, setCustomActivities] = useState([]);
+
+  // modal + new activity state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newActName, setNewActName] = useState('');
+  const [newActIcon, setNewActIcon] = useState('');
+
+  // request permissions for image picker (optional but helpful)
   useEffect(() => {
     (async () => {
-      const saved = await GetActivities();
-      const savedFilePaths = saved.map(item => item.filePath);
-      setSelectedActivities(savedFilePaths || []);
+      try {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission required', 'Photo library permissions required to pick activity icons!');
+        }
+      } catch (err) {
+        console.log('permission error', err);
+      }
     })();
   }, []);
 
+  // load saved selections and custom activities on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        // load schedule selections
+        const saved = await GetActivities();
+        const savedFilePaths = (saved || []).map(item => item.filePath);
+        setSelectedActivities(savedFilePaths);
+
+        // load custom categories and this category's activities
+        const categories = await GetCustomCategories();
+        const found = (categories || []).find(c => c.categoryName === categoryName);
+        setCustomActivities(found?.activities || []);
+      } catch (err) {
+        console.log('load RoomSpaces error', err);
+        setSelectedActivities([]);
+        setCustomActivities([]);
+      }
+    })();
+  }, []);
+
+  // toggle selection for any activity id (either static id or custom icon uri)
   async function toggleSelection(id) {
-    const prev = await GetActivities();
-    const prevFilePaths = prev.map(item => item.filePath);
+    try {
+      const prev = await GetActivities();
+      const exists = (prev || []).some(item => item.filePath === id);
 
-    const next = prevFilePaths.includes(id)
-      ? prev.filter(item => item.filePath !== id)
-      : [...prev, { filePath: id, notes: '' }];
+      const next = exists
+        ? prev.filter(item => item.filePath !== id)
+        : [...(prev || []), { filePath: id, notes: '' }];
 
-    await SaveActivities(next);
-    setSelectedActivities(next.map(item => item.filePath));
+      await SaveActivities(next);
+      setSelectedActivities(next.map(item => item.filePath));
+    } catch (err) {
+      console.log('toggleSelection error', err);
+    }
   }
+
+  // open image picker
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        setNewActIcon(result.assets[0].uri);
+      }
+    } catch (err) {
+      console.log('pickImage error', err);
+      Alert.alert('Error selecting image.');
+    }
+  };
+
+  // add custom activity to this category (create category if missing)
+  const addActivity = async () => {
+    if (!newActName || !newActIcon) {
+      Alert.alert('Please enter a name and choose an image.');
+      return;
+    }
+
+    const activity = { name: newActName.trim(), icon: newActIcon, notes: '' };
+
+    try {
+      // load existing custom categories
+      let categories = await GetCustomCategories();
+      if (!Array.isArray(categories)) categories = [];
+
+      // create category if missing
+      if (!categories.find(c => c.categoryName === categoryName)) {
+        await AddCategory(categoryName, newActIcon);
+        categories = await GetCustomCategories();
+      }
+
+      // add the activity
+      const updated = await AddActivityToCategory(categoryName, activity);
+
+      // update UI to show the just-added activity
+      const cat = (updated || []).find(c => c.categoryName === categoryName);
+      setCustomActivities(cat?.activities || []);
+
+      // reset modal
+      setNewActName('');
+      setNewActIcon('');
+      setModalVisible(false);
+    } catch (err) {
+      console.log('addActivity error', err);
+      Alert.alert('Error saving activity.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Image source={logo} />
+
+      {/* Add custom activity button */}
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.addButtonText}>+ Add Activity</Text>
+      </TouchableOpacity>
+
       <ScrollView>
         <View style={styles.grid}>
 
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act1)}>
-            <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
-              <Image source={img1} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Rocking Chair</Text>
-          </TouchableOpacity>
+          {/* built-in activities */}
+          {images.map((img, i) => (
+            <TouchableOpacity
+              key={`built-${i}`}
+              activeOpacity={0.6}
+              onPress={() => toggleSelection(ids[i])}
+            >
+              <View style={[styles.circle, selectedActivities.includes(ids[i]) && styles.selectedCircle]}>
+                <Image source={img} style={styles.circleImage} />
+              </View>
+              <Text style={styles.activityText}>{names[i]}</Text>
+            </TouchableOpacity>
+          ))}
 
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
-            <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
-              <Image source={img2} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Nurse</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
-            <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
-              <Image source={img3} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Auditory Room</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
-            <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
-              <Image source={img4} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Puzzle Room</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
-            <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
-              <Image source={img5} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Waiting Room</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
-            <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
-              <Image source={img6} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Speech Room</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
-            <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
-              <Image source={img7} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Bathroom</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act8)}>
-            <View style={[styles.circle6, selectedActivities.includes(act8) && styles.selectedCircle]}>
-              <Image source={img8} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Treetop Room</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act9)}>
-            <View style={[styles.circle6, selectedActivities.includes(act9) && styles.selectedCircle]}>
-              <Image source={img9} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Kitchen</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act10)}>
-            <View style={[styles.circle6, selectedActivities.includes(act10) && styles.selectedCircle]}>
-              <Image source={img10} style={styles.circleImage} />
-            </View>
-            <Text style={styles.activityText}>Gym</Text>
-          </TouchableOpacity>
+          {/* custom activities (persisted) */}
+          {customActivities.map((act, i) => (
+            <TouchableOpacity
+              key={`custom-${i}`}
+              activeOpacity={0.6}
+              onPress={() => toggleSelection(act.icon)}
+            >
+              <View style={[styles.circle, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
+                <Image source={{ uri: act.icon }} style={styles.circleImage} />
+              </View>
+              <Text style={styles.activityText}>{act.name}</Text>
+            </TouchableOpacity>
+          ))}
 
         </View>
       </ScrollView>
+
       <StatusBar style="auto" />
       <BottomNavBar />
+
+      {/* ADD CUSTOM ACTIVITY MODAL */}
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={{ fontWeight: '600' }}>Activity Name:</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={newActName}
+              onChangeText={setNewActName}
+            />
+
+            <Text style={{ fontWeight: '600', marginTop: 10 }}>Activity Image:</Text>
+            <Button title={newActIcon ? 'Change Image' : 'Pick Image'} onPress={pickImage} />
+
+            {newActIcon ? (
+              <Image source={{ uri: newActIcon }} style={{ width: 80, height: 80, alignSelf: 'center', marginVertical: 10 }} />
+            ) : null}
+
+            <Button title="Add Activity" onPress={addActivity} />
+            <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
+// ------------------- styles -------------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
+
+  addButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 6,
+  },
+  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
 
   grid: {
     flexDirection: 'row',
@@ -149,47 +273,16 @@ const styles = StyleSheet.create({
     width: 300,
   },
 
-  circle1: {
-    width: 100, height: 100, padding: 20, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginVertical: 20,
+  circle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 20,
     backgroundColor: 'rgb(195, 229, 236)',
-  },
-
-  circle2: {
-    width: 100, height: 100, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
-  },
-
-  circle3: {
-    width: 100, height: 100, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
-  },
-
-  circle4: {
-    width: 100, height: 100, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
-    paddingLeft: 10,
-  },
-
-  circle5: {
-    width: 100, height: 100, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
-  },
-
-  circle6: {
-    width: 100, height: 100, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    overflow: 'hidden',
   },
 
   circleImage: { width: 80, height: 80, resizeMode: 'contain' },
@@ -201,5 +294,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
     color: '#333',
+  },
+
+  modalBackground: {
+    flex: 1, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff', padding: 20, borderRadius: 8, width: '80%',
+  },
+  modalInput: {
+    borderWidth: 1, borderColor: '#ccc', borderRadius: 6, paddingHorizontal: 8, height: 40, marginVertical: 10,
   },
 });
