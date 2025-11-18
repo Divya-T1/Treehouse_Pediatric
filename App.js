@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ScrollView, SafeAreaView, View, Text, Image, TouchableOpacity, Modal, TextInput, Button, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
 import ToyAndActScreen from './screens/ToysAndActScreen';
@@ -16,7 +17,7 @@ import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
 import CustomCategoryScreen from './screens/CustomCategoryScreen';
-import { AddCategory, GetCustomCategories } from './ActivitiesSaver.js';
+import { AddCategory, GetCategories } from './ActivitiesSaver.js';
 import useAppState from './useAppState.js';
 
 const Stack = createNativeStackNavigator();
@@ -26,25 +27,45 @@ function Homescreen({ navigation }) {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newCatName, setNewCatName] = useState('');
-  const [newCatIcon, setNewCatIcon] = useState('');
+  const [newCatImage, setNewCatImage] = useState(null);
   const [customCategories, setCustomCategories] = useState([]);
 
   // Load custom categories
   useEffect(() => {
     (async () => {
-      const cats = await GetCustomCategories();
+      const cats = await GetCategories();
       setCustomCategories(cats);
     })();
   }, []);
 
+  // Pick category icon
+  const pickCategoryImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setNewCatImage(result.assets[0].uri);
+      }
+    } catch (e) {
+      console.log("Image picker error:", e);
+    }
+  };
+
   // Add new category
   const addCategory = async () => {
-    if (!newCatName || !newCatIcon) return;
-    const updated = await AddCategory(newCatName, newCatIcon);
+    if (!newCatName || !newCatImage) return;
+
+    const updated = await AddCategory(newCatName, newCatImage);
     setCustomCategories(updated);
+
     setModalVisible(false);
     setNewCatName('');
-    setNewCatIcon('');
+    setNewCatImage(null);
   };
 
   return (
@@ -62,9 +83,31 @@ function Homescreen({ navigation }) {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={{ fontWeight: '600' }}>Category Name:</Text>
-            <TextInput style={styles.modalInput} value={newCatName} onChangeText={setNewCatName} />
-            <Text style={{ fontWeight: '600' }}>Category Icon (path or URL):</Text>
-            <TextInput style={styles.modalInput} value={newCatIcon} onChangeText={setNewCatIcon} />
+            <TextInput
+              style={styles.modalInput}
+              value={newCatName}
+              onChangeText={setNewCatName}
+            />
+
+            <Text style={{ fontWeight: '600', marginTop: 10 }}>Category Icon:</Text>
+
+            <TouchableOpacity style={styles.imageButton} onPress={pickCategoryImage}>
+              <Text style={{ color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                PICK IMAGE
+              </Text>
+            </TouchableOpacity>
+
+            <View style={{ alignItems: 'center', marginVertical: 10 }}>
+              <Image
+                source={
+                  newCatImage
+                    ? { uri: newCatImage }
+                    : require('./assets/ADL/button.png') 
+                }
+                style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#eee' }}
+              />
+            </View>
+
             <Button title="Add" onPress={addCategory} />
             <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
           </View>
@@ -109,12 +152,14 @@ function Homescreen({ navigation }) {
             <Text style={styles.activityText}>Regulation</Text>
           </TouchableOpacity>
 
+          {/* FIXED TOYS/GAMES ICON SIZE */}
           <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('ToyScreen')}>
-            <View style={styles.circle}><Image
-  source={require('./assets/toy.png')}
-  style={{ width: 60, height: 60, resizeMode: 'contain' }}
-/>
-</View>
+            <View style={styles.circle}>
+              <Image
+                source={require('./assets/toy.png')}
+                style={{ width: 70, height: 70, resizeMode: 'contain' }}
+              />
+            </View>
             <Text style={styles.activityText}>Toys/Games</Text>
           </TouchableOpacity>
 
@@ -126,7 +171,7 @@ function Homescreen({ navigation }) {
               onPress={() => navigation.navigate('CustomCategory', { categoryName: cat.categoryName })}
             >
               <View style={styles.circle}>
-                <Image source={{ uri: cat.icon }} style={{ width: 80, height: 80 }} />
+                <Image source={{ uri: cat.icon }} style={{ width: 80, height: 80, borderRadius: 40 }} />
               </View>
               <Text style={styles.activityText}>{cat.categoryName}</Text>
             </TouchableOpacity>
@@ -177,6 +222,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 20,
     backgroundColor: 'rgb(211,211,211)',
+  },
+  imageButton: {
+    backgroundColor: '#333',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 6
   },
   activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },
   addButton: { backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, marginTop: 10, borderRadius: 6, alignSelf: 'center' },
