@@ -21,7 +21,7 @@ export default function RoomSpacesScreen() {
   const img9 = require('../assets/RoomSpacesPictures/utensils.png');
   const img10 = require('../assets/RoomSpacesPictures/weight.png');
 
-  // keep your existing string IDs for storage
+  // string IDs matching file paths
   const act1 = '../assets/RoomSpacesPictures/horse.png';
   const act2 = '../assets/RoomSpacesPictures/house.png';
   const act3 = '../assets/RoomSpacesPictures/mask.png';
@@ -46,9 +46,11 @@ export default function RoomSpacesScreen() {
   async function toggleSelection(id) {
     const prev = await GetActivities();
     const prevFilePaths = prev.map(item => item.filePath);
+
     const next = prevFilePaths.includes(id)
       ? prev.filter(item => item.filePath !== id)
-      : [...prev, {filePath: id, notes: ''}];
+      : [...prev, { filePath: id, notes: '' }];
+
     await SaveActivities(next);
     setSelectedActivities(next.map(item => item.filePath));
   }
@@ -58,6 +60,7 @@ export default function RoomSpacesScreen() {
       <Image source={logo} />
       <ScrollView>
         <View style={styles.grid}>
+
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act1)}>
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={img1} style={styles.circleImage} />
@@ -127,6 +130,7 @@ export default function RoomSpacesScreen() {
             </View>
             <Text style={styles.activityText}>Gym</Text>
           </TouchableOpacity>
+
         </View>
       </ScrollView>
       <StatusBar style="auto" />
@@ -142,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    width: 300, // number, not "300px"
+    width: 300,
   },
 
   circle1: {

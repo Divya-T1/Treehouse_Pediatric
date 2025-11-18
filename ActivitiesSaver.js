@@ -59,14 +59,32 @@ export const AddCategory = async (categoryName, icon) => {
 };
 
 // Add activity to custom category
-export const AddActivityToCategory = async (categoryName, activity) => {
-  const cats = await GetCustomCategories();
-  const updated = cats.map(c => {
-    if (c.categoryName === categoryName) {
-      return { ...c, activities: [...c.activities, activity] };
-    }
-    return c;
-  });
-  await SaveCustomCategories(updated);
-  return updated;
-};
+// export const AddActivityToCategory = async (categoryName, activity) => {
+//   const cats = await GetCustomCategories();
+//   const updated = cats.map(c => {
+//     if (c.categoryName === categoryName) {
+//       return { ...c, activities: [...c.activities, activity] };
+//     }
+//     return c;
+//   });
+//   await SaveCustomCategories(updated);
+//   return updated;
+// };
+
+export async function AddActivityToCategory(categoryName, activity) {
+  const categories = JSON.parse(await AsyncStorage.getItem(STORAGE_KEY_CATEGORIES) || "[]");
+  const catIndex = categories.findIndex(c => c.categoryName === categoryName);
+
+  if (catIndex !== -1) {
+    // Add activity
+    categories[catIndex].activities.push(activity);
+  } else {
+    // Create category if missing
+    categories.push({ categoryName, icon: '', activities: [activity] });
+  }
+
+  await AsyncStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
+  return categories;
+}
+
+

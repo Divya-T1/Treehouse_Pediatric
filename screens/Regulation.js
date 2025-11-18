@@ -8,7 +8,7 @@ import BottomNavBar from './NavigationOptions.js';
 import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
 
 export default function Regulation() {
-  // static requires for RN bundler (filenames contain spaces; static require is important)
+  // static requires for RN bundler (filenames contain spaces; static require is required)
   const logo = require('../Logo.png');
   const img1 = require('../assets/Regulation/image 1.png');
   const img2 = require('../assets/Regulation/image 2.png');
@@ -40,9 +40,11 @@ export default function Regulation() {
   async function toggleSelection(id) {
     const prev = await GetActivities();
     const prevFilePaths = prev.map(item => item.filePath);
+
     const next = prevFilePaths.includes(id)
       ? prev.filter(item => item.filePath !== id)
-      : [...prev, {filePath: id, notes: ''}];
+      : [...prev, { filePath: id, notes: '' }];
+
     await SaveActivities(next);
     setSelectedActivities(next.map(item => item.filePath));
   }
@@ -52,6 +54,7 @@ export default function Regulation() {
       <Image source={logo} />
       <ScrollView>
         <View style={styles.grid}>
+
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act1)}>
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
               <Image source={img1} style={styles.circleImage} />
@@ -100,8 +103,10 @@ export default function Regulation() {
             </View>
             <Text style={styles.activityText}>Music</Text>
           </TouchableOpacity>
+
         </View>
       </ScrollView>
+
       <StatusBar style="auto" />
       <BottomNavBar />
     </SafeAreaView>
@@ -115,7 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    width: 300, // number, not "300px"
+    width: 300,
   },
 
   circle1: {
