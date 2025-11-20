@@ -1,12 +1,5 @@
 import { jsPDF } from "jspdf";
 
-// Helper function to extract activity name from file path
-const getActivityName = (filePath) => {
-  const parts = filePath.split('/');
-  const fileName = parts[parts.length - 1];
-  return fileName.replace('.png', '').replace(/_/g, ' ');
-};
-
 // Helper function to load image as base64
 const loadImageAsBase64 = (imageSource) => {
   return new Promise((resolve, reject) => {
@@ -48,7 +41,7 @@ const createPDF = async (activities = [], iconMap = {}) => {
   let yPos = 40;
   const pageHeight = doc.internal.pageSize.height;
   const marginBottom = 20;
-  const iconSize = 20; // Size of icon in PDF (mm)
+  const iconSize = 13.5; // Size of icon in PDF (mm)
 
   if (activities.length === 0) {
     doc.setFontSize(12);
@@ -77,9 +70,9 @@ const createPDF = async (activities = [], iconMap = {}) => {
           const base64Image = await loadImageAsBase64(iconSource);
           // Draw circular background (simulated with a square)
           doc.setFillColor(232, 202, 202); // #E8CACA
-          doc.circle(35, yPos + 5, 10, 'F');
+          doc.circle(35, yPos + 6, 10, 'F');
           // Add image on top
-          doc.addImage(base64Image, 'PNG', 30, yPos, iconSize, iconSize);
+          doc.addImage(base64Image, 'PNG', 28, yPos, iconSize, iconSize);
         } catch (error) {
           console.warn(`Failed to load icon for ${activity.filePath}:`, error);
           // Fallback: just show activity name
@@ -89,22 +82,15 @@ const createPDF = async (activities = [], iconMap = {}) => {
         }
       }
 
-      // Activity name to the right of icon
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
-      const activityName = getActivityName(activity.filePath);
-      doc.text(activityName, 55, yPos + 8);
-
-      // Move down for notes
-      yPos += iconSize + 5;
-
-      // Notes
+      // Notes to the right of icon
       if (activity.notes && activity.notes.trim() !== '') {
         doc.setFontSize(11);
-        doc.setFont(undefined, 'italic');
-        const splitNotes = doc.splitTextToSize(activity.notes, 150);
-        doc.text(splitNotes, 30, yPos);
-        yPos += splitNotes.length * 6;
+        doc.setFont(undefined, 'normal');
+        const splitNotes = doc.splitTextToSize(activity.notes, 135);
+        doc.text(splitNotes, 55, yPos + 8);
+        yPos += iconSize + Math.max(0, (splitNotes.length - 1) * 6);
+      } else {
+        yPos += iconSize;
       }
 
       // Add spacing between activities
