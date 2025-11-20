@@ -125,12 +125,12 @@ export default function Schedule() {
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton}>
-              <Text onPress={() => {createPDF()}} style={styles.saveButtonText}>Create PDF</Text>
+              <Text onPress={() => {createPDF(activities, ICONS)}} style={styles.saveButtonText}>Create PDF</Text>
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation, filePaths, notes])
+  }, [navigation, filePaths, notes, activities])
 
   // Load once on mount
   useEffect(() => {
