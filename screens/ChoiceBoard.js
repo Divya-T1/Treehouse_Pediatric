@@ -189,7 +189,7 @@ export default function ChoiceBoard() {
     //console.log(item);
     return (
       <View style={styles.row}>
-        <Text style={styles.label}>Fine Motor</Text>
+        <Text style={styles.label}>Activity {index + 1}</Text>
         <View style={[styles.iconAndTextInput]}>
           <View style={styles.iconCircle}>
             <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item.filePath)}}>
