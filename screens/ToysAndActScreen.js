@@ -24,7 +24,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ToysAndActScreen() {
-  const categoryName = "Toys";
+  const categoryName = "Fun Activities";
 
   // static image requires
   const logo = require('../Logo.png');

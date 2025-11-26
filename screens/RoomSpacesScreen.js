@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: 'rgb(195, 229, 236)', 
     overflow: 'hidden',
   },
 

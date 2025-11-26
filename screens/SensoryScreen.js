@@ -10,6 +10,7 @@ import {
   SaveActivities,
   GetActivities,
   GetCustomCategories,
+  SaveCustomCategories,
   AddActivityToCategory,
   AddCategory
 } from '../ActivitiesSaver.js';
@@ -131,42 +132,99 @@ export default function SensoryScreen() {
     }
   };
 
-  // add custom activity to this category (create category if missing)
+  // // add custom activity to this category (create category if missing)
+  // const addActivity = async () => {
+  //   if (!newActName || !newActIcon) {
+  //     Alert.alert('Please enter a name and choose an image.');
+  //     return;
+  //   }
+
+  //   const activity = { name: newActName.trim(), icon: newActIcon, notes: '' };
+
+  //   try {
+  //     // load existing custom categories
+  //     let categories = await GetCustomCategories();
+  //     if (!Array.isArray(categories)) categories = [];
+
+  //     // create category if missing
+  //     if (!categories.find(c => c.categoryName === categoryName)) {
+  //       await AddCategory(categoryName, newActIcon);
+  //       categories = await GetCustomCategories();
+  //     }
+
+  //     // add the activity
+  //     const updated = await AddActivityToCategory(categoryName, activity);
+
+  //     // update UI to show the just-added activity
+  //     const cat = (updated || []).find(c => c.categoryName === categoryName);
+  //     setCustomActivities(cat?.activities || []);
+
+  //     // reset modal
+  //     setNewActName('');
+  //     setNewActIcon('');
+  //     setModalVisible(false);
+  //   } catch (err) {
+  //     console.log('addActivity error', err);
+  //     Alert.alert('Error saving activity.');
+  //   }
+  // };
+
+
   const addActivity = async () => {
-    if (!newActName || !newActIcon) {
-      Alert.alert('Please enter a name and choose an image.');
-      return;
+  if (!newActName || !newActIcon) {
+    Alert.alert("Please enter a name and choose an image.");
+    return;
+  }
+
+  const activity = { name: newActName, icon: newActIcon, notes: '' };
+
+  try {
+    // Load stored categories
+    let categories = await GetCustomCategories();
+    if (!Array.isArray(categories)) categories = [];
+
+    // Try to find this built-in category WITHOUT creating a new global category
+    let thisCat = categories.find(c => c.categoryName === categoryName);
+
+    if (!thisCat) {
+      // DO NOT PUSH A NEW CATEGORY
+      // Just create a temporary one for local use
+      thisCat = { categoryName, icon: '', activities: [] };
     }
 
-    const activity = { name: newActName.trim(), icon: newActIcon, notes: '' };
+    // Add the activity locally
+    thisCat.activities.push(activity);
 
-    try {
-      // load existing custom categories
-      let categories = await GetCustomCategories();
-      if (!Array.isArray(categories)) categories = [];
+    // Save ONLY the sub-activities of this built-in screen
+    // WITHOUT adding this category to the user category list
+    const updated = categories.map(c =>
+      c.categoryName === categoryName ? thisCat : c
+    );
 
-      // create category if missing
-      if (!categories.find(c => c.categoryName === categoryName)) {
-        await AddCategory(categoryName, newActIcon);
-        categories = await GetCustomCategories();
-      }
-
-      // add the activity
-      const updated = await AddActivityToCategory(categoryName, activity);
-
-      // update UI to show the just-added activity
-      const cat = (updated || []).find(c => c.categoryName === categoryName);
-      setCustomActivities(cat?.activities || []);
-
-      // reset modal
-      setNewActName('');
-      setNewActIcon('');
-      setModalVisible(false);
-    } catch (err) {
-      console.log('addActivity error', err);
-      Alert.alert('Error saving activity.');
+    // If category was never stored before, store only its content
+    if (!categories.find(c => c.categoryName === categoryName)) {
+      updated.push({
+        categoryName,
+        icon: '',        // no icon = hidden from user category list
+        activities: thisCat.activities
+      });
     }
-  };
+
+    await SaveCustomCategories(updated);
+
+    // Update UI
+    setCustomActivities([...thisCat.activities]);
+
+    // Reset modal
+    setNewActName('');
+    setNewActIcon('');
+    setModalVisible(false);
+
+  } catch (err) {
+    Alert.alert("Error saving activity.");
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.container}>
