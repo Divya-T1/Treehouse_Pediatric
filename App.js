@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, SafeAreaView, View, Text, Image, TouchableOpacity, Modal, TextInput, Button, StyleSheet } from 'react-native';
+import {
+  ScrollView,
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  Button,
+  StyleSheet,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,7 +29,12 @@ import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
 import CustomCategoryScreen from './screens/CustomCategoryScreen';
 
-import { AddCategory, GetCustomCategories } from './ActivitiesSaver.js';
+import {
+  AddCategory,
+  GetCustomCategories,
+  GetActivities,
+  SaveActivities,
+} from './ActivitiesSaver.js';
 import useAppState from './useAppState.js';
 
 // All built-in activities
@@ -33,9 +49,9 @@ function Homescreen({ navigation }) {
   const [newCatName, setNewCatName] = useState('');
   const [newCatImage, setNewCatImage] = useState(null);
   const [customCategories, setCustomCategories] = useState([]);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [scheduleActivities, setScheduleActivities] = useState([]);
 
   const originalCategories = [
     { name: 'Gross Motor', icon: require('./Running.png'), screen: 'Gross Motor' },
@@ -48,11 +64,41 @@ function Homescreen({ navigation }) {
     { name: 'Toys/Games', icon: require('./assets/toy.png'), screen: 'ToyScreen' },
   ];
 
-  // Load custom categories
+  // helper: is an activity name selected?
+  const isSelected = name =>
+    scheduleActivities.some(a => a.name === name);
+
+  // helper: get the current icon for a name (schedule wins over defaults)
+  const getIconForName = (name, defaultIcon) => {
+    const match = scheduleActivities.find(a => a.name === name);
+    if (!match) {
+      // defaultIcon can be require(...) or already {uri: ...}
+      if (typeof defaultIcon === 'string') {
+        return { uri: defaultIcon };
+      }
+      return defaultIcon;
+    }
+    return typeof match.icon === 'string' ? { uri: match.icon } : match.icon;
+  };
+
+  // Load custom categories and schedule
   useEffect(() => {
     (async () => {
-      const cats = await GetCustomCategories();
-      setCustomCategories(cats);
+      try {
+        const cats = await GetCustomCategories();
+        setCustomCategories(Array.isArray(cats) ? cats : []);
+      } catch (e) {
+        console.log('GetCustomCategories error:', e);
+        setCustomCategories([]);
+      }
+
+      try {
+        const saved = await GetActivities();
+        setScheduleActivities(Array.isArray(saved) ? saved : []);
+      } catch (e) {
+        console.log('GetActivities error:', e);
+        setScheduleActivities([]);
+      }
     })();
   }, []);
 
@@ -65,21 +111,20 @@ function Homescreen({ navigation }) {
 
     const q = searchQuery.toLowerCase();
 
-    // Flatten custom activities with category reference
     const customActs = customCategories.flatMap(cat =>
       (cat.activities || []).map(act => ({
         ...act,
         category: cat.categoryName,
-        icon: act.icon
+        // act.icon is a URI string
       }))
     );
 
-    // Combine built-in and custom activities
-    const allActs = [...ALL_ACTIVITIES, ...customActs];
+    const allActs = [...(ALL_ACTIVITIES || []), ...customActs];
 
-    const filtered = allActs.filter(a => a.name.toLowerCase().includes(q));
+    const filtered = allActs.filter(
+      a => typeof a.name === 'string' && a.name.toLowerCase().includes(q)
+    );
     setSearchResults(filtered);
-
   }, [searchQuery, customCategories]);
 
   const pickCategoryImage = async () => {
@@ -91,22 +136,58 @@ function Homescreen({ navigation }) {
         quality: 1,
       });
 
-      if (!result.canceled) setNewCatImage(result.assets[0].uri);
+      if (!result.canceled && result.assets?.length > 0) {
+        setNewCatImage(result.assets[0].uri);
+      }
     } catch (e) {
-      console.log("Image picker error:", e);
+      console.log('Image picker error:', e);
     }
   };
 
   const addCategory = async () => {
     if (!newCatName || !newCatImage) return;
 
-    const updated = await AddCategory(newCatName, newCatImage);
-    setCustomCategories(updated);
+    try {
+      const updated = await AddCategory(newCatName, newCatImage);
+      setCustomCategories(Array.isArray(updated) ? updated : []);
+    } catch (e) {
+      console.log('AddCategory error:', e);
+    }
 
     setModalVisible(false);
     setNewCatName('');
     setNewCatImage(null);
   };
+
+  // Add to schedule (no navigation)
+  // Toggle in/out of schedule (no navigation)
+const toggleScheduleActivity = async activity => {
+  const exists = scheduleActivities.some(a => a.name === activity.name);
+
+  let newSchedule;
+  if (exists) {
+    // remove
+    newSchedule = scheduleActivities.filter(a => a.name !== activity.name);
+  } else {
+    // add
+    const newActivity = {
+      ...activity,
+      icon: activity.icon,           // require(...) or URI string
+      category: activity.category || '',
+      screen: activity.screen || '',
+      notes: activity.notes || '',
+    };
+    newSchedule = [...scheduleActivities, newActivity];
+  }
+
+  setScheduleActivities(newSchedule);
+  try {
+    await SaveActivities(newSchedule);
+  } catch (e) {
+    console.log('SaveActivities error:', e);
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,30 +201,47 @@ function Homescreen({ navigation }) {
         style={styles.searchInput}
       />
 
-      {/* Search results */}
+      {/* Search results – tap adds to schedule and highlights */}
       {searchResults.length > 0 && (
         <ScrollView style={{ maxHeight: 250, width: '100%' }}>
           <View style={{ paddingHorizontal: 20 }}>
-            {searchResults.map((item, i) => (
-              <TouchableOpacity
-                key={i}
-                style={styles.searchItem}
-                onPress={() => {
-                  // If built-in activity has category (screen), navigate
-                  if (item.screen) navigation.navigate(item.screen);
-                  else navigation.navigate('CustomCategory', { categoryName: item.category });
-                }}
-              >
-                <Image source={item.icon} style={{ width: 40, height: 40, marginRight: 10 }} />
-                <Text style={{ fontSize: 18 }}>{item.name}</Text>
-              </TouchableOpacity>
-            ))}
+            {searchResults.map((item, i) => {
+              const itemSelected = isSelected(item.name);
+
+              const defaultIcon =
+                typeof item.icon === 'string'
+                  ? { uri: item.icon }
+                  : item.icon;
+
+              const imgSource = getIconForName(item.name, defaultIcon);
+
+              return (
+                <TouchableOpacity
+                  key={i}
+                  style={[
+                    styles.searchItem,
+                    { backgroundColor: itemSelected ? '#cce5ff' : 'transparent' },
+                  ]}
+                  onPress={() => toggleScheduleActivity(item)}
+                  activeOpacity={0.7}
+                >
+                  <Image
+                    source={imgSource}
+                    style={{ width: 40, height: 40, marginRight: 10 }}
+                  />
+                  <Text style={{ fontSize: 18 }}>{item.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
       )}
 
       {/* Add category */}
-      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+      >
         <Text style={styles.addButtonText}>+ Add Category</Text>
       </TouchableOpacity>
       <View style={styles.divider} />
@@ -153,51 +251,119 @@ function Homescreen({ navigation }) {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={{ fontWeight: '600' }}>Category Name:</Text>
-            <TextInput style={styles.modalInput} value={newCatName} onChangeText={setNewCatName} />
+            <TextInput
+              style={styles.modalInput}
+              value={newCatName}
+              onChangeText={setNewCatName}
+            />
 
-            <Text style={{ fontWeight: '600', marginTop: 10 }}>Category Icon:</Text>
-            <TouchableOpacity style={styles.imageButton} onPress={pickCategoryImage}>
-              <Text style={{ color: 'white', fontWeight: '600', textAlign: 'center' }}>PICK IMAGE</Text>
+            <Text style={{ fontWeight: '600', marginTop: 10 }}>
+              Category Icon:
+            </Text>
+            <TouchableOpacity
+              style={styles.imageButton}
+              onPress={pickCategoryImage}
+            >
+              <Text
+                style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                }}
+              >
+                PICK IMAGE
+              </Text>
             </TouchableOpacity>
 
             <View style={{ alignItems: 'center', marginVertical: 10 }}>
               <Image
-                source={newCatImage ? { uri: newCatImage } : require('./assets/ADL/button.png')}
-                style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#eee' }}
+                source={
+                  newCatImage
+                    ? { uri: newCatImage }
+                    : require('./assets/ADL/button.png')
+                }
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 40,
+                  backgroundColor: '#eee',
+                }}
               />
             </View>
 
             <Button title="Add" onPress={addCategory} />
-            <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+            <Button
+              title="Cancel"
+              color="red"
+              onPress={() => setModalVisible(false)}
+            />
           </View>
         </View>
       </Modal>
 
-      {/* Category grid (only shown when not searching) */}
+      {/* Category grid */}
       {searchResults.length === 0 && (
         <ScrollView>
           <View style={styles.grid}>
-            {originalCategories.map((item, i) => (
-              <TouchableOpacity key={i} activeOpacity={0.6} onPress={() => navigation.navigate(item.screen)}>
-                <View style={styles.circle}>
-                  <Image source={item.icon} style={{ width: 80, height: 80, borderRadius: 40 }} />
-                </View>
-                <Text style={styles.activityText}>{item.name}</Text>
-              </TouchableOpacity>
-            ))}
+            {originalCategories.map((item, i) => {
+              const selected = isSelected(item.name);
+              const imgSource = getIconForName(item.name, item.icon);
 
-            {customCategories.map((item, i) => (
-              <TouchableOpacity
-                key={i}
-                activeOpacity={0.6}
-                onPress={() => navigation.navigate('CustomCategory', { categoryName: item.categoryName })}
-              >
-                <View style={styles.circle}>
-                  <Image source={{ uri: item.icon }} style={{ width: 80, height: 80, borderRadius: 40 }} />
-                </View>
-                <Text style={styles.activityText}>{item.categoryName}</Text>
-              </TouchableOpacity>
-            ))}
+              return (
+                <TouchableOpacity
+                  key={i}
+                  activeOpacity={0.6}
+                  onPress={() => navigation.navigate(item.screen)}
+                >
+                  <View
+                    style={[
+                      styles.circle,
+                      selected && styles.selectedCircle,
+                    ]}
+                  >
+                    <Image
+                      source={imgSource}
+                      style={{ width: 80, height: 80, borderRadius: 40 }}
+                    />
+                  </View>
+                  <Text style={styles.activityText}>{item.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+
+            {customCategories.map((item, i) => {
+              const selected = isSelected(item.categoryName);
+              // For custom categories you may or may not want to override icon from schedule;
+              // here we keep their saved category icon.
+              const imgSource = { uri: item.icon };
+
+              return (
+                <TouchableOpacity
+                  key={i}
+                  activeOpacity={0.6}
+                  onPress={() =>
+                    navigation.navigate('CustomCategory', {
+                      categoryName: item.categoryName,
+                    })
+                  }
+                >
+                  <View
+                    style={[
+                      styles.circle,
+                      selected && styles.selectedCircle,
+                    ]}
+                  >
+                    <Image
+                      source={imgSource}
+                      style={{ width: 80, height: 80, borderRadius: 40 }}
+                    />
+                  </View>
+                  <Text style={styles.activityText}>
+                    {item.categoryName}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
       )}
@@ -208,6 +374,7 @@ function Homescreen({ navigation }) {
   );
 }
 
+
 // Stack and App
 export default function App() {
   return (
@@ -216,7 +383,10 @@ export default function App() {
         <Stack.Group>
           <Stack.Screen name="Home" component={Homescreen} />
           <Stack.Screen name="Gross Motor" component={GrossMotorScreen} />
-          <Stack.Screen name="Toys And Activities" component={ToyAndActScreen} />
+          <Stack.Screen
+            name="Toys And Activities"
+            component={ToyAndActScreen}
+          />
           <Stack.Screen name="Fine Motor" component={FineMotorScreen} />
           <Stack.Screen name="Room Spaces" component={RoomSpacesScreen} />
           <Stack.Screen name="Regulation" component={Regulation} />
@@ -224,7 +394,10 @@ export default function App() {
           <Stack.Screen name="ADLScreen" component={ADLScreen} />
           <Stack.Screen name="ToyScreen" component={ToyScreen} />
           <Stack.Screen name="Schedule" component={Schedule} />
-          <Stack.Screen name="CustomCategory" component={CustomCategoryScreen} />
+          <Stack.Screen
+            name="CustomCategory"
+            component={CustomCategoryScreen}
+          />
         </Stack.Group>
         <Stack.Group screenOptions={{ presentation: 'modal' }}>
           <Stack.Screen name="Notes" component={NotesModal} />
@@ -236,17 +409,91 @@ export default function App() {
 
 // Styles
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
-  searchInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, margin: 10, paddingHorizontal: 8, height: 40, width: '90%' },
-  searchItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: 300 },
-  circle: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(211,211,211)' },
-  imageButton: { backgroundColor: '#333', padding: 8, borderRadius: 6, marginTop: 6 },
-  activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },
-  addButton: { backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, marginTop: 10, borderRadius: 6, alignSelf: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    width: '100%',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    margin: 10,
+    paddingHorizontal: 8,
+    height: 40,
+    width: '90%',
+  },
+  searchItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+    width: 300,
+  },
+  circle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 20,
+    backgroundColor: 'rgb(211,211,211)',
+  },
+  selectedCircle: {
+    backgroundColor: 'rgb(195, 229, 236)',
+  },
+  imageButton: {
+    backgroundColor: '#333',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 6,
+  },
+  activityText: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '600',
+    color: '#333',
+  },
+  addButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 6,
+    alignSelf: 'center',
+  },
   addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
-  divider: { height: 1, backgroundColor: '#333', width: '90%', alignSelf: 'center', marginVertical: 10 },
-  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContainer: { backgroundColor: '#fff', padding: 20, borderRadius: 8, width: '80%' },
-  modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginVertical: 10, paddingHorizontal: 8, height: 40 },
+  divider: {
+    height: 1,
+    backgroundColor: '#333',
+    width: '90%',
+    alignSelf: 'center',
+    marginVertical: 10,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 8,
+    width: '80%',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    marginVertical: 10,
+    paddingHorizontal: 8,
+    height: 40,
+  },
 });
