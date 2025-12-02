@@ -42,6 +42,21 @@ export default function CustomCategoryScreen({ route }) {
       try {
         const custom = await GetCustomCategories();
         const cat = custom?.find(c => c.categoryName === categoryName);
+        
+        if (!cat) {
+        Alert.alert(
+          "Category Not Found",
+          "This category no longer exists.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.goBack()
+            }
+          ]
+        );
+        return;
+      }
+        
         setActivities(cat?.activities ? [...cat.activities] : []);
       } catch (err) {
         console.log('load activities error', err);
@@ -55,7 +70,7 @@ export default function CustomCategoryScreen({ route }) {
     (async () => {
       try {
         const saved = await GetActivities();
-        setSelectedActivities(saved.map(item => item.filePath) || []);
+        setSelectedActivities(saved.map(item => item.icon) || []);
       } catch (err) {
         console.log('load selected activities error', err);
         setSelectedActivities([]);
@@ -81,13 +96,13 @@ export default function CustomCategoryScreen({ route }) {
   async function toggleSelection(iconPath) {
     try {
       const prev = await GetActivities();
-      const exists = prev.find(item => item.filePath === iconPath);
+      const exists = prev.find(item => item.icon === iconPath);
       const next = exists
-        ? prev.filter(item => item.filePath !== iconPath)
-        : [...prev, { filePath: iconPath, notes: '' }];
+        ? prev.filter(item => item.icon !== iconPath)
+        : [...prev, { icon: iconPath, notes: '' }];
 
       await SaveActivities(next);
-      setSelectedActivities(next.map(item => item.filePath));
+      setSelectedActivities(next.map(item => item.icon));
     } catch (err) {
       console.log('toggleSelection error', err);
     }
@@ -126,11 +141,22 @@ export default function CustomCategoryScreen({ route }) {
       let allCategories = await GetCustomCategories();
       if (!Array.isArray(allCategories)) allCategories = [];
 
-      // --- Find or create this category ---
+      // --- Find this category ---
       let thisCat = allCategories.find(c => c.categoryName === categoryName);
+
+      //creates a new category!!! We don't want these!!! vvvvv
+
+      // if (!thisCat) {
+      //   thisCat = { categoryName, icon: newActIcon, activities: [] };
+      //   allCategories.push(thisCat);
+      // }
+
       if (!thisCat) {
-        thisCat = { categoryName, icon: newActIcon, activities: [] };
-        allCategories.push(thisCat);
+        Alert.alert(
+        "Category Not Found",
+        "This category does not exist. Please create it before adding activities."
+        );
+      return; // prevent crash + prevent accidental creation
       }
 
       // --- Add activity ---

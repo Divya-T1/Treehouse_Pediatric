@@ -78,10 +78,11 @@ export async function AddActivityToCategory(categoryName, activity) {
   if (catIndex !== -1) {
     // Add activity
     categories[catIndex].activities.push(activity);
-  } else {
-    // Create category if missing
-    categories.push({ categoryName, icon: '', activities: [activity] });
   }
+  // } else {
+  //   // Create category if missing
+  //   categories.push({ categoryName, icon: '', activities: [activity] });
+  // }
 
   await AsyncStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
   return categories;
