@@ -17,6 +17,7 @@ import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
 import {createPDF} from '../PDFSaver.js';
+import { GetChoiceBoard, SaveChoiceBoard } from '../ActivitiesSaver.js';
 
 // Icon registry: map the saved string IDs -> static require(...)
 const ICONS = {
@@ -118,6 +119,8 @@ export default function ChoiceBoard() {
 
   const navigation = useNavigation();
 
+
+
   const toggleSelection = (filePath) => {
     //saves to filepaths to choiceBoardActivities
     if(choiceBoardActivities.length >= 3 && !choiceBoardActivities.includes(filePath)) {
@@ -133,6 +136,7 @@ export default function ChoiceBoard() {
     }
   };
 
+
   const createMax3Alert = () => {
     alert("You can only select up to 3 activities.");
     Alert.alert(
@@ -146,7 +150,7 @@ export default function ChoiceBoard() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.notesButtonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={() => {combineListsAndSave(filePaths, notes)}}>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {SaveChoiceBoard(choiceBoardActivities)}}>
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton}>
@@ -155,7 +159,7 @@ export default function ChoiceBoard() {
         </View>
       ),
     });
-  }, [navigation, filePaths, notes])
+  }, [navigation, filePaths, notes, choiceBoardActivities]);
 
   // Load once on mount
   useEffect(() => {
@@ -164,6 +168,9 @@ export default function ChoiceBoard() {
       setActivities(saved || []);
       setFilePaths(saved.map(item => item.filePath));
       setNotes(saved.map(item => item.notes));
+
+      const savedChoiceBoard = await GetChoiceBoard();
+      setChoiceBoardActivities(savedChoiceBoard || []);
     })();
     //console.log(activities);
   }, []);

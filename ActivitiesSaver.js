@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY_ACTIVITIES = 'SavedActivities';
 const STORAGE_KEY_CATEGORIES = 'CustomCategories';
+const STORAGE_KEY_CHOICE_BOARD = 'ChoiceBoard';
 
 // -------------------- Activities --------------------
 
@@ -82,6 +83,29 @@ export const AddActivityToCategory = async (categoryName, activity) => {
   await SaveCustomCategories(categories);
   return categories;
 };
+
+// -------------------- Choice Board Activities --------------------
+
+// Save regular activities
+export const SaveChoiceBoard = async (choiceBoardActivities) => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY_CHOICE_BOARD, JSON.stringify(choiceBoardActivities || []));
+  } catch (e) {
+    console.warn('SaveActivities error:', e);
+  }
+};
+
+// Get regular activities
+export const GetChoiceBoard = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_CHOICE_BOARD);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn('GetActivities error:', e);
+    return [];
+  }
+};
+
 
 // -------------------- Clear all data --------------------
 export const clearData = async () => {
