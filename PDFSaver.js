@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { GetActivities, SaveActivities } from './ActivitiesSaver.js';
 
 // Helper function to load image as base64
 const loadImageAsBase64 = (imageSource) => {
@@ -28,7 +29,12 @@ const loadImageAsBase64 = (imageSource) => {
   });
 };
 
-const createPDF = async (activities = [], iconMap = {}) => {
+const createPDF = async (iconMap = {}) => {
+
+
+  var activities = await GetActivities();
+  console.log(activities);
+
   // Create a new document for each PDF generation
   const doc = new jsPDF();
 

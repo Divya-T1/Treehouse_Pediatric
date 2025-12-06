@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, Modal, TextInput, Button, Alert } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
@@ -132,51 +132,38 @@ export default function ADLScreen() {
           {/* ORIGINAL BUILT-IN ACTIVITIES */}
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act1)}>
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
-              <Image source={img1} style={styles.circleImage} />
+              <Image source={require(act1)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Buttons</Text>
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
-              <Image source={img2} style={styles.circleImage} />
+              <Image source={require(act2)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Pants</Text>
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
-              <Image source={img3} style={styles.circleImage} />
+              <Image source={require(act3)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Shoes</Text>
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
-              <Image source={img4} style={styles.circleImage} />
+              <Image source={require(act4)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Socks</Text>
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
-              <Image source={img5} style={styles.circleImage} />
+              <Image source={require(act5)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>T-Shirt</Text>
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
             <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
-              <Image source={img6} style={styles.circleImage} />
+              <Image source={require(act6)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Toothbrush</Text>
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
-              <Image source={img7} style={styles.circleImage} />
+              <Image source={require(act7)} style={styles.circleImage} />
             </View>
-            <Text style={styles.activityText}>Zipper</Text>
           </TouchableOpacity>
 
           {/* CUSTOM ADDED ACTIVITIES */}
@@ -225,7 +212,13 @@ export default function ADLScreen() {
 // -------------------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'top',
+    width: '100%',
+  },
 
   addButton: {
     backgroundColor: '#ccc',
@@ -255,15 +248,11 @@ const styles = StyleSheet.create({
   circle5: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(218, 188, 188)' },
   circle6: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(218, 188, 188)' },
 
-  circleImage: { width: 80, height: 80, resizeMode: 'contain' },
-
-  selectedCircle: { backgroundColor: 'rgb(211,211,211)' },
-
-  activityText: {
-    fontSize: 16,
-    textAlign: 'center',
-    fontWeight: '600',
-    color: '#333',
+  circleImage: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+    //resizeMode: 'cover',
   },
 
   modalBackground: {

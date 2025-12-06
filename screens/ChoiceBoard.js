@@ -9,7 +9,8 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  Alert
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
@@ -109,13 +110,37 @@ function combineListsAndSave(filePaths, notes){
 }
 
 
-export default function Schedule() {
+export default function ChoiceBoard() {
   const [activities, setActivities] = useState([]);
   const [filePaths, setFilePaths] = useState([]);
   const [notes, setNotes] = useState([]);
+  const [choiceBoardActivities, setChoiceBoardActivities] = useState([]);
 
   const navigation = useNavigation();
 
+  const toggleSelection = (filePath) => {
+    //saves to filepaths to choiceBoardActivities
+    if(choiceBoardActivities.length >= 3 && !choiceBoardActivities.includes(filePath)) {
+        createMax3Alert();
+        return;
+    }
+    if (choiceBoardActivities.includes(filePath)) {
+        setChoiceBoardActivities(choiceBoardActivities.filter(item => item !== filePath));
+        console.log("removed " + filePath);
+    } else {
+        setChoiceBoardActivities([...choiceBoardActivities, filePath]);
+        console.log("added " + filePath);
+    }
+  };
+
+  const createMax3Alert = () => {
+    alert("You can only select up to 3 activities.");
+    Alert.alert(
+      "Maximum Selection Reached",
+      "You can only select up to 3 activities.",
+      [{ text: "OK" }]
+    );
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -125,12 +150,12 @@ export default function Schedule() {
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton}>
-              <Text onPress={() => {createPDF(ICONS)}} style={styles.saveButtonText}>Create PDF</Text>
+              <Text onPress={() => {createPDF()}} style={styles.saveButtonText}>Create PDF</Text>
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation, filePaths, notes, activities])
+  }, [navigation, filePaths, notes])
 
   // Load once on mount
   useEffect(() => {
@@ -164,35 +189,19 @@ export default function Schedule() {
     //console.log(item);
     return (
       <View style={styles.row}>
-        <Text style={styles.label}>Activity {index + 1}:</Text>
-        <View style={styles.iconAndTextInput}>
+        <Text style={styles.label}>Activity {index + 1}</Text>
+        <View style={[styles.iconAndTextInput]}>
           <View style={styles.iconCircle}>
-            {src ? (
-              <Image source={src} style={styles.iconImage} />
-            ) : (
-              <Text style={styles.fallback}>?</Text>
-            )}
+            <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item.filePath)}}>
+                <View style={[styles.normalCircle, choiceBoardActivities.includes(item.filePath) && styles.selectedCircle]}>
+                    {src ? (
+                        <Image source={src} style={styles.iconImage} />
+                    ) : (
+                        <Text style={styles.fallback}>?</Text>
+                    )}
+                </View>
+            </TouchableOpacity>
           </View>
-          
-          <TextInput
-            multiline     // Allow multiple lines
-            style={styles.textBox}
-            value={notes[index]}  // Controlled value
-            onChangeText={newText => {
-              setNotes((prev) => {
-                const newNotes = prev.map((value, i) => {
-                  if(i == index){
-                    return newText;
-                  }
-                  return value;
-                })
-                //console.log(newNotes);
-                return newNotes;
-              });
-            }}
-
-          />
-          
         </View>
       </View>
     );
@@ -200,19 +209,24 @@ export default function Schedule() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Schedule</Text>
+      <Text style={styles.title}>Choice Board</Text>
+
+      <FlatList
+        data={choiceBoardActivities.map(path => ({ filePath: path }))}
+        keyExtractor={(it, idx) => `${it}-${idx}`}
+        renderItem={renderItem}
+        contentContainerStyle={choiceBoardActivities.length === 0 && { flex: 1, justifyContent: 'center' }}
+        style={styles.MainFlatListStyle}
+        horizontal={true}
+      />
 
       <FlatList
         data={activities}
         keyExtractor={(it, idx) => `${it}-${idx}`}
         renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No activities selected yet. Pick some on ADL, Fine Motor, etc.
-          </Text>
-        }
         contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
-        style={{ width: '100%' }}
+        style={styles.FlatListStyle}
+        horizontal={true}
       />
 
       <StatusBar style="auto" />
@@ -229,6 +243,18 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingTop: 12,
   },
+  FlatListStyle: {
+    width: '100%',
+    position: 'absolute',
+    bottom: 40,
+    borderTopWidth: 1,
+    borderTopColor: '#000000ff',
+  },
+  MainFlatListStyle: {
+    display: 'flex',
+    position: 'absolute',
+    top: 70,
+  },
   title: {
     fontSize: 22,
     fontWeight: '700',
@@ -240,8 +266,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    borderWidth: 1,
   },
   label: {
     fontSize: 18,
@@ -266,6 +292,7 @@ const styles = StyleSheet.create({
   fallback: {
     fontSize: 16,
     color: '#888',
+    textAlign: 'center',
   },
   empty: {
     textAlign: 'center',
@@ -293,12 +320,18 @@ const styles = StyleSheet.create({
   iconAndTextInput: {
       flexDirection: 'row',
       gap: 20,
-      padding:20,
+      paddingHorizontal: 40,
+      paddingVertical: 10,
       width: '100%',
+      justifyContent: 'center',
   }, 
   textBox: {
     width: '100%',
     fontSize: '20px',
-  }
+  },
+  normalCircle: { width: 75, height: 75, borderRadius: 75, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(218, 188, 188)', overflow: 'hidden' },
+  selectedCircle: {
+    backgroundColor: 'rgb(211,211,211)',
+  },
 });
 

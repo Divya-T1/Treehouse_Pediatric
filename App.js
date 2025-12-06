@@ -39,6 +39,9 @@ import useAppState from './useAppState.js';
 
 // All built-in activities
 import { ALL_ACTIVITIES } from './activities.js';
+import ChoiceBoard from './screens/ChoiceBoard.js';
+import { clearData } from './ActivitiesSaver.js';
+import { useEffect } from 'react';
 
 const Stack = createNativeStackNavigator();
 
@@ -397,6 +400,9 @@ export default function App() {
           <Stack.Screen
             name="CustomCategory"
             component={CustomCategoryScreen}
+          />
+          <Stack.Screen name = "ChoiceBoard" 
+          component={ChoiceBoard}
           />
         </Stack.Group>
         <Stack.Group screenOptions={{ presentation: 'modal' }}>
