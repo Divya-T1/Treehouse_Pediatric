@@ -116,7 +116,6 @@ export default function Schedule() {
 
   const navigation = useNavigation();
 
-
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -130,17 +129,26 @@ export default function Schedule() {
         </View>
       ),
     });
-  }, [navigation, filePaths, notes, activities])
+  }, [navigation, filePaths, notes, activities]);
 
   // Load once on mount
   useEffect(() => {
     (async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
-      setFilePaths(saved.map(item => item.filePath));
+      setFilePaths(saved.map(item => {
+        if(item.filePath != null){
+          return item.filePath;
+        } else if(item.id != null){
+          //console.log("Using id for filepath:", item.id);
+          return item.id;
+        } else {
+          return '';
+        }
+      }));
       setNotes(saved.map(item => item.notes));
     })();
-    //console.log(activities);
+    //console.log(filePaths);
   }, []);
 
   // Refresh every time the screen gets focus
@@ -151,17 +159,22 @@ export default function Schedule() {
         const saved = await GetActivities();
         if (alive){
           setActivities(saved || []);
-          setFilePaths(saved.map(item => item.filePath));
+          setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
           setNotes(saved.map(item => item.notes));
         } 
       })();
+      console.log(filePaths);
       return () => { alive = false; };
     }, [])
   );
 
+  
+
+  console.log(activities);
+
   const renderItem = ({ item, index }) => {
-    const src = ICONS[item.filePath]; // item is the saved string ID
-    //console.log(item);
+    const src = ICONS[filePaths[index]];
+    //console.log(item.filePath);
     return (
       <View style={styles.row}>
         <Text style={styles.label}>Activity {index + 1}:</Text>
