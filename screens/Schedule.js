@@ -115,6 +115,16 @@ const isAbsoluteURI = (path) => {
            path.startsWith('blob:');
 };
 
+const getImageSource = (filePath) => {
+  if (ICONS[filePath]) {
+    return ICONS[filePath];
+  } else if (isAbsoluteURI(filePath)) {
+    return { uri: filePath };
+  } else {
+    return null; // or a default image
+  }
+};
+
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
   const [filePaths, setFilePaths] = useState([]);
@@ -142,16 +152,7 @@ export default function Schedule() {
     (async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
-      setFilePaths(saved.map(item => {
-        if(item.filePath != null){
-          return item.filePath;
-        } else if(item.id != null){
-          //console.log("Using id for filepath:", item.id);
-          return item.id;
-        } else {
-          return '';
-        }
-      }));
+      setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
       setNotes(saved.map(item => item.notes));
     })();
     //console.log(filePaths);
@@ -178,18 +179,7 @@ export default function Schedule() {
 
   const renderItem = ({ item, index }) => {
 
-    var src = ICONS[filePaths[index]];
-    
-    //Checks to see if icon is missing from registry (In which case use absolute URI if possible)
-    if(ICONS[filePaths[index]] == null){
-      console.log("Missing icon for filepath:", filePaths[index]);
-      if(isAbsoluteURI(filePaths[index])){
-        console.log("Using absolute URI");
-        src = {uri: filePaths[index]};
-      } else {
-        src = null;
-      }
-    }
+    var src = getImageSource(filePaths[index]);
     
     return (
       <View style={styles.row}>

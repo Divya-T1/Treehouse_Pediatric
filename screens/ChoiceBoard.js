@@ -111,6 +111,25 @@ function combineListsAndSave(filePaths, notes){
 }
 
 
+const isAbsoluteURI = (path) => {
+    return path.startsWith('file://') ||
+           path.startsWith('http://') ||
+           path.startsWith('https://') ||
+           path.startsWith('content://') || 
+           path.startsWith('blob:');
+};
+
+const getImageSource = (filePath) => {
+  if (ICONS[filePath]) {
+    return ICONS[filePath];
+  } else if (isAbsoluteURI(filePath)) {
+    return { uri: filePath };
+  } else {
+    return null; // or a default image
+  }
+};
+
+
 export default function ChoiceBoard() {
   const [activities, setActivities] = useState([]);
   const [filePaths, setFilePaths] = useState([]);
@@ -166,7 +185,7 @@ export default function ChoiceBoard() {
     (async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
-      setFilePaths(saved.map(item => item.filePath));
+      setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
       setNotes(saved.map(item => item.notes));
 
       const savedChoiceBoard = await GetChoiceBoard();
@@ -183,7 +202,7 @@ export default function ChoiceBoard() {
         const saved = await GetActivities();
         if (alive){
           setActivities(saved || []);
-          setFilePaths(saved.map(item => item.filePath));
+          setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
           setNotes(saved.map(item => item.notes));
         } 
       })();
@@ -192,7 +211,7 @@ export default function ChoiceBoard() {
   );
 
   const renderItem = ({ item, index }) => {
-    const src = ICONS[item.filePath]; // item is the saved string ID
+    const src = getImageSource(item.filePath);
     //console.log(item);
     return (
       <View style={styles.row}>
