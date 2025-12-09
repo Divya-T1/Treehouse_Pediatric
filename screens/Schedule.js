@@ -1,5 +1,5 @@
 // screens/Schedule.js
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   SafeAreaView,
@@ -96,7 +96,6 @@ const ICONS = {
   '../assets/VideoToy.png': require('../assets/VideoToy.png'),
 };
 
-
 function combineListsAndSave(filePaths, notes){
   console.log(filePaths);
   console.log(notes);
@@ -108,6 +107,13 @@ function combineListsAndSave(filePaths, notes){
   SaveActivities(newActivities);
 }
 
+const isAbsoluteURI = (path) => {
+    return path.startsWith('file://') ||
+           path.startsWith('http://') ||
+           path.startsWith('https://') ||
+           path.startsWith('content://') || 
+           path.startsWith('blob:');
+};
 
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
@@ -168,13 +174,23 @@ export default function Schedule() {
     }, [])
   );
 
-  
-
   console.log(activities);
 
   const renderItem = ({ item, index }) => {
-    const src = ICONS[filePaths[index]];
-    //console.log(item.filePath);
+
+    var src = ICONS[filePaths[index]];
+    
+    //Checks to see if icon is missing from registry (In which case use absolute URI if possible)
+    if(ICONS[filePaths[index]] == null){
+      console.log("Missing icon for filepath:", filePaths[index]);
+      if(isAbsoluteURI(filePaths[index])){
+        console.log("Using absolute URI");
+        src = {uri: filePaths[index]};
+      } else {
+        src = null;
+      }
+    }
+    
     return (
       <View style={styles.row}>
         <Text style={styles.label}>Activity {index + 1}:</Text>
