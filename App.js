@@ -338,6 +338,10 @@ const toggleScheduleActivity = async activity => {
               // here we keep their saved category icon.
               const imgSource = { uri: item.icon };
 
+              //If icon doesn't exist, return nothing
+              if (!item.icon) return null;
+
+
               return (
                 <TouchableOpacity
                   key={i}
