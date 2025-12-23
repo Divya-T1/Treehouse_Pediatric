@@ -1,8 +1,14 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, Modal, TextInput, Button, Alert } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
-import { SaveActivities, GetActivities, AddActivityToCategory, AddCategory } from '../ActivitiesSaver.js';
+import {
+  SaveActivities,
+  GetActivities,
+  GetCustomCategories,
+  AddActivityToCategory,
+  AddCategory,
+} from '../ActivitiesSaver.js';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ADLScreen() {
@@ -39,14 +45,20 @@ export default function ADLScreen() {
 
   useEffect(() => {
     (async () => {
+      // Load selected activities
       const saved = await GetActivities();
-      const savedFilePaths = saved.map(item => item.filePath);
+      const savedFilePaths = (saved || []).map(item => item.filePath);
       setSelectedActivities(savedFilePaths || []);
 
-      // Load custom activities for ADL
-      const storedCategories = await AddActivityToCategory(); // calling without args returns list
-      const found = storedCategories?.find(c => c.categoryName === categoryName);
-      setCustomActivities(found ? found.activities : []);
+      // Load custom activities for this category from saved custom categories
+      try {
+        const categories = await GetCustomCategories();
+        const found = (categories || []).find(c => c.categoryName === categoryName);
+        setCustomActivities(found ? found.activities || [] : []);
+      } catch (err) {
+        console.log('load ADL custom activities error', err);
+        setCustomActivities([]);
+      }
     })();
   }, []);
 
@@ -132,37 +144,37 @@ export default function ADLScreen() {
           {/* ORIGINAL BUILT-IN ACTIVITIES */}
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act1)}>
             <View style={[styles.circle1, selectedActivities.includes(act1) && styles.selectedCircle]}>
-              <Image source={require(act1)} style={styles.circleImage} />
+              <Image source={img1} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act2)}>
             <View style={[styles.circle2, selectedActivities.includes(act2) && styles.selectedCircle]}>
-              <Image source={require(act2)} style={styles.circleImage} />
+              <Image source={img2} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act3)}>
             <View style={[styles.circle3, selectedActivities.includes(act3) && styles.selectedCircle]}>
-              <Image source={require(act3)} style={styles.circleImage} />
+              <Image source={img3} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act4)}>
             <View style={[styles.circle4, selectedActivities.includes(act4) && styles.selectedCircle]}>
-              <Image source={require(act4)} style={styles.circleImage} />
+              <Image source={img4} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act5)}>
             <View style={[styles.circle5, selectedActivities.includes(act5) && styles.selectedCircle]}>
-              <Image source={require(act5)} style={styles.circleImage} />
+              <Image source={img5} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act6)}>
             <View style={[styles.circle6, selectedActivities.includes(act6) && styles.selectedCircle]}>
-              <Image source={require(act6)} style={styles.circleImage} />
+              <Image source={img6} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act7)}>
             <View style={[styles.circle6, selectedActivities.includes(act7) && styles.selectedCircle]}>
-              <Image source={require(act7)} style={styles.circleImage} />
+              <Image source={img7} style={styles.circleImage} />
             </View>
           </TouchableOpacity>
 

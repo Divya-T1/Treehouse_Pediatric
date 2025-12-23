@@ -34,6 +34,7 @@ import {
   GetCustomCategories,
   GetActivities,
   SaveActivities,
+  clearData,
 } from './ActivitiesSaver.js';
 import useAppState from './useAppState.js';
 
@@ -53,6 +54,7 @@ function Homescreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [scheduleActivities, setScheduleActivities] = useState([]);
+  const [clearStorageModalVisible, setClearStorageModalVisible] = useState(false);
 
   const originalCategories = [
     { name: 'Gross Motor', icon: require('./Running.png'), screen: 'Gross Motor' },
@@ -60,7 +62,7 @@ function Homescreen({ navigation }) {
     { name: 'Fine Motor', icon: require('./Arts.png'), screen: 'Fine Motor' },
     { name: 'Room Spaces', icon: require('./Door.png'), screen: 'Room Spaces' },
     { name: 'Sensory Screen', icon: require('./PlayDoh.png'), screen: 'SensoryScreen' },
-    { name: 'ADL', icon: require('./Brushing.png'), screen: 'ADLScreen' },
+    { name: 'ADL', icon: require('./Brushing.png'), screen: 'ADLscreen' },
     { name: 'Regulation', icon: require('./Headphones.png'), screen: 'Regulation' },
     { name: 'Toys/Games', icon: require('./assets/toy.png'), screen: 'ToyScreen' },
   ];
@@ -160,6 +162,122 @@ function Homescreen({ navigation }) {
     setNewCatImage(null);
   };
 
+  // Helper: determine category screen from activity id/path
+  const getCategoryScreen = (activity) => {
+    // If it's a custom category activity, navigate to CustomCategory
+    if (activity.category) {
+      return { screen: 'CustomCategory', params: { categoryName: activity.category } };
+    }
+
+    // Determine category from activity id/path (case-insensitive, handle all variations)
+    const id = (activity.id || '').toLowerCase();
+    const name = (activity.name || '').toLowerCase();
+    
+    // ADL activities - check path and common ADL names
+    // Check for ADL in path (handles ../assets/ADL/, assets/ADL/, /ADL/, etc.)
+    if (id.includes('adl') ||
+        name === 'buttons' || name === 'pants' || name === 'shoes' || 
+        name === 'socks' || name === 't-shirt' || name === 'toothbrush' || name === 'zipper') {
+      return { screen: 'ADLscreen' };
+    }
+    
+    // Fine Motor activities - check path and common fine motor names
+    if (id.includes('finemotorpictures/') || id.includes('finemotorpictures\\') || 
+        id.includes('/finemotorpictures/') ||
+        name === 'coloring' || name === 'cutting' || name === 'dot markers' ||
+        name === 'drawing' || name === 'craft' || name === 'painting' ||
+        name === 'tweezers' || name === 'writing') {
+      return { screen: 'Fine Motor' };
+    }
+    
+    // Regulation activities - check path and common regulation names
+    if (id.includes('regulation/') || id.includes('regulation\\') || 
+        id.includes('/regulation/') ||
+        name === 'breathing' || name === 'lights off' || name === 'quiet space' ||
+        name === 'hugging' || name === 'relaxing' || name === 'weighted blanket' ||
+        name === 'music') {
+      return { screen: 'Regulation' };
+    }
+    
+    // Room Spaces activities - check path and common room space names
+    if (id.includes('roomspacespictures/') || id.includes('roomspacespictures\\') ||
+        id.includes('/roomspacespictures/') ||
+        name === 'rocking chair' || name === 'nurse' || name === 'auditory room' ||
+        name === 'puzzle room' || name === 'waiting room' || name === 'speech room' ||
+        name === 'bathroom' || name === 'treetop room' || name === 'kitchen' ||
+        name === 'gym') {
+      return { screen: 'Room Spaces' };
+    }
+    
+    // Sensory activities - check path and common sensory names
+    if (id.includes('sensory/') || id.includes('sensory\\') || id.includes('/sensory/') ||
+        name === 'clay' || name === 'peanut ball' || name === 'playdoh' ||
+        name === 'putty' || name === 'sandpit' || name === 'swing') {
+      return { screen: 'SensoryScreen' };
+    }
+    
+    // Gross Motor activities - check for specific files and common gross motor names
+    if (id.includes('group_11') || id.includes('group_12') || 
+        id.includes('image_6') || id.includes('image_7') || 
+        id.includes('image_9') || id.includes('image_10') ||
+        name === 'rock climbing' || name === 'sliding' || name === 'yoga' ||
+        name === 'balancing beam' || name === 'trampoline' || name === 'obstacle course') {
+      return { screen: 'Gross Motor' };
+    }
+    
+    // Toys activities - check for TOYS folder, toy-related files, and common toy names
+    if (id.includes('toys/') || id.includes('toys\\') || id.includes('/toys/') ||
+        id.includes('toyfood') || id.includes('cartoy') || 
+        id.includes('train') || id.includes('animaltoy') || 
+        id.includes('booktoy') || id.includes('videotoy') ||
+        name.includes('toy') || name === 'reading' || name === 'watch video' ||
+        name === 'puzzles' || name === 'puzzle' || name === 'ipad time' || name === 'ipad' ||
+        name === 'card game' || name === 'table work' || name === 'work table' ||
+        name === 'instrument' || name === 'animals' || name === 'toy cars' ||
+        name === 'toy food' || name === 'toy car' || name === 'toy train' ||
+        name === 'stuffed animal') {
+      return { screen: 'ToyScreen' };
+    }
+
+    // Default: return null if category can't be determined
+    return null;
+  };
+
+  // Handle search result tap: navigate to category screen
+  const handleSearchResultPress = (activity) => {
+    const categoryInfo = getCategoryScreen(activity);
+    if (categoryInfo) {
+      try {
+        if (categoryInfo.params) {
+          navigation.navigate(categoryInfo.screen, categoryInfo.params);
+        } else {
+          navigation.navigate(categoryInfo.screen);
+        }
+      } catch (error) {
+        console.log('Navigation error:', error, 'Activity:', activity, 'CategoryInfo:', categoryInfo);
+      }
+    } else {
+      console.log('No category found for activity:', activity);
+    }
+  };
+
+  // Clear all storage and reload data
+  const handleClearStorage = async () => {
+    try {
+      await clearData();
+      // Reload all data
+      const cats = await GetCustomCategories();
+      setCustomCategories(Array.isArray(cats) ? cats : []);
+      const saved = await GetActivities();
+      setScheduleActivities(Array.isArray(saved) ? saved : []);
+      setClearStorageModalVisible(false);
+      console.log('Storage cleared and data reloaded');
+    } catch (e) {
+      console.log('Clear storage error:', e);
+      setClearStorageModalVisible(false);
+    }
+  };
+
   // Add to schedule (no navigation)
   // Toggle in/out of schedule (no navigation)
 const toggleScheduleActivity = async activity => {
@@ -192,7 +310,15 @@ const toggleScheduleActivity = async activity => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={require('./Logo.png')} />
+      <View style={styles.headerContainer}>
+        <Image source={require('./Logo.png')} />
+        <TouchableOpacity
+          style={styles.clearStorageButton}
+          onPress={() => setClearStorageModalVisible(true)}
+        >
+          <Text style={styles.clearStorageButtonText}>Clear</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Search bar */}
       <TextInput
@@ -223,7 +349,7 @@ const toggleScheduleActivity = async activity => {
                     styles.searchItem,
                     { backgroundColor: itemSelected ? '#cce5ff' : 'transparent' },
                   ]}
-                  onPress={() => toggleScheduleActivity(item)}
+                  onPress={() => handleSearchResultPress(item)}
                   activeOpacity={0.7}
                 >
                   <Image
@@ -245,6 +371,7 @@ const toggleScheduleActivity = async activity => {
       >
         <Text style={styles.addButtonText}>+ Add Category</Text>
       </TouchableOpacity>
+      
       <View style={styles.divider} />
 
       {/* Category modal */}
@@ -298,6 +425,32 @@ const toggleScheduleActivity = async activity => {
               color="red"
               onPress={() => setModalVisible(false)}
             />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Clear storage confirmation modal */}
+      <Modal visible={clearStorageModalVisible} transparent animationType="fade">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={{ fontWeight: '600', fontSize: 18, marginBottom: 10 }}>
+              Clear All Storage?
+            </Text>
+            <Text style={{ marginBottom: 20, textAlign: 'center' }}>
+              This will delete all saved activities, custom categories, and schedule data. This action cannot be undone.
+            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              <Button
+                title="Cancel"
+                color="#666"
+                onPress={() => setClearStorageModalVisible(false)}
+              />
+              <Button
+                title="Continue"
+                color="#ff6b6b"
+                onPress={handleClearStorage}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -396,7 +549,7 @@ export default function App() {
           <Stack.Screen name="Room Spaces" component={RoomSpacesScreen} />
           <Stack.Screen name="Regulation" component={Regulation} />
           <Stack.Screen name="SensoryScreen" component={SensoryScreen} />
-          <Stack.Screen name="ADLScreen" component={ADLScreen} />
+          <Stack.Screen name="ADLscreen" component={ADLScreen} />
           <Stack.Screen name="ToyScreen" component={ToyScreen} />
           <Stack.Screen name="Schedule" component={Schedule} />
           <Stack.Screen
@@ -422,6 +575,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     width: '100%',
+  },
+  headerContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  clearStorageButton: {
+    backgroundColor: '#ff6b6b',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  clearStorageButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   searchInput: {
     borderWidth: 1,
