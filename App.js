@@ -27,7 +27,7 @@ import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
-import CustomCategoryScreen from './screens/CustomCategoryScreen';
+import CategoryScreen from './screens/CategoryScreen.js';
 
 import {
   AddCategory,
@@ -39,7 +39,7 @@ import {
 import useAppState from './useAppState.js';
 
 // All built-in activities
-import { ALL_ACTIVITIES } from './activities.js';
+import { DEFAULT_ACTIVITIES } from './activities.js';
 import ChoiceBoard from './screens/ChoiceBoard.js';
 
 const Stack = createNativeStackNavigator();
@@ -88,6 +88,10 @@ function Homescreen({ navigation }) {
   useEffect(() => {
     (async () => {
       try {
+        for(var i = 0; i < DEFAULT_ACTIVITIES.length; i++){
+          //Adds any of the default categories if they aren't already in CustomCategories in async storage
+          await AddCategory(DEFAULT_ACTIVITIES[i].categoryName, DEFAULT_ACTIVITIES[i].icon, DEFAULT_ACTIVITIES[i].activities);
+        }
         const cats = await GetCustomCategories();
         setCustomCategories(Array.isArray(cats) ? cats : []);
       } catch (e) {
@@ -122,7 +126,7 @@ function Homescreen({ navigation }) {
       }))
     );
 
-    const allActs = [...(ALL_ACTIVITIES || []), ...customActs];
+    const allActs = [...(DEFAULT_ACTIVITIES || []), ...customActs];
 
     const filtered = allActs.filter(
       a => typeof a.name === 'string' && a.name.toLowerCase().includes(q)
@@ -459,6 +463,8 @@ const toggleScheduleActivity = async activity => {
       {searchResults.length === 0 && (
         <ScrollView>
           <View style={styles.grid}>
+
+            {/*
             {originalCategories.map((item, i) => {
               const selected = isSelected(item.name);
               const imgSource = getIconForName(item.name, item.icon);
@@ -484,12 +490,13 @@ const toggleScheduleActivity = async activity => {
                 </TouchableOpacity>
               );
             })}
+            */}
 
             {customCategories.map((item, i) => {
               const selected = isSelected(item.categoryName);
               // For custom categories you may or may not want to override icon from schedule;
               // here we keep their saved category icon.
-              const imgSource = { uri: item.icon };
+              const imgSource = { uri: typeof(item.icon) === "string" ? item.icon : item.icon.uri };
 
               //If icon doesn't exist, return nothing
               if (!item.icon) return null;
@@ -554,7 +561,7 @@ export default function App() {
           <Stack.Screen name="Schedule" component={Schedule} />
           <Stack.Screen
             name="CustomCategory"
-            component={CustomCategoryScreen}
+            component={CategoryScreen}
           />
           <Stack.Screen name = "ChoiceBoard" 
           component={ChoiceBoard}

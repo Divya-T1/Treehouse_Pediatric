@@ -50,7 +50,7 @@ export const SaveCustomCategories = async (categoriesArray) => {
 };
 
 // Add a new category (prevents duplicates)
-export const AddCategory = async (categoryName, icon) => {
+export const AddCategory = async (categoryName, icon, activities = []) => {
   const cats = await GetCustomCategories();
 
   // Prevent duplicate category names
@@ -58,7 +58,7 @@ export const AddCategory = async (categoryName, icon) => {
     return cats;
   }
 
-  const next = [...cats, { categoryName, icon, activities: [] }];
+  const next = [...cats, { categoryName, icon, activities }];
   await SaveCustomCategories(next);
   return next;
 };

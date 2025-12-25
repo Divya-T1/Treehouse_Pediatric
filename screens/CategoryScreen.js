@@ -27,7 +27,7 @@ import {
 
 import * as ImagePicker from 'expo-image-picker';
 
-export default function CustomCategoryScreen({ route }) {
+export default function CategoryScreen({ route }) {
   const { categoryName } = route.params;
 
   const [activities, setActivities] = useState([]);
@@ -209,14 +209,17 @@ export default function CustomCategoryScreen({ route }) {
       {/* Activities Grid */}
       <ScrollView>
         <View style={styles.grid}>
-          {activities.map((act, i) => (
-            <TouchableOpacity key={i} onPress={() => toggleSelection(act.icon)}>
-              <View style={[styles.circleCustom, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
-                <Image source={{ uri: act.icon }} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>{act.name}</Text>
-            </TouchableOpacity>
-          ))}
+          {activities.map((act, i) => {
+            const iconUri = typeof(act.icon) === "string" ? act.icon : act.icon.uri;
+            return (
+              <TouchableOpacity key={i} onPress={() => toggleSelection(iconUri)}>
+                <View style={[styles.circleCustom, selectedActivities.includes(iconUri) && styles.selectedCircle]}>
+                  <Image source={{ uri: iconUri }} style={styles.circleImage} />
+                </View>
+                <Text style={styles.activityText}>{act.name}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
 
