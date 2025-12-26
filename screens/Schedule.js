@@ -127,8 +127,6 @@ const getImageSource = (filePath) => {
 
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
-  const [filePaths, setFilePaths] = useState([]);
-  const [notes, setNotes] = useState([]);
 
   const navigation = useNavigation();
 
@@ -136,7 +134,7 @@ export default function Schedule() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.notesButtonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={() => {combineListsAndSave(filePaths, notes)}}>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {SaveActivities(activities)}}>
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton}>
@@ -145,15 +143,13 @@ export default function Schedule() {
         </View>
       ),
     });
-  }, [navigation, filePaths, notes, activities]);
+  }, [navigation, activities]);
 
   // Load once on mount
   useEffect(() => {
     (async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
-      setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
-      setNotes(saved.map(item => item.notes));
     })();
     //console.log(filePaths);
   }, []);
@@ -166,24 +162,30 @@ export default function Schedule() {
         const saved = await GetActivities();
         if (alive){
           setActivities(saved || []);
-          setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
-          setNotes(saved.map(item => item.notes));
         } 
       })();
-      console.log(filePaths);
       return () => { alive = false; };
     }, [])
   );
 
   console.log(activities);
 
+  const handleNoteChange = (index, newNote) => {
+    const updatedActivities = [...activities];
+    updatedActivities[index] = {
+      ...updatedActivities[index],
+      notes: newNote
+    };
+    setActivities(updatedActivities);
+  };
+
   const renderItem = ({ item, index }) => {
 
-    var src = getImageSource(filePaths[index]);
+    const src = {uri: typeof(item.icon) === "string" ? item.icon : item.icon.uri};
     
     return (
       <View style={styles.row}>
-        <Text style={styles.label}>Activity {index + 1}:</Text>
+        <Text style={styles.label}>Activity {index + 1}: {item.name}</Text>
         <View style={styles.iconAndTextInput}>
           <View style={styles.iconCircle}>
             {src ? (
@@ -196,20 +198,8 @@ export default function Schedule() {
           <TextInput
             multiline     // Allow multiple lines
             style={styles.textBox}
-            value={notes[index]}  // Controlled value
-            onChangeText={newText => {
-              setNotes((prev) => {
-                const newNotes = prev.map((value, i) => {
-                  if(i == index){
-                    return newText;
-                  }
-                  return value;
-                })
-                //console.log(newNotes);
-                return newNotes;
-              });
-            }}
-
+            value={item.notes || ''}  // Controlled value
+            onChangeText={(text) => handleNoteChange(index, text)}
           />
           
         </View>

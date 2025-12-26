@@ -349,6 +349,4 @@ export const DEFAULT_ACTIVITIES = [
       },
     ]
   },
-
-
 ];

@@ -93,16 +93,18 @@ export default function CategoryScreen({ route }) {
   }, []);
 
   // Toggle activity selection
-  async function toggleSelection(iconPath) {
+  async function toggleSelection(act) {
+    const id = act.id;
     try {
       const prev = await GetActivities();
-      const exists = prev.find(item => item.icon === iconPath);
+      const exists = prev.find(item => item.id === id);
       const next = exists
-        ? prev.filter(item => item.icon !== iconPath)
-        : [...prev, { icon: iconPath, notes: '' }];
+        ? prev.filter(item => item.id !== id)
+        : [...prev, act];
 
       await SaveActivities(next);
-      setSelectedActivities(next.map(item => item.icon));
+      const filePaths = next.map(item => typeof(item.icon) === "string" ? item.icon : item.icon.uri);
+      setSelectedActivities(filePaths);
     } catch (err) {
       console.log('toggleSelection error', err);
     }
@@ -134,7 +136,7 @@ export default function CategoryScreen({ route }) {
       return;
     }
 
-    const activity = { name: newActName.trim(), icon: newActIcon, notes: '' };
+    const activity = { id: newActIcon, name: newActName.trim(), icon: newActIcon};
 
     try {
       // --- Load all custom categories ---
@@ -212,7 +214,7 @@ export default function CategoryScreen({ route }) {
           {activities.map((act, i) => {
             const iconUri = typeof(act.icon) === "string" ? act.icon : act.icon.uri;
             return (
-              <TouchableOpacity key={i} onPress={() => toggleSelection(iconUri)}>
+              <TouchableOpacity key={i} onPress={() => toggleSelection(act)}>
                 <View style={[styles.circleCustom, selectedActivities.includes(iconUri) && styles.selectedCircle]}>
                   <Image source={{ uri: iconUri }} style={styles.circleImage} />
                 </View>
