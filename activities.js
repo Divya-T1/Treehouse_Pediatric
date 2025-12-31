@@ -318,34 +318,9 @@ export const DEFAULT_ACTIVITIES = [
         icon: require('./assets/TOYS/Vector.png')
       },
       {
-        id: '../ToyFood.png',
-        name: 'Toy Food',
-        icon: require('./ToyFood.png')
-      },
-      {
-        id: '../assets/CarToy.png',
-        name: 'Toy Car',
-        icon: require('./assets/CarToy.png')
-      },
-      {
-        id: '../assets/Train.png',
-        name: 'Toy Train',
-        icon: require('./assets/Train.png')
-      },
-      {
         id: '../assets/AnimalToy.png',
         name: 'Stuffed Animal',
         icon: require('./assets/AnimalToy.png')
-      },
-      {
-        id: '../assets/BookToy.png',
-        name: 'Reading',
-        icon: require('./assets/BookToy.png')
-      },
-      {
-        id: '../assets/VideoToy.png',
-        name: 'Video',
-        icon: require('./assets/VideoToy.png')
       },
     ]
   },

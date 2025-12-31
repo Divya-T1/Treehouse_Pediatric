@@ -16,143 +16,32 @@ import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
-import {createPDF} from '../PDFSaver.js';
+import {createChoiceBoardPDF} from '../PDFSaver.js';
 import { GetChoiceBoard, SaveChoiceBoard } from '../ActivitiesSaver.js';
-
-// Icon registry: map the saved string IDs -> static require(...)
-const ICONS = {
-  // ADL
-  '../assets/ADL/button.png': require('../assets/ADL/button.png'),
-  '../assets/ADL/pants.png': require('../assets/ADL/pants.png'),
-  '../assets/ADL/running_shoes.png': require('../assets/ADL/running_shoes.png'),
-  '../assets/ADL/socks_.png': require('../assets/ADL/socks_.png'),
-  '../assets/ADL/t-shirt.png': require('../assets/ADL/t-shirt.png'),
-  '../assets/ADL/toothbrush.png': require('../assets/ADL/toothbrush.png'),
-  '../assets/ADL/zipper.png': require('../assets/ADL/zipper.png'),
-
-  // Fine Motor
-  '../assets/FineMotorPictures/coloring.png': require('../assets/FineMotorPictures/coloring.png'),
-  '../assets/FineMotorPictures/cutting.png': require('../assets/FineMotorPictures/cutting.png'),
-  '../assets/FineMotorPictures/dot_markers.png': require('../assets/FineMotorPictures/dot_markers.png'),
-  '../assets/FineMotorPictures/drawing.png': require('../assets/FineMotorPictures/drawing.png'),
-  '../assets/FineMotorPictures/craft.png': require('../assets/FineMotorPictures/craft.png'),
-  '../assets/FineMotorPictures/painting.png': require('../assets/FineMotorPictures/painting.png'),
-  '../assets/FineMotorPictures/tweezers.png': require('../assets/FineMotorPictures/tweezers.png'),
-  '../assets/FineMotorPictures/writing.png': require('../assets/FineMotorPictures/writing.png'),
-
-  // Gross Motor
-  '../assets/Group_11.png': require('../assets/Group_11.png'),
-  '../assets/Group_12.png': require('../assets/Group_12.png'),
-  '../assets/image_6.png': require('../assets/image_6.png'),
-  '../assets/image_7.png': require('../assets/image_7.png'),
-  '../assets/image_9.png': require('../assets/image_9.png'),
-  '../assets/image_10.png': require('../assets/image_10.png'),
-
-  // Regulation (note the spaces in filenames)
-  '../assets/Regulation/image 1.png': require('../assets/Regulation/image 1.png'),
-  '../assets/Regulation/image 2.png': require('../assets/Regulation/image 2.png'),
-  '../assets/Regulation/image 3.png': require('../assets/Regulation/image 3.png'),
-  '../assets/Regulation/image 4.png': require('../assets/Regulation/image 4.png'),
-  '../assets/Regulation/image 5.png': require('../assets/Regulation/image 5.png'),
-  '../assets/Regulation/image 6.png': require('../assets/Regulation/image 6.png'),
-  '../assets/Regulation/image 20.png': require('../assets/Regulation/image 20.png'),
-
-  // Room Spaces
-  '../assets/RoomSpacesPictures/horse.png': require('../assets/RoomSpacesPictures/horse.png'),
-  '../assets/RoomSpacesPictures/house.png': require('../assets/RoomSpacesPictures/house.png'),
-  '../assets/RoomSpacesPictures/mask.png': require('../assets/RoomSpacesPictures/mask.png'),
-  '../assets/RoomSpacesPictures/puzzle.png': require('../assets/RoomSpacesPictures/puzzle.png'),
-  '../assets/RoomSpacesPictures/sitting.png': require('../assets/RoomSpacesPictures/sitting.png'),
-  '../assets/RoomSpacesPictures/talking.png': require('../assets/RoomSpacesPictures/talking.png'),
-  '../assets/RoomSpacesPictures/toilet.png': require('../assets/RoomSpacesPictures/toilet.png'),
-  '../assets/RoomSpacesPictures/treehouse.png': require('../assets/RoomSpacesPictures/treehouse.png'),
-  '../assets/RoomSpacesPictures/utensils.png': require('../assets/RoomSpacesPictures/utensils.png'),
-  '../assets/RoomSpacesPictures/weight.png': require('../assets/RoomSpacesPictures/weight.png'),
-
-  // Sensory
-  '../assets/Sensory/imageS.png': require('../assets/Sensory/imageS.png'),
-  '../assets/Sensory/peanutball.png': require('../assets/Sensory/peanutball.png'),
-  '../assets/Sensory/PlayDoh.png': require('../assets/Sensory/PlayDoh.png'),
-  '../assets/Sensory/putty.png': require('../assets/Sensory/putty.png'),
-  '../assets/Sensory/sandpit.png': require('../assets/Sensory/sandpit.png'),
-  '../assets/Sensory/swing.png': require('../assets/Sensory/swing.png'),
-
-  // Toys & Activities (TOYS)
-  '../assets/TOYS/Group 16.png': require('../assets/TOYS/Group 16.png'),
-  '../assets/TOYS/Group-1.png': require('../assets/TOYS/Group-1.png'),
-  '../assets/TOYS/Group-2.png': require('../assets/TOYS/Group-2.png'),
-  '../assets/TOYS/Group.png': require('../assets/TOYS/Group.png'),
-  '../assets/TOYS/Vector-1.png': require('../assets/TOYS/Vector-1.png'),
-  '../assets/TOYS/Vector-2.png': require('../assets/TOYS/Vector-2.png'),
-  '../assets/TOYS/Vector-3.png': require('../assets/TOYS/Vector-3.png'),
-  '../assets/TOYS/Vector-4.png': require('../assets/TOYS/Vector-4.png'),
-  '../assets/TOYS/Vector-5.png': require('../assets/TOYS/Vector-5.png'),
-  '../assets/TOYS/Vector.png': require('../assets/TOYS/Vector.png'),
-
-  // ToyScreen extras
-  '../ToyFood.png': require('../ToyFood.png'),
-  '../assets/CarToy.png': require('../assets/CarToy.png'),
-  '../assets/Train.png': require('../assets/Train.png'),
-  '../assets/AnimalToy.png': require('../assets/AnimalToy.png'),
-  '../assets/BookToy.png': require('../assets/BookToy.png'),
-  '../assets/VideoToy.png': require('../assets/VideoToy.png'),
-};
-
-
-function combineListsAndSave(filePaths, notes){
-  console.log(filePaths);
-  console.log(notes);
-  const newActivities = filePaths.map((path, index) => ({
-    
-    filePath: path,
-    notes: notes[index] || '' // fallback to blank if no note
-  }));
-  SaveActivities(newActivities);
-}
-
-
-const isAbsoluteURI = (path) => {
-    return path.startsWith('file://') ||
-           path.startsWith('http://') ||
-           path.startsWith('https://') ||
-           path.startsWith('content://') || 
-           path.startsWith('blob:');
-};
-
-const getImageSource = (filePath) => {
-  if (ICONS[filePath]) {
-    return ICONS[filePath];
-  } else if (isAbsoluteURI(filePath)) {
-    return { uri: filePath };
-  } else {
-    return null; // or a default image
-  }
-};
 
 
 export default function ChoiceBoard() {
   const [activities, setActivities] = useState([]);
-  const [filePaths, setFilePaths] = useState([]);
-  const [notes, setNotes] = useState([]);
   const [choiceBoardActivities, setChoiceBoardActivities] = useState([]);
 
   const navigation = useNavigation();
 
+  const toggleSelection = (act) =>  {
+    const id = act.id;
+    const prev = choiceBoardActivities;
 
 
-  const toggleSelection = (filePath) => {
-    //saves to filepaths to choiceBoardActivities
-    if(choiceBoardActivities.length >= 3 && !choiceBoardActivities.includes(filePath)) {
-        createMax3Alert();
-        return;
+    const exists = prev.find(item => item.id === id);
+    const next = exists
+      ? prev.filter(item => item.id !== id)
+      : [...prev, act];
+
+    if(next.length > 3){
+      createMax3Alert();
+      return;
     }
-    if (choiceBoardActivities.includes(filePath)) {
-        setChoiceBoardActivities(choiceBoardActivities.filter(item => item !== filePath));
-        console.log("removed " + filePath);
-    } else {
-        setChoiceBoardActivities([...choiceBoardActivities, filePath]);
-        console.log("added " + filePath);
-    }
+
+    setChoiceBoardActivities(next);
   };
 
 
@@ -173,25 +62,22 @@ export default function ChoiceBoard() {
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton}>
-              <Text onPress={() => {createPDF()}} style={styles.saveButtonText}>Create PDF</Text>
+              <Text onPress={() => {createChoiceBoardPDF()}} style={styles.saveButtonText}>Create PDF</Text>
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation, filePaths, notes, choiceBoardActivities]);
+  }, [navigation, choiceBoardActivities]);
 
   // Load once on mount
   useEffect(() => {
     (async () => {
       const saved = await GetActivities();
       setActivities(saved || []);
-      setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
-      setNotes(saved.map(item => item.notes));
-
       const savedChoiceBoard = await GetChoiceBoard();
-      setChoiceBoardActivities(savedChoiceBoard || []);
+      setChoiceBoardActivities(savedChoiceBoard);
     })();
-    //console.log(activities);
+    //console.log(filePaths);
   }, []);
 
   // Refresh every time the screen gets focus
@@ -200,10 +86,10 @@ export default function ChoiceBoard() {
       let alive = true;
       (async () => {
         const saved = await GetActivities();
+        const savedChoiceBoard = await GetChoiceBoard();
         if (alive){
-          setActivities(saved || []);
-          setFilePaths(saved.map(item => item.filePath != null ? item.filePath : item.id != null ? item.id : ''));
-          setNotes(saved.map(item => item.notes));
+          setActivities(saved || []);     
+          setChoiceBoardActivities(savedChoiceBoard);
         } 
       })();
       return () => { alive = false; };
@@ -211,15 +97,19 @@ export default function ChoiceBoard() {
   );
 
   const renderItem = ({ item, index }) => {
-    const src = getImageSource(item.filePath);
-    //console.log(item);
+
+
+    const iconUri = typeof(item.icon) === "string" ? item.icon : item.icon.uri;
+    const src = {uri: iconUri};
+
     return (
       <View style={styles.row}>
         <Text style={styles.label}>Activity {index + 1}</Text>
         <View style={[styles.iconAndTextInput]}>
           <View style={styles.iconCircle}>
-            <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item.filePath)}}>
-                <View style={[styles.normalCircle, choiceBoardActivities.includes(item.filePath) && styles.selectedCircle]}>
+            
+            <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item)}}>
+                <View style={[styles.normalCircle, choiceBoardActivities.find(act => act.id === item.id) && styles.selectedCircle]}>
                     {src ? (
                         <Image source={src} style={styles.iconImage} />
                     ) : (
@@ -238,7 +128,7 @@ export default function ChoiceBoard() {
       <Text style={styles.title}>Choice Board</Text>
 
       <FlatList
-        data={choiceBoardActivities.map(path => ({ filePath: path }))}
+        data={choiceBoardActivities}
         keyExtractor={(it, idx) => `${it}-${idx}`}
         renderItem={renderItem}
         contentContainerStyle={choiceBoardActivities.length === 0 && { flex: 1, justifyContent: 'center' }}
@@ -355,9 +245,9 @@ const styles = StyleSheet.create({
     width: '100%',
     fontSize: '20px',
   },
-  normalCircle: { width: 75, height: 75, borderRadius: 75, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(218, 188, 188)', overflow: 'hidden' },
+  normalCircle: { width: 75, height: 75, borderRadius: 75, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(211,211,211)', overflow: 'hidden' },
   selectedCircle: {
-    backgroundColor: 'rgb(211,211,211)',
+    backgroundColor: 'rgb(218, 188, 188)',
   },
 });
 

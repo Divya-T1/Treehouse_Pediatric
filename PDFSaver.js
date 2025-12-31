@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { GetActivities, SaveActivities } from './ActivitiesSaver.js';
+import { GetActivities, GetChoiceBoard, SaveActivities } from './ActivitiesSaver.js';
 
 
 
@@ -167,4 +167,76 @@ const createPDF = async () => {
   doc.save("activity_schedule.pdf");
 };
 
-export { createPDF };
+const createChoiceBoardPDF = async () => {
+  var activities = await GetChoiceBoard();
+  console.log('Choice Board Activities:', activities);
+
+  // Create a new document for choice board
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(20);
+  doc.setFont(undefined, 'bold');
+  doc.text("Choice Board", 105, 20, { align: 'center' });
+
+  // Choice boards typically show only the first 3 activities
+  const choiceBoardActivities = activities.slice(0, 3);
+
+  if (choiceBoardActivities.length === 0) {
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text("No activities selected for choice board.", 105, 50, { align: 'center' });
+  } else {
+    // Layout activities horizontally in a grid
+    const iconSize = 25; // Larger icons for choice board
+    const circleSize = 40;
+    const spacing = 60; // Space between icons
+    const startX = 105 - ((choiceBoardActivities.length - 1) * spacing / 2); // Center the activities
+    let yPos = 60;
+
+    for (let index = 0; index < choiceBoardActivities.length; index++) {
+      const activity = choiceBoardActivities[index];
+      const xPos = startX + (index * spacing);
+
+      // Draw background circle
+      doc.setFillColor(232, 202, 202); // #E8CACA
+      doc.circle(xPos, yPos, circleSize / 2, 'F');
+
+      const iconSource = typeof(activity.icon) === "string" ? activity.icon : activity.icon.uri;
+
+      if (iconSource) {
+        try {
+          const base64Image = await loadImageAsBase64(iconSource);
+          // Add image centered in circle
+          doc.addImage(base64Image, 'PNG', xPos - (iconSize / 2), yPos - (iconSize / 2), iconSize, iconSize);
+        } catch (error) {
+          console.warn(`Failed to load icon for ${activity.filePath}:`, error);
+          // Fallback: show text
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+          doc.text('[Icon]', xPos, yPos, { align: 'center' });
+        }
+      }
+
+      // Activity name below icon
+      if (activity.name) {
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        const splitName = doc.splitTextToSize(activity.name, spacing - 5);
+        doc.text(splitName, xPos, yPos + circleSize / 2 + 10, { align: 'center' });
+      }
+
+      // Notes below name (if any)
+      if (activity.notes && activity.notes.trim() !== '') {
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        const splitNotes = doc.splitTextToSize(activity.notes, spacing - 5);
+        doc.text(splitNotes, xPos, yPos + circleSize / 2 + 20, { align: 'center' });
+      }
+    }
+  }
+
+  doc.save("choice_board.pdf");
+};
+
+export { createPDF, createChoiceBoardPDF };
