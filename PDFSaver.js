@@ -89,7 +89,7 @@ const loadImageAsBase64 = (imgSrc) => {
   });
 };
 
-const createPDF = async (iconMap = {}) => {
+const createPDF = async () => {
 
 
   var activities = await GetActivities();
@@ -126,10 +126,10 @@ const createPDF = async (iconMap = {}) => {
       // Activity number label
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
-      doc.text(`Activity ${index + 1}:`, 20, yPos);
+      doc.text(`Activity ${index + 1}: ${activity.name}`, 20, yPos);
       yPos += 10;
 
-      const iconSource = getImageSource(activity.filePath, iconMap);
+      const iconSource = typeof(activity.icon) === "string" ? activity.icon : activity.icon.uri;
 
       if (iconSource) {
         try {
