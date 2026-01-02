@@ -1,5 +1,12 @@
-import { jsPDF } from "jspdf";
+import { Platform, Alert } from 'react-native';
 import { GetActivities, GetChoiceBoard, SaveActivities } from './ActivitiesSaver.js';
+
+// Only import jsPDF on web platform
+let jsPDF = null;
+if (Platform.OS === 'web') {
+  const jsPDFModule = require("jspdf");
+  jsPDF = jsPDFModule.jsPDF;
+}
 
 
 
@@ -90,7 +97,15 @@ const loadImageAsBase64 = (imgSrc) => {
 };
 
 const createPDF = async () => {
-
+  // PDF export only works on web platform
+  if (Platform.OS !== 'web') {
+    Alert.alert(
+      'Not Available',
+      'PDF export is only available on the web version of this app.',
+      [{ text: 'OK' }]
+    );
+    return;
+  }
 
   var activities = await GetActivities();
   console.log(activities);
@@ -168,6 +183,16 @@ const createPDF = async () => {
 };
 
 const createChoiceBoardPDF = async () => {
+  // PDF export only works on web platform
+  if (Platform.OS !== 'web') {
+    Alert.alert(
+      'Not Available',
+      'PDF export is only available on the web version of this app.',
+      [{ text: 'OK' }]
+    );
+    return;
+  }
+
   var activities = await GetChoiceBoard();
   console.log('Choice Board Activities:', activities);
 
