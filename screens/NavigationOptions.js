@@ -19,7 +19,7 @@ export default function BottomNavBar() {
         <Text style={styles.navText}>🗓 Schedule</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('ChoiceBoard')}>
-        <Text style={styles.navText}>✅ Choice Board</Text>
+        <Text style={styles.navText}>Choice Board</Text>
       </TouchableOpacity>
     </View>
   );
