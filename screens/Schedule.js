@@ -74,8 +74,8 @@ export default function Schedule() {
 
   const renderItem = ({ item, index }) => {
 
-    const src = {uri: typeof(item.icon) === "string" ? item.icon : item.icon.uri};
-    
+    const src = typeof(item.icon) === "string" ? {uri: item.icon} : item.icon;
+
     return (
       <View style={styles.row}>
         <Text style={styles.label}>Activity {index + 1}: {item.name}</Text>

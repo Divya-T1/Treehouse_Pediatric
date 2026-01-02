@@ -103,8 +103,8 @@ export default function CategoryScreen({ route }) {
         : [...prev, act];
 
       await SaveActivities(next);
-      const filePaths = next.map(item => typeof(item.icon) === "string" ? item.icon : item.icon.uri);
-      setSelectedActivities(filePaths);
+      const activityIDs = next.map(item => item.id);
+      setSelectedActivities(activityIDs);
     } catch (err) {
       console.log('toggleSelection error', err);
     }
@@ -212,11 +212,11 @@ export default function CategoryScreen({ route }) {
       <ScrollView>
         <View style={styles.grid}>
           {activities.map((act, i) => {
-            const iconUri = typeof(act.icon) === "string" ? act.icon : act.icon.uri;
+            const imgSource = typeof(act.icon) === "string" ? { uri: act.icon } : act.icon;
             return (
               <TouchableOpacity key={i} onPress={() => toggleSelection(act)}>
-                <View style={[styles.circleCustom, selectedActivities.includes(iconUri) && styles.selectedCircle]}>
-                  <Image source={{ uri: iconUri }} style={styles.circleImage} />
+                <View style={[styles.circleCustom, selectedActivities.includes(act.id) && styles.selectedCircle]}>
+                  <Image source={imgSource} style={styles.circleImage} />
                 </View>
                 <Text style={styles.activityText}>{act.name}</Text>
               </TouchableOpacity>

@@ -339,10 +339,7 @@ const toggleScheduleActivity = async activity => {
             {searchResults.map((item, i) => {
               const itemSelected = isSelected(item.name);
 
-              const defaultIcon =
-                typeof item.icon === 'string'
-                  ? { uri: item.icon }
-                  : item.icon;
+              const defaultIcon = typeof item.icon === 'string' ? { uri: item.icon } : item.icon;
 
               const imgSource = getIconForName(item.name, defaultIcon);
 
@@ -496,7 +493,7 @@ const toggleScheduleActivity = async activity => {
               const selected = isSelected(item.categoryName);
               // For custom categories you may or may not want to override icon from schedule;
               // here we keep their saved category icon.
-              const imgSource = { uri: typeof(item.icon) === "string" ? item.icon : item.icon.uri };
+              const imgSource = typeof(item.icon) === "string" ? { uri: item.icon } : item.icon;
 
               //If icon doesn't exist, return nothing
               if (!item.icon) return null;

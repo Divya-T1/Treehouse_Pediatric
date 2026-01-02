@@ -98,9 +98,7 @@ export default function ChoiceBoard() {
 
   const renderItem = ({ item, index }) => {
 
-
-    const iconUri = typeof(item.icon) === "string" ? item.icon : item.icon.uri;
-    const src = {uri: iconUri};
+    const src = typeof(item.icon) === "string" ? {uri: item.icon} : item.icon;
 
     return (
       <View style={styles.row}>
