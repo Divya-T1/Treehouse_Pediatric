@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   TextInput
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { CurrentRenderContext, useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
@@ -25,13 +25,14 @@ export default function Schedule() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <View style={styles.notesButtonContainer}>
+      headerTitle: () => (
+        <View style={styles.headerButtonsContainer}>
           <TouchableOpacity style={styles.saveButton} onPress={() => {SaveActivities(activities)}}>
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton}>
-              <Text onPress={() => {createPDF()}} style={styles.saveButtonText}>Create PDF</Text>
+          <Text style={styles.headerTitleText}>Schedule</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {createPDF()}}>
+              <Text style={styles.saveButtonText}>Print</Text>
           </TouchableOpacity>
         </View>
       ),
@@ -102,7 +103,6 @@ export default function Schedule() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Schedule</Text>
 
       <FlatList
         data={activities}
@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     marginBottom: 8,
+    marginTop: 8,
   },
   row: {
     width: '90%',
@@ -175,15 +176,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 24,
   },
-  notesButtonContainer: {
-    flexDirection: 'row',
-    gap: 20,
-    padding:20,
-    paddingHorizontal: 20,
+  headerButtonsContainer: {
+    flexDirection: 'row',         // Arrange buttons horizontally
+    alignItems: 'center',          // Center vertically
+    gap: 30,
+  },
+  headerTitleText: {
+    textAlign: 'center',
+    fontSize: 16,      // Matches other screen titles
+    fontWeight: '700',  // Matches other screen titles
+    color: '#333',
   },
   saveButton: {
+      flex: 1,
       backgroundColor: 'transparent', // transparent background
       borderWidth: 1,
+      height: 30,
       padding: 5,
       borderColor: '#333', // optional border
   },
@@ -191,6 +199,7 @@ const styles = StyleSheet.create({
       color: '#333', // custom text color
       textTransform: 'none', // keep lowercase
       fontSize: 16,
+      textAlign: 'center',
   },
   iconAndTextInput: {
       flexDirection: 'row',

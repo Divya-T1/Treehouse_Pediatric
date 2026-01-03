@@ -46,7 +46,6 @@ export default function ChoiceBoard() {
 
 
   const createMax3Alert = () => {
-    alert("You can only select up to 3 activities.");
     Alert.alert(
       "Maximum Selection Reached",
       "You can only select up to 3 activities.",
@@ -56,13 +55,14 @@ export default function ChoiceBoard() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <View style={styles.notesButtonContainer}>
+      headerTitle: () => (
+        <View style={styles.headerButtonsContainer}>
           <TouchableOpacity style={styles.saveButton} onPress={() => {SaveChoiceBoard(choiceBoardActivities)}}>
               <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton}>
-              <Text onPress={() => {createChoiceBoardPDF()}} style={styles.saveButtonText}>Create PDF</Text>
+          <Text style={styles.headerTitleText}>Choice Board</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {createChoiceBoardPDF()}}>
+              <Text style={styles.saveButtonText}>Print</Text>
           </TouchableOpacity>
         </View>
       ),
@@ -224,15 +224,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 24,
   },
-  notesButtonContainer: {
-    flexDirection: 'row',
-    gap: 20,
-    padding:20,
-    paddingHorizontal: 20,
+  headerButtonsContainer: {
+    flexDirection: 'row',         // Arrange buttons horizontally
+    alignItems: 'center',          // Center vertically
+    gap: 30,
+  },
+  headerTitleText: {
+    textAlign: 'center',
+    fontSize: 16,      // Matches other screen titles
+    fontWeight: '700',  // Matches other screen titles
+    color: '#333',
   },
   saveButton: {
+      flex: 1,
       backgroundColor: 'transparent', // transparent background
       borderWidth: 1,
+      height: 30,
       padding: 5,
       borderColor: '#333', // optional border
   },
@@ -240,6 +247,7 @@ const styles = StyleSheet.create({
       color: '#333', // custom text color
       textTransform: 'none', // keep lowercase
       fontSize: 16,
+      textAlign: 'center',
   },
   iconAndTextInput: {
       flexDirection: 'row',
