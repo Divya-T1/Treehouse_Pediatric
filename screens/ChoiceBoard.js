@@ -129,18 +129,28 @@ export default function ChoiceBoard() {
         data={choiceBoardActivities}
         keyExtractor={(it, idx) => `${it}-${idx}`}
         renderItem={renderItem}
-        contentContainerStyle={choiceBoardActivities.length === 0 && { flex: 1, justifyContent: 'center' }}
+        contentContainerStyle={
+          choiceBoardActivities.length === 0
+            ? { flex: 1, justifyContent: 'center' }
+            : { paddingRight: 20 }  // Add padding at the end
+        }
         style={styles.MainFlatListStyle}
         horizontal={true}
+        showsHorizontalScrollIndicator={false}
       />
 
       <FlatList
         data={activities}
         keyExtractor={(it, idx) => `${it}-${idx}`}
         renderItem={renderItem}
-        contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
+        contentContainerStyle={
+          activities.length === 0
+            ? { flex: 1, justifyContent: 'center' }
+            : { paddingRight: 20 }  // Add padding at the end so last item is reachable
+        }
         style={styles.FlatListStyle}
         horizontal={true}
+        showsHorizontalScrollIndicator={false}  // Optional: cleaner look
       />
 
       <StatusBar style="auto" />
@@ -175,9 +185,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   row: {
-    width: '90%',
-    marginHorizontal: '5%',
-    paddingVertical: 16,
+    width: 100,
+    marginHorizontal: 5,  // Changed from '5%' to fixed 5px - reduces excessive spacing
+    paddingVertical: 5,
     alignItems: 'center',
     justifyContent: 'center',
     borderColor: '#ddd',
@@ -241,9 +251,19 @@ const styles = StyleSheet.create({
   }, 
   textBox: {
     width: '100%',
-    fontSize: '20px',
+    fontSize: 17,
   },
-  normalCircle: { width: 75, height: 75, borderRadius: 75, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(211,211,211)', overflow: 'hidden' },
+  normalCircle: {
+    width: 75,
+    height: 75,
+    borderRadius: 75,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,  // Reduced from 20 to 5 - less spacing between icons
+    marginVertical: 10,   // Reduced from 20 to 10
+    backgroundColor: 'rgb(211,211,211)',
+    overflow: 'hidden'
+  },
   selectedCircle: {
     backgroundColor: 'rgb(218, 188, 188)',
   },

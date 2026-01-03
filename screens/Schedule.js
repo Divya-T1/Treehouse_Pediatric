@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   }, 
   textBox: {
     width: '100%',
-    fontSize: '20px',
+    fontSize: 17,
   }
 });
 
