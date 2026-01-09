@@ -518,7 +518,7 @@ const toggleScheduleActivity = async activity => {
                   >
                     <Image
                       source={imgSource}
-                      style={{ width: 80, height: 80, resizeMode: 'contain' }}
+                      style={{ width: 70, height: 70, resizeMode: 'contain' }}
                     />
                   </View>
                   <Text style={styles.activityText}>

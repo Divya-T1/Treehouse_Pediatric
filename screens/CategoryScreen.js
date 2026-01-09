@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-  circleImage: { width: 80, height: 80, resizeMode: 'contain' },
+  circleImage: { width: 60, height: 60, resizeMode: 'contain' },
   selectedCircle: { backgroundColor: 'rgb(195, 229, 236)' },
 
   activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },

@@ -102,7 +102,7 @@ export default function ChoiceBoard() {
 
     return (
       <View style={styles.row}>
-        <Text style={styles.label}>Activity {index + 1}</Text>
+        <Text style={styles.label}>{item.name}</Text>
         <View style={[styles.iconAndTextInput]}>
           <View style={styles.iconCircle}>
             
