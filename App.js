@@ -217,34 +217,34 @@ function Homescreen({ navigation }) {
     }
   };
 
-  // Add to schedule (no navigation)
-  // Toggle in/out of schedule (no navigation)
-const toggleScheduleActivity = async activity => {
-  const exists = scheduleActivities.some(a => a.name === activity.name);
+    // Add to schedule (no navigation)
+    // Toggle in/out of schedule (no navigation)
+  const toggleScheduleActivity = async activity => {
+    const exists = scheduleActivities.some(a => a.name === activity.name);
 
-  let newSchedule;
-  if (exists) {
-    // remove
-    newSchedule = scheduleActivities.filter(a => a.name !== activity.name);
-  } else {
-    // add
-    const newActivity = {
-      ...activity,
-      icon: activity.icon,           // require(...) or URI string
-      category: activity.category || '',
-      screen: activity.screen || '',
-      notes: activity.notes || '',
-    };
-    newSchedule = [...scheduleActivities, newActivity];
-  }
+    let newSchedule;
+    if (exists) {
+      // remove
+      newSchedule = scheduleActivities.filter(a => a.name !== activity.name);
+    } else {
+      // add
+      const newActivity = {
+        ...activity,
+        icon: activity.icon,           // require(...) or URI string
+        category: activity.category || '',
+        screen: activity.screen || '',
+        notes: activity.notes || '',
+      };
+      newSchedule = [...scheduleActivities, newActivity];
+    }
 
-  setScheduleActivities(newSchedule);
-  try {
-    await SaveActivities(newSchedule);
-  } catch (e) {
-    console.log('SaveActivities error:', e);
-  }
-};
+    setScheduleActivities(newSchedule);
+    try {
+      await SaveActivities(newSchedule);
+    } catch (e) {
+      console.log('SaveActivities error:', e);
+    }
+  };
 
 
   return (
@@ -471,36 +471,36 @@ const toggleScheduleActivity = async activity => {
   );
 }
 
-
 // Stack and App
 export default function App() {
+
+  const transitionSpecification = {
+    open: {
+      animation: 'timing',  
+      config: { duration: 100 }, // Duration for opening in ms
+    },
+    close: {
+      animation: 'timing',
+      config: { duration: 100 }, // Duration for closing in ms
+    },
+  };
+  const fade = { animation: 'fade',  transitionSpec: transitionSpecification };
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Group>
-            <Stack.Screen name="Home" component={Homescreen} />
-            <Stack.Screen name="Gross Motor" component={GrossMotorScreen} />
-            <Stack.Screen
-              name="Toys And Activities"
-              component={ToyAndActScreen}
-            />
-            <Stack.Screen name="Fine Motor" component={FineMotorScreen} />
-            <Stack.Screen name="Room Spaces" component={RoomSpacesScreen} />
-            <Stack.Screen name="Regulation" component={Regulation} />
-            <Stack.Screen name="SensoryScreen" component={SensoryScreen} />
-            <Stack.Screen name="ADLscreen" component={ADLScreen} />
-            <Stack.Screen name="ToyScreen" component={ToyScreen} />
-            <Stack.Screen name="Schedule" component={Schedule} />
+            <Stack.Screen name="Home" component={Homescreen}  options={{animation: 'fade'}}/>
+            <Stack.Screen name="Schedule" component={Schedule} options={{animation: 'fade'}}/>
             <Stack.Screen
               name="CustomCategory"
               component={CategoryScreen}
+              options={{animation: 'slide_from_right'}}
             />
-            <Stack.Screen name = "ChoiceBoard"
-            component={ChoiceBoard}
-            />
+            <Stack.Screen name = "ChoiceBoard" component={ChoiceBoard} options={{animation: 'fade'}}/>
           </Stack.Group>
-          <Stack.Group screenOptions={{ presentation: 'modal' }}>
+          <Stack.Group screenOptions={{ presentation: 'modal'}}>
             <Stack.Screen name="Notes" component={NotesModal} />
           </Stack.Group>
         </Stack.Navigator>
