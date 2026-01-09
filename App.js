@@ -174,76 +174,6 @@ function Homescreen({ navigation }) {
       return { screen: 'CustomCategory', params: { categoryName: activity.category } };
     }
 
-    // Determine category from activity id/path (case-insensitive, handle all variations)
-    const id = (activity.id || '').toLowerCase();
-    const name = (activity.name || '').toLowerCase();
-    
-    // ADL activities - check path and common ADL names
-    // Check for ADL in path (handles ../assets/ADL/, assets/ADL/, /ADL/, etc.)
-    if (id.includes('adl') ||
-        name === 'buttons' || name === 'pants' || name === 'shoes' || 
-        name === 'socks' || name === 't-shirt' || name === 'toothbrush' || name === 'zipper') {
-      return { screen: 'ADLscreen' };
-    }
-    
-    // Fine Motor activities - check path and common fine motor names
-    if (id.includes('finemotorpictures/') || id.includes('finemotorpictures\\') || 
-        id.includes('/finemotorpictures/') ||
-        name === 'coloring' || name === 'cutting' || name === 'dot markers' ||
-        name === 'drawing' || name === 'craft' || name === 'painting' ||
-        name === 'tweezers' || name === 'writing') {
-      return { screen: 'Fine Motor' };
-    }
-    
-    // Regulation activities - check path and common regulation names
-    if (id.includes('regulation/') || id.includes('regulation\\') || 
-        id.includes('/regulation/') ||
-        name === 'breathing' || name === 'lights off' || name === 'quiet space' ||
-        name === 'hugging' || name === 'relaxing' || name === 'weighted blanket' ||
-        name === 'music') {
-      return { screen: 'Regulation' };
-    }
-    
-    // Room Spaces activities - check path and common room space names
-    if (id.includes('roomspacespictures/') || id.includes('roomspacespictures\\') ||
-        id.includes('/roomspacespictures/') ||
-        name === 'rocking chair' || name === 'nurse' || name === 'auditory room' ||
-        name === 'puzzle room' || name === 'waiting room' || name === 'speech room' ||
-        name === 'bathroom' || name === 'treetop room' || name === 'kitchen' ||
-        name === 'gym') {
-      return { screen: 'Room Spaces' };
-    }
-    
-    // Sensory activities - check path and common sensory names
-    if (id.includes('sensory/') || id.includes('sensory\\') || id.includes('/sensory/') ||
-        name === 'clay' || name === 'peanut ball' || name === 'playdoh' ||
-        name === 'putty' || name === 'sandpit' || name === 'swing') {
-      return { screen: 'SensoryScreen' };
-    }
-    
-    // Gross Motor activities - check for specific files and common gross motor names
-    if (id.includes('group_11') || id.includes('group_12') || 
-        id.includes('image_6') || id.includes('image_7') || 
-        id.includes('image_9') || id.includes('image_10') ||
-        name === 'rock climbing' || name === 'sliding' || name === 'yoga' ||
-        name === 'balancing beam' || name === 'trampoline' || name === 'obstacle course') {
-      return { screen: 'Gross Motor' };
-    }
-    
-    // Toys activities - check for TOYS folder, toy-related files, and common toy names
-    if (id.includes('toys/') || id.includes('toys\\') || id.includes('/toys/') ||
-        id.includes('toyfood') || id.includes('cartoy') || 
-        id.includes('train') || id.includes('animaltoy') || 
-        id.includes('booktoy') || id.includes('videotoy') ||
-        name.includes('toy') || name === 'reading' || name === 'watch video' ||
-        name === 'puzzles' || name === 'puzzle' || name === 'ipad time' || name === 'ipad' ||
-        name === 'card game' || name === 'table work' || name === 'work table' ||
-        name === 'instrument' || name === 'animals' || name === 'toy cars' ||
-        name === 'toy food' || name === 'toy car' || name === 'toy train' ||
-        name === 'stuffed animal') {
-      return { screen: 'ToyScreen' };
-    }
-
     // Default: return null if category can't be determined
     return null;
   };
@@ -270,6 +200,10 @@ function Homescreen({ navigation }) {
   const handleClearStorage = async () => {
     try {
       await clearData();
+      for(var i = 0; i < DEFAULT_ACTIVITIES.length; i++){
+        //Adds any of the default categories if they aren't already in CustomCategories in async storage
+        await AddCategory(DEFAULT_ACTIVITIES[i].categoryName, DEFAULT_ACTIVITIES[i].icon, DEFAULT_ACTIVITIES[i].activities);
+      }
       // Reload all data
       const cats = await GetCustomCategories();
       setCustomCategories(Array.isArray(cats) ? cats : []);
