@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   headerTitleText: {
     textAlign: 'center',
     fontSize: 16,      // Matches other screen titles
-    fontWeight: '700',  // Matches other screen titles
+    fontWeight: '600',  // Matches other screen titles
     color: '#333',
   },
   saveButton: {

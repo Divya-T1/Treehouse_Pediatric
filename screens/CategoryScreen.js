@@ -15,6 +15,7 @@ import {
   Alert,
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+import { useNavigation } from '@react-navigation/native';
 
 import {
   GetCustomCategories,
@@ -35,6 +36,8 @@ export default function CategoryScreen({ route }) {
   const [newActName, setNewActName] = useState('');
   const [newActIcon, setNewActIcon] = useState('');
   const [selectedActivities, setSelectedActivities] = useState([]);
+
+  const navigation = useNavigation();
 
   // Load activities for this category
   useEffect(() => {
@@ -65,12 +68,21 @@ export default function CategoryScreen({ route }) {
     })();
   }, [categoryName]);
 
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <Text style={styles.headerTitleText}>{categoryName}</Text>
+      ),
+    });
+  }, [navigation, activities]);
+
   // Load selected activities
   useEffect(() => {
     (async () => {
       try {
         const saved = await GetActivities();
-        setSelectedActivities(saved.map(item => item.icon) || []);
+        setSelectedActivities(saved.map(item => item.id) || []);
       } catch (err) {
         console.log('load selected activities error', err);
         setSelectedActivities([]);
@@ -245,6 +257,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 20,
     backgroundColor: 'rgb(211,211,211)',
+  },
+
+  headerTitleText: {
+    textAlign: 'center',
+    fontSize: 16,      // Matches other screen titles
+    fontWeight: '600',  // Matches other screen titles
+    color: '#333',
   },
 
   circleImage: { width: 80, height: 80, resizeMode: 'contain' },

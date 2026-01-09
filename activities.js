@@ -319,7 +319,6 @@ export const DEFAULT_ACTIVITIES = [
       },
     ]
   },
-
   {
     categoryName: 'Fun Activities',
     icon: require('./TeddyBear.png'),
