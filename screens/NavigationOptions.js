@@ -1,11 +1,13 @@
 // BottomNavBar.js
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Image, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SaveActivities, GetActivities } from '../ActivitiesSaver.js';
 
 export default function BottomNavBar() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const navBarIcons = [require('../assets/NavBarIcons/Calendar.png'), require('../assets/NavBarIcons/Home.png'), require('../assets/NavBarIcons/ChoiceBoard.png')]
   const navBarIconsSelected = [require('../assets/NavBarIcons/Calendar_Selected.png'), require('../assets/NavBarIcons/Home_Selected.png'), require('../assets/NavBarIcons/ChoiceBoard_Selected.png')]
@@ -14,7 +16,7 @@ export default function BottomNavBar() {
   const currentRouteName = state.routes[state.index].name; 
 
   return (
-    <View style={styles.navBar}>
+    <View style={[styles.navBar, { paddingBottom: insets.bottom }]}>
       <TouchableOpacity onPress={() => navigation.navigate('Schedule')} style={styles.navBarIconContainer}>
         <Image
           source={currentRouteName === 'Schedule' ? navBarIconsSelected[0] : navBarIcons[0]}
@@ -44,7 +46,7 @@ export default function BottomNavBar() {
 const styles = StyleSheet.create({
   navBar: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#fff',
     flexDirection: 'row',

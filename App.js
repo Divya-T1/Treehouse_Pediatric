@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 
 import GrossMotorScreen from './screens/GrossMotorScreen';
@@ -540,35 +541,37 @@ const toggleScheduleActivity = async activity => {
 // Stack and App
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Group>
-          <Stack.Screen name="Home" component={Homescreen} />
-          <Stack.Screen name="Gross Motor" component={GrossMotorScreen} />
-          <Stack.Screen
-            name="Toys And Activities"
-            component={ToyAndActScreen}
-          />
-          <Stack.Screen name="Fine Motor" component={FineMotorScreen} />
-          <Stack.Screen name="Room Spaces" component={RoomSpacesScreen} />
-          <Stack.Screen name="Regulation" component={Regulation} />
-          <Stack.Screen name="SensoryScreen" component={SensoryScreen} />
-          <Stack.Screen name="ADLscreen" component={ADLScreen} />
-          <Stack.Screen name="ToyScreen" component={ToyScreen} />
-          <Stack.Screen name="Schedule" component={Schedule} />
-          <Stack.Screen
-            name="CustomCategory"
-            component={CategoryScreen}
-          />
-          <Stack.Screen name = "ChoiceBoard" 
-          component={ChoiceBoard}
-          />
-        </Stack.Group>
-        <Stack.Group screenOptions={{ presentation: 'modal' }}>
-          <Stack.Screen name="Notes" component={NotesModal} />
-        </Stack.Group>
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Group>
+            <Stack.Screen name="Home" component={Homescreen} />
+            <Stack.Screen name="Gross Motor" component={GrossMotorScreen} />
+            <Stack.Screen
+              name="Toys And Activities"
+              component={ToyAndActScreen}
+            />
+            <Stack.Screen name="Fine Motor" component={FineMotorScreen} />
+            <Stack.Screen name="Room Spaces" component={RoomSpacesScreen} />
+            <Stack.Screen name="Regulation" component={Regulation} />
+            <Stack.Screen name="SensoryScreen" component={SensoryScreen} />
+            <Stack.Screen name="ADLscreen" component={ADLScreen} />
+            <Stack.Screen name="ToyScreen" component={ToyScreen} />
+            <Stack.Screen name="Schedule" component={Schedule} />
+            <Stack.Screen
+              name="CustomCategory"
+              component={CategoryScreen}
+            />
+            <Stack.Screen name = "ChoiceBoard"
+            component={ChoiceBoard}
+            />
+          </Stack.Group>
+          <Stack.Group screenOptions={{ presentation: 'modal' }}>
+            <Stack.Screen name="Notes" component={NotesModal} />
+          </Stack.Group>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
