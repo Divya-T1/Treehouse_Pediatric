@@ -113,7 +113,7 @@ export default function Schedule() {
             No activities selected yet. Pick some on ADL, Fine Motor, etc.
           </Text>
         }
-        contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
+        contentContainerStyle={activities.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 100 } : { paddingBottom: 100 }}
         style={{ width: '100%' }}
       />
 

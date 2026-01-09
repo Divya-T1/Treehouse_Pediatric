@@ -245,8 +245,8 @@ export default function CategoryScreen({ route }) {
 
 // ------------------- Styles -------------------
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: 300 },
+  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%'},
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: 300, paddingBottom: 100 },
 
   circleCustom: {
     width: 100,

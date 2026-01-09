@@ -122,7 +122,7 @@ export default function ChoiceBoard() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} >
 
       <FlatList
         data={choiceBoardActivities}
@@ -145,7 +145,7 @@ export default function ChoiceBoard() {
         contentContainerStyle={
           activities.length === 0
             ? { flex: 1, justifyContent: 'center' }
-            : { paddingRight: 20 }  // Add padding at the end so last item is reachable
+            : { paddingRight: 20, marginBottom: 100}  // Add padding at the end so last item is reachable
         }
         style={styles.FlatListStyle}
         horizontal={true}
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'absolute',
     bottom: 40,
-    borderTopWidth: 1,
-    borderTopColor: '#000000ff',
+    borderWidth:1,
+    borderColor:'fffff',
   },
   MainFlatListStyle: {
     display: 'flex',

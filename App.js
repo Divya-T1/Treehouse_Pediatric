@@ -618,6 +618,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: 300,
+    paddingBottom:100,
   },
   circle: {
     width: 100,
