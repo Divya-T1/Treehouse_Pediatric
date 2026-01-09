@@ -268,6 +268,63 @@ export const DEFAULT_ACTIVITIES = [
     icon: require('./assets/toy.png'),
     activities: [
       {
+        id: '../ToyFood.png',
+        name: 'Toy Food',
+        icon: require('./ToyFood.png')
+      },
+      {
+        id: '../assets/CarToy.png',
+        name: 'Toy Car',
+        icon: require('./assets/CarToy.png')
+      },
+      {
+        id: '../assets/Train.png',
+        name: 'Toy Train',
+        icon: require('./assets/Train.png')
+      },
+      {
+        id: '../assets/AnimalToy.png',
+        name: 'Stuffed Animal',
+        icon: require('./assets/AnimalToy.png')
+      },
+      {
+        id: '../assets/BookToy.png',
+        name: 'Reading',
+        icon: require('./assets/BookToy.png')
+      },
+      {
+        id: '../assets/VideoToy.png',
+        name: 'Video',
+        icon: require('./assets/VideoToy.png')
+      },
+      {
+        id: '../assets/TOYS/Vector-3.png',
+        name: 'Puzzle',
+        icon: require('./assets/TOYS/Vector-3.png')
+      },
+      {
+        id: '../assets/TOYS/Vector-4.png',
+        name: 'iPad',
+        icon: require('./assets/TOYS/Vector-4.png')
+      },
+      {
+        id: '../assets/TOYS/Vector-5.png',
+        name: 'Card Game',
+        icon: require('./assets/TOYS/Vector-5.png')
+      },
+      {
+        id: '../assets/TOYS/Group-2.png',
+        name: 'Table Work',
+        icon: require('./assets/TOYS/Group-2.png')
+      },
+    ]
+  },
+
+  {
+    categoryName: 'Fun Activities',
+    icon: require('./TeddyBear.png'),
+    activities: [
+      {
         id: '../assets/TOYS/Group 16.png',
         name: 'Animals',
         icon: require('./assets/TOYS/Group 16.png')
@@ -316,11 +373,6 @@ export const DEFAULT_ACTIVITIES = [
         id: '../assets/TOYS/Vector.png',
         name: 'Toy Train',
         icon: require('./assets/TOYS/Vector.png')
-      },
-      {
-        id: '../assets/AnimalToy.png',
-        name: 'Stuffed Animal',
-        icon: require('./assets/AnimalToy.png')
       },
     ]
   },
