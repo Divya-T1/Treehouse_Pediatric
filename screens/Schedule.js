@@ -1,5 +1,5 @@
 // screens/Schedule.js
-import React, { useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback, useRef} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   SafeAreaView,
@@ -9,7 +9,10 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  Platform,
+  KeyboardAvoidingView,
+  Keyboard
 } from 'react-native';
 import { CurrentRenderContext, useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
@@ -20,8 +23,11 @@ import {createPDF} from '../PDFSaver.js';
 
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
+  const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
+  const flatListRef = useRef(null);
 
   const navigation = useNavigation();
+
 
   useEffect(() => {
     navigation.setOptions({
@@ -62,7 +68,7 @@ export default function Schedule() {
     }, [])
   );
 
-  console.log(activities);
+  //console.log(keyboardVisible);
 
   const handleNoteChange = (index, newNote) => {
     const updatedActivities = [...activities];
@@ -71,7 +77,23 @@ export default function Schedule() {
       notes: newNote
     };
     setActivities(updatedActivities);
+    setCurrentNoteIndex(index);
   };
+
+  const handlePressIn = (index) => {
+    setCurrentNoteIndex(index);
+    console.log(currentNoteIndex == activities.length-1);
+    //console.log(activities.length);
+
+    // Scroll to the focused item after a short delay to ensure keyboard is visible
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({
+        index: index,
+        animated: true,
+        viewPosition: 0.5, // Center the item on screen
+      });
+    }, 300);
+  }
 
   const renderItem = ({ item, index }) => {
 
@@ -94,6 +116,7 @@ export default function Schedule() {
             style={styles.textBox}
             value={item.notes || ''}  // Controlled value
             onChangeText={(text) => handleNoteChange(index, text)}
+            onPressIn={() => handlePressIn(index)}
           />
           
         </View>
@@ -102,24 +125,37 @@ export default function Schedule() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
 
-      <FlatList
-        data={activities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No activities selected yet. Pick some on ADL, Fine Motor, etc.
-          </Text>
-        }
-        contentContainerStyle={activities.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 100 } : { paddingBottom: 100 }}
-        style={{ width: '100%' }}
-      />
+        <FlatList
+          ref={flatListRef}
+          data={activities}
+          keyExtractor={(it, idx) => `${it}-${idx}`}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              No activities selected yet. Pick some on ADL, Fine Motor, etc.
+            </Text>
+          }
+          contentContainerStyle={activities.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 150 } : { paddingBottom: 150 }}
+          style={{ width: '100%' }}
+          onScrollToIndexFailed={(info) => {
+            // Fallback if scrollToIndex fails
+            setTimeout(() => {
+              flatListRef.current?.scrollToOffset({
+                offset: info.averageItemLength * info.index,
+                animated: true,
+              });
+            }, 100);
+          }}
+        />
 
-      <StatusBar style="auto" />
-      <BottomNavBar />
-    </SafeAreaView>
+        <StatusBar style="auto" />
+        <BottomNavBar />
+      </KeyboardAvoidingView>
   );
 }
 
