@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
       width: '100%',
   }, 
   textBox: {
-    width: '100%',
+    width: 200,
     fontSize: 17,
   }
 });
