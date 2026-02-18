@@ -122,22 +122,28 @@ export default function CategoryScreen({ route }) {
     }
   }
 
-  // Pick image
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.7,  // Reduce quality slightly to keep size manageable
+        base64: true,  // Request base64 data
       });
 
       if (!result.canceled && result.assets?.length > 0) {
-        setNewActIcon(result.assets[0].uri);
+        const asset = result.assets[0];
+        // On web, use base64 data URI; on mobile, use file URI
+        if (asset.base64) {
+          const mimeType = asset.mimeType || 'image/jpeg';
+          setNewActIcon(`data:${mimeType};base64,${asset.base64}`);
+        } else {
+          setNewActIcon(asset.uri);
+        }
       }
-    } catch (err) {
-      console.log('Image picker error', err);
-      Alert.alert('Error', 'Could not pick image.');
+    } catch (e) {
+      console.log('Image picker error:', e);
     }
   };
 

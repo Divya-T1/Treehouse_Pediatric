@@ -19,7 +19,10 @@ import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
 import {createPDF} from '../PDFSaver.js';
-
+//remove custom catogories getting removed when all delete
+//add 4 choice board
+//Specific deletion
+//Add deleting after every session for privacy 
 
 export default function Schedule() {
   const [activities, setActivities] = useState([]);
