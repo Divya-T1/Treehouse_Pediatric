@@ -36,6 +36,7 @@ import {
   GetActivities,
   SaveActivities,
   clearData,
+  clearActivities
 } from './ActivitiesSaver.js';
 import useAppState from './useAppState.js';
 
@@ -67,6 +68,12 @@ function Homescreen({ navigation }) {
     { name: 'Regulation', icon: require('./Headphones.png'), screen: 'Regulation' },
     { name: 'Toys/Games', icon: require('./assets/toy.png'), screen: 'ToyScreen' },
   ];
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', () => {
+      clearActivities();
+    });
+  },[]);
 
   // helper: is an activity name selected?
   const isSelected = name =>

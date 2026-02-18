@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   saveButton: {
-      flex: 1,
       backgroundColor: 'transparent', // transparent background
       borderWidth: 1,
       height: 30,

@@ -116,3 +116,9 @@ export const clearData = async () => {
     console.warn('clearData error:', e);
   }
 };
+
+// -------------------- Clear only activity data (ONLY WORKS FOR WEB) --------------------
+export const clearActivities = () => {
+  localStorage.removeItem(STORAGE_KEY_ACTIVITIES);
+  localStorage.removeItem(STORAGE_KEY_CHOICE_BOARD);
+}
