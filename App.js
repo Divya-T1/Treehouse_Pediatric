@@ -141,16 +141,25 @@ function Homescreen({ navigation }) {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.7,  // Reduce quality slightly to keep size manageable
+        base64: true,  // Request base64 data
       });
 
       if (!result.canceled && result.assets?.length > 0) {
-        setNewCatImage(result.assets[0].uri);
+        const asset = result.assets[0];
+        // On web, use base64 data URI; on mobile, use file URI
+        if (asset.base64) {
+          const mimeType = asset.mimeType || 'image/jpeg';
+          setNewCatImage(`data:${mimeType};base64,${asset.base64}`);
+        } else {
+          setNewCatImage(asset.uri);
+        }
       }
     } catch (e) {
       console.log('Image picker error:', e);
     }
   };
+
 
   const addCategory = async () => {
     if (!newCatName || !newCatImage) return;

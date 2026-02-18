@@ -62,7 +62,25 @@ Persistent bottom navigation bar rendered on all screens with:
 - Schedule button (navigate to 'Schedule')
 - Choice Board button (navigate to 'ChoiceBoard')
 
-The bar is positioned absolutely at bottom: 0 with white background.
+The bar is positioned absolutely at `bottom: 20` with white background.
+
+**CRITICAL - Bottom Padding Issue**: Because the navigation bar is positioned absolutely, it overlays screen content. All screens with scrollable content (ScrollView or FlatList) MUST include bottom padding to prevent content from being cut off by the nav bar.
+
+**Solution**: Add `contentContainerStyle={{ paddingBottom: 100 }}` to ScrollView or FlatList components.
+
+Example for ScrollView:
+```javascript
+<ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+  {/* content */}
+</ScrollView>
+```
+
+Example for FlatList (when content can vary):
+```javascript
+<FlatList
+  contentContainerStyle={data.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 100 } : { paddingBottom: 100 }}
+/>
+```
 
 ### Choice Board Functionality
 ChoiceBoard.js enforces a 3-activity maximum for the choice board display:
@@ -79,6 +97,10 @@ Uses jsPDF library to create simple text PDFs. Currently basic implementation wi
 - `/screens/` - All screen components (activity categories, Schedule, ChoiceBoard, NotesModal)
 - `/assets/` - Organized by category (ADL/, FineMotorPictures/, Regulation/, RoomSpacesPictures/, Sensory/, TOYS/)
 - Root level - App.js, ActivitiesSaver.js, PDFSaver.js, Logo.png
+
+## Known Issues
+
+**ADLScreen.js**: This file is currently broken and should not be modified. Use other screen files as reference instead (e.g., ToysAndActScreen.js, FineMotorScreen.js).
 
 ## Key Technical Constraints
 

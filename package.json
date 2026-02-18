@@ -16,11 +16,14 @@
     "@react-navigation/native-stack": "^7.1.10",
     "expo": "^54.0.15",
     "expo-asset": "^12.0.12",
+    "expo-constants": "~18.0.13",
     "expo-file-system": "^19.0.21",
     "expo-image-picker": "^17.0.8",
+    "expo-linking": "~8.0.11",
     "expo-print": "^15.0.8",
+    "expo-router": "~6.0.23",
     "expo-sharing": "^14.0.8",
-    "expo-status-bar": "~3.0.8",
+    "expo-status-bar": "~3.0.9",
     "jspdf": "^3.0.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -31,7 +34,10 @@
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "gh-pages": "^6.3.0"
   },
-  "private": true
+  "private": true,
+  "deploy": "gh-pages --nojekyll -d dist",
+  "predeploy": "expo export -p web"
 }

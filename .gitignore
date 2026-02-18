@@ -36,3 +36,4 @@ yarn-error.*
 *.tsbuildinfo
 
 screens/ADLscreen.js
+.vercel
