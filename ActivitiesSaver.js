@@ -1,5 +1,6 @@
 // ActivitiesSaver.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CameraType } from 'expo-image-picker';
 
 const STORAGE_KEY_ACTIVITIES = 'SavedActivities';
 const STORAGE_KEY_CATEGORIES = 'CustomCategories';
@@ -118,7 +119,9 @@ export const clearData = async () => {
 };
 
 // -------------------- Clear only activity data (ONLY WORKS FOR WEB) --------------------
-export const clearActivities = () => {
-  localStorage.removeItem(STORAGE_KEY_ACTIVITIES);
-  localStorage.removeItem(STORAGE_KEY_CHOICE_BOARD);
+export const clearActivities = async () => {
+  const cats = await GetCustomCategories();
+  console.log(cats);
+  clearData();
+  SaveCustomCategories(Array.isArray(cats) ? cats : []);
 }
