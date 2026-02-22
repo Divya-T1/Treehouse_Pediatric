@@ -240,13 +240,14 @@ const styles = StyleSheet.create({
       textAlign: 'center',
   },
   iconAndTextInput: {
+      flex: 1,
       flexDirection: 'row',
       gap: 20,
       padding:20,
       width: '100%',
   }, 
   textBox: {
-    width: 200,
+    width: '100%',
     fontSize: 17,
   }
 });
