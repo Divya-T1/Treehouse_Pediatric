@@ -1,4 +1,4 @@
-// screens/Schedule.js
+// screens/ChoiceBoard.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -9,16 +9,13 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  TextInput,
   Alert
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
-import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
+import { GetActivities, GetChoiceBoard, SaveChoiceBoard } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
-import {createChoiceBoardPDF} from '../PDFSaver.js';
-import { GetChoiceBoard, SaveChoiceBoard } from '../ActivitiesSaver.js';
-
+import { createChoiceBoardPDF } from '../PDFSaver.js';
 
 export default function ChoiceBoard() {
   const [activities, setActivities] = useState([]);
@@ -26,123 +23,102 @@ export default function ChoiceBoard() {
 
   const navigation = useNavigation();
 
-  const toggleSelection = (act) =>  {
-    const id = act.id;
-    const prev = choiceBoardActivities;
+  // Toggle activity selection (max 3)
+  const toggleSelection = (act) => {
+    const exists = choiceBoardActivities.find(item => item.id === act.id);
+    let next = exists
+      ? choiceBoardActivities.filter(item => item.id !== act.id)
+      : [...choiceBoardActivities, act];
 
-
-    const exists = prev.find(item => item.id === id);
-    const next = exists
-      ? prev.filter(item => item.id !== id)
-      : [...prev, act];
-
-    if(next.length > 3){
-      createMax3Alert();
+    if (next.length > 3) {
+      Alert.alert("Maximum Selection Reached", "You can only select up to 3 activities.", [{ text: "OK" }]);
       return;
     }
 
     setChoiceBoardActivities(next);
   };
 
-
-  const createMax3Alert = () => {
-    alert("You can only select up to 3 activities.");
-    Alert.alert(
-      "Maximum Selection Reached",
-      "You can only select up to 3 activities.",
-      [{ text: "OK" }]
-    );
-  };
-
+  // Header buttons
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View style={styles.notesButtonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={() => {SaveChoiceBoard(choiceBoardActivities)}}>
-              <Text style={styles.saveButtonText}>Save</Text>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.saveButton} onPress={() => SaveChoiceBoard(choiceBoardActivities)}>
+            <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton}>
-              <Text onPress={() => {createChoiceBoardPDF()}} style={styles.saveButtonText}>Create PDF</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={createChoiceBoardPDF}>
+            <Text style={styles.saveButtonText}>Create PDF</Text>
           </TouchableOpacity>
         </View>
       ),
     });
   }, [navigation, choiceBoardActivities]);
 
-  // Load once on mount
+  // Load activities
   useEffect(() => {
     (async () => {
       const saved = await GetActivities();
-      setActivities(saved || []);
       const savedChoiceBoard = await GetChoiceBoard();
-      setChoiceBoardActivities(savedChoiceBoard);
+      setActivities(saved || []);
+      setChoiceBoardActivities(savedChoiceBoard || []);
     })();
-    //console.log(filePaths);
   }, []);
 
-  // Refresh every time the screen gets focus
+  // Refresh on focus
   useFocusEffect(
     useCallback(() => {
       let alive = true;
       (async () => {
+        if (!alive) return;
         const saved = await GetActivities();
         const savedChoiceBoard = await GetChoiceBoard();
-        if (alive){
-          setActivities(saved || []);     
-          setChoiceBoardActivities(savedChoiceBoard);
-        } 
+        setActivities(saved || []);
+        setChoiceBoardActivities(savedChoiceBoard || []);
       })();
       return () => { alive = false; };
     }, [])
   );
 
-  const renderItem = ({ item, index }) => {
-
-
-    const iconUri = typeof(item.icon) === "string" ? item.icon : item.icon.uri;
-    const src = {uri: iconUri};
+  // Render each activity item
+  const renderItem = ({ item }) => {
+    const iconUri = typeof(item.icon) === "string" ? item.icon : item.icon?.uri;
+    const src = iconUri ? { uri: iconUri } : null;
+    const isSelected = choiceBoardActivities.find(act => act.id === item.id);
 
     return (
-      <View style={styles.row}>
-        <Text style={styles.label}>Activity {index + 1}</Text>
-        <View style={[styles.iconAndTextInput]}>
-          <View style={styles.iconCircle}>
-            
-            <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item)}}>
-                <View style={[styles.normalCircle, choiceBoardActivities.find(act => act.id === item.id) && styles.selectedCircle]}>
-                    {src ? (
-                        <Image source={src} style={styles.iconImage} />
-                    ) : (
-                        <Text style={styles.fallback}>?</Text>
-                    )}
-                </View>
-            </TouchableOpacity>
-          </View>
+      <TouchableOpacity style={styles.activityWrapper} onPress={() => toggleSelection(item)}>
+        <View style={[styles.activityCircle, isSelected && styles.selectedCircle]}>
+          {src ? <Image source={src} style={styles.iconImage} /> : <Text style={styles.fallback}>?</Text>}
         </View>
-      </View>
+        <Text style={styles.activityLabel}>{item.name}</Text>
+      </TouchableOpacity>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Choice Board</Text>
+      <Text style={styles.instructionText}>Select up to 3 activities for your choice board</Text>
 
+      {/* Selected Activities */}
       <FlatList
         data={choiceBoardActivities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
-        contentContainerStyle={choiceBoardActivities.length === 0 && { flex: 1, justifyContent: 'center' }}
-        style={styles.MainFlatListStyle}
-        horizontal={true}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.flatList}
       />
 
+      {/* All Activities */}
+      <Text style={styles.sectionTitle}>All Activities</Text>
       <FlatList
         data={activities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
-        contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
-        style={styles.FlatListStyle}
-        horizontal={true}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.flatList}
       />
 
       <StatusBar style="auto" />
@@ -155,50 +131,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    width: '100%',
     alignItems: 'center',
-    width: '100%',
     paddingTop: 12,
-  },
-  FlatListStyle: {
-    width: '100%',
-    position: 'absolute',
-    bottom: 40,
-    borderTopWidth: 1,
-    borderTopColor: '#000000ff',
-  },
-  MainFlatListStyle: {
-    display: 'flex',
-    position: 'absolute',
-    top: 70,
   },
   title: {
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  row: {
-    width: '90%',
-    marginHorizontal: '5%',
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: '#ddd',
-    borderWidth: 1,
+  instructionText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 8,
+    color: '#333',
   },
-  label: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,        // push icon downward
+    marginTop: 12,
+    marginBottom: 6,
     textAlign: 'center',
   },
-  iconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#E8CACA',
+  flatList: {
+    maxHeight: 140,
+    marginBottom: 10,
+  },
+  activityWrapper: {
     alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  activityCircle: {
+    width: 75,
+    height: 75,
+    borderRadius: 37.5,
+    backgroundColor: '#D3D3D3', // unselected
+    borderWidth: 2,
+    borderColor: '#7A5E4C',
     justifyContent: 'center',
-    marginBottom: 6,
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  selectedCircle: {
+    backgroundColor: '#D2E1D0', // selected
   },
   iconImage: {
     width: 45,
@@ -208,46 +183,27 @@ const styles = StyleSheet.create({
   fallback: {
     fontSize: 16,
     color: '#888',
-    textAlign: 'center',
   },
-  empty: {
+  activityLabel: {
+    fontSize: 14,
+    fontWeight: '500',
     textAlign: 'center',
-    color: '#666',
-    fontSize: 16,
-    paddingHorizontal: 24,
+    marginTop: 4,
+    maxWidth: 75,
   },
-  notesButtonContainer: {
+  headerButtons: {
     flexDirection: 'row',
-    gap: 20,
-    padding:20,
-    paddingHorizontal: 20,
+    gap: 12,
+    paddingHorizontal: 10,
   },
   saveButton: {
-      backgroundColor: 'transparent', // transparent background
-      borderWidth: 1,
-      padding: 5,
-      borderColor: '#333', // optional border
+    backgroundColor: '#7A5E4C',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 6,
   },
   saveButtonText: {
-      color: '#333', // custom text color
-      textTransform: 'none', // keep lowercase
-      fontSize: 16,
-  },
-  iconAndTextInput: {
-      flexDirection: 'row',
-      gap: 20,
-      paddingHorizontal: 40,
-      paddingVertical: 10,
-      width: '100%',
-      justifyContent: 'center',
-  }, 
-  textBox: {
-    width: '100%',
-    fontSize: '20px',
-  },
-  normalCircle: { width: 75, height: 75, borderRadius: 75, alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, marginVertical: 20, backgroundColor: 'rgb(211,211,211)', overflow: 'hidden' },
-  selectedCircle: {
-    backgroundColor: 'rgb(218, 188, 188)',
+    color: '#fff',
+    fontSize: 16,
   },
 });
-

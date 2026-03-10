@@ -460,78 +460,48 @@ const toggleScheduleActivity = async activity => {
       </Modal>
 
       {/* Category grid */}
-      {searchResults.length === 0 && (
-        <ScrollView>
-          <View style={styles.grid}>
+      {/* Category grid */}
+{searchResults.length === 0 && (
+  <ScrollView>
+    <View style={{ width: '100%', alignItems: 'center' }}>
+      
+      {/* Instruction line */}
+      <Text style={{ fontSize: 16, fontWeight: '500', marginVertical: 10 }}>
+        Select a category to choose activities
+      </Text>
 
-            {/*
-            {originalCategories.map((item, i) => {
-              const selected = isSelected(item.name);
-              const imgSource = getIconForName(item.name, item.icon);
+      <View style={styles.grid}>
+        {customCategories.map((item, i) => {
+          if (!item.icon) return null;
 
-              return (
-                <TouchableOpacity
-                  key={i}
-                  activeOpacity={0.6}
-                  onPress={() => navigation.navigate(item.screen)}
-                >
-                  <View
-                    style={[
-                      styles.circle,
-                      selected && styles.selectedCircle,
-                    ]}
-                  >
-                    <Image
-                      source={imgSource}
-                      style={{ width: 80, height: 80, borderRadius: 40 }}
-                    />
-                  </View>
-                  <Text style={styles.activityText}>{item.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
-            */}
+          const selected = isSelected(item.categoryName);
+          const imgSource = typeof item.icon === "string" ? { uri: item.icon } : item.icon;
 
-            {customCategories.map((item, i) => {
-              const selected = isSelected(item.categoryName);
-              // For custom categories you may or may not want to override icon from schedule;
-              // here we keep their saved category icon.
-              const imgSource = { uri: typeof(item.icon) === "string" ? item.icon : item.icon.uri };
+          return (
+            <TouchableOpacity
+              key={i}
+              activeOpacity={0.6}
+              onPress={() =>
+                navigation.navigate('CustomCategory', {
+                  categoryName: item.categoryName,
+                })
+              }
+            >
+              <View style={[styles.circle, selected && styles.selectedCircle]}>
+                <Image
+                  source={imgSource}
+                  style={{ width: 80, height: 80, borderRadius: 40 }}
+                />
+              </View>
+              <Text style={styles.activityText}>{item.categoryName}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  </ScrollView>
+)}
 
-              //If icon doesn't exist, return nothing
-              if (!item.icon) return null;
-
-
-              return (
-                <TouchableOpacity
-                  key={i}
-                  activeOpacity={0.6}
-                  onPress={() =>
-                    navigation.navigate('CustomCategory', {
-                      categoryName: item.categoryName,
-                    })
-                  }
-                >
-                  <View
-                    style={[
-                      styles.circle,
-                      selected && styles.selectedCircle,
-                    ]}
-                  >
-                    <Image
-                      source={imgSource}
-                      style={{ width: 80, height: 80, borderRadius: 40 }}
-                    />
-                  </View>
-                  <Text style={styles.activityText}>
-                    {item.categoryName}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
-      )}
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -592,7 +562,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   clearStorageButton: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: '#7A5E4C', // muted brown
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 6,
@@ -604,7 +574,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#7A5E4C', // muted brown
     borderRadius: 6,
     margin: 10,
     paddingHorizontal: 8,
@@ -630,13 +600,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
+    backgroundColor: '#D2E1D0', // soft earthy green
+    borderWidth: 2,
+    borderColor: '#7A5E4C', // muted brown border
   },
   selectedCircle: {
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: '#B0C9A5', // slightly darker brownish-green for selection
+    borderColor: '#7A5E4C',
   },
   imageButton: {
-    backgroundColor: '#333',
+    backgroundColor: '#7A9B76', // medium brownish-green
     padding: 8,
     borderRadius: 6,
     marginTop: 6,
@@ -648,17 +621,21 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   addButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#7A9B76', // medium brownish-green
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 10,
     borderRadius: 6,
     alignSelf: 'center',
   },
-  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
+  addButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff', // white text on green
+  },
   divider: {
     height: 1,
-    backgroundColor: '#333',
+    backgroundColor: '#A6C3A0', // lighter brownish-green
     width: '90%',
     alignSelf: 'center',
     marginVertical: 10,
@@ -677,10 +654,13 @@ const styles = StyleSheet.create({
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#7A9B76', // brownish-green
     borderRadius: 6,
     marginVertical: 10,
     paddingHorizontal: 8,
     height: 40,
   },
 });
+
+
+

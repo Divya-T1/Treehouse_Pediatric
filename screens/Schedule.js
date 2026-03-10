@@ -110,7 +110,7 @@ export default function Schedule() {
         renderItem={renderItem}
         ListEmptyComponent={
           <Text style={styles.empty}>
-            No activities selected yet. Pick some on ADL, Fine Motor, etc.
+            No activities selected yet. Please go to the Home Page to select activities for your schedule.
           </Text>
         }
         contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
@@ -148,18 +148,21 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,        // push icon downward
+    marginBottom: 8,
     textAlign: 'center',
   },
   iconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#E8CACA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
+  width: 70,
+  height: 70,
+  borderRadius: 35,
+  backgroundColor: '#D2E1D0', // earthy green
+  borderWidth: 2,
+  borderColor: '#7A5E4C', // brown border
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 6,
+},
+
   iconImage: {
     width: 45,
     height: 45,
@@ -178,29 +181,31 @@ const styles = StyleSheet.create({
   notesButtonContainer: {
     flexDirection: 'row',
     gap: 20,
-    padding:20,
+    padding: 20,
     paddingHorizontal: 20,
   },
   saveButton: {
-      backgroundColor: 'transparent', // transparent background
-      borderWidth: 1,
-      padding: 5,
-      borderColor: '#333', // optional border
+    backgroundColor: '#7A5E4C', // brown for save/create PDF
+    borderWidth: 1,
+    padding: 5,
+    borderColor: '#7A5E4C', // same brown border
+    borderRadius: 6,
   },
   saveButtonText: {
-      color: '#333', // custom text color
-      textTransform: 'none', // keep lowercase
-      fontSize: 16,
+    color: '#fff', // white text for contrast
+    textTransform: 'none',
+    fontSize: 16,
   },
   iconAndTextInput: {
-      flexDirection: 'row',
-      gap: 20,
-      padding:20,
-      width: '100%',
+    flexDirection: 'row',
+    gap: 20,
+    padding: 20,
+    width: '100%',
   }, 
   textBox: {
     width: '100%',
-    fontSize: '20px',
+    fontSize: 20,
   }
 });
+
 

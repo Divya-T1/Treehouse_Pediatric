@@ -1,26 +1,40 @@
 // ActivitiesSaver.js
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  Set_Encrypted_AsyncStorage,
+  Get_Encrypted_AsyncStorage,
+} from 'react-native-encrypted-asyncstorage';
 
+// -------------------- Encryption Key --------------------
+const ENCRYPTION_KEY = 'w8rT4zPq9vL1sX2mK6bH3nQ0yF7eJ5uD'; // replace with your own secure key
+//HARDCODED FOR NOW, SHOULD BE GENERATED AND STORED SECURELY IN PRODUCTION
+
+// -------------------- Storage Keys --------------------
 const STORAGE_KEY_ACTIVITIES = 'SavedActivities';
 const STORAGE_KEY_CATEGORIES = 'CustomCategories';
 const STORAGE_KEY_CHOICE_BOARD = 'ChoiceBoard';
 
 // -------------------- Activities --------------------
-
-// Save regular activities
 export const SaveActivities = async (activitiesArray) => {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY_ACTIVITIES, JSON.stringify(activitiesArray || []));
+    await Set_Encrypted_AsyncStorage(
+      'object',
+      STORAGE_KEY_ACTIVITIES,
+      activitiesArray || [],
+      ENCRYPTION_KEY
+    );
   } catch (e) {
     console.warn('SaveActivities error:', e);
   }
 };
 
-// Get regular activities
 export const GetActivities = async () => {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY_ACTIVITIES);
-    return raw ? JSON.parse(raw) : [];
+    const data = await Get_Encrypted_AsyncStorage(
+      'object',
+      STORAGE_KEY_ACTIVITIES,
+      ENCRYPTION_KEY
+    );
+    return data || [];
   } catch (e) {
     console.warn('GetActivities error:', e);
     return [];
@@ -28,24 +42,30 @@ export const GetActivities = async () => {
 };
 
 // -------------------- Custom Categories --------------------
-
-// Get custom categories
-export const GetCustomCategories = async () => {
+export const SaveCustomCategories = async (categoriesArray) => {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY_CATEGORIES);
-    return raw ? JSON.parse(raw) : [];
+    await Set_Encrypted_AsyncStorage(
+      'object',
+      STORAGE_KEY_CATEGORIES,
+      categoriesArray || [],
+      ENCRYPTION_KEY
+    );
   } catch (e) {
-    console.warn('GetCustomCategories error:', e);
-    return [];
+    console.warn('SaveCustomCategories error:', e);
   }
 };
 
-// Save custom categories
-export const SaveCustomCategories = async (categoriesArray) => {
+export const GetCustomCategories = async () => {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categoriesArray || []));
+    const data = await Get_Encrypted_AsyncStorage(
+      'object',
+      STORAGE_KEY_CATEGORIES,
+      ENCRYPTION_KEY
+    );
+    return data || [];
   } catch (e) {
-    console.warn('SaveCustomCategories error:', e);
+    console.warn('GetCustomCategories error:', e);
+    return [];
   }
 };
 
@@ -53,7 +73,6 @@ export const SaveCustomCategories = async (categoriesArray) => {
 export const AddCategory = async (categoryName, icon, activities = []) => {
   const cats = await GetCustomCategories();
 
-  // Prevent duplicate category names
   if (cats.some(c => c.categoryName === categoryName)) {
     return cats;
   }
@@ -69,12 +88,10 @@ export const AddActivityToCategory = async (categoryName, activity) => {
   const catIndex = categories.findIndex(c => c.categoryName === categoryName);
 
   if (catIndex === -1) {
-    // Category does not exist → do NOT create it
     console.warn(`AddActivityToCategory: category "${categoryName}" not found`);
     return categories;
   }
 
-  // Add activity if it doesn't already exist in the category
   const existingActivity = categories[catIndex].activities.find(a => a.name === activity.name);
   if (!existingActivity) {
     categories[catIndex].activities.push(activity);
@@ -85,32 +102,39 @@ export const AddActivityToCategory = async (categoryName, activity) => {
 };
 
 // -------------------- Choice Board Activities --------------------
-
-// Save regular activities
 export const SaveChoiceBoard = async (choiceBoardActivities) => {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY_CHOICE_BOARD, JSON.stringify(choiceBoardActivities || []));
+    await Set_Encrypted_AsyncStorage(
+      'object',
+      STORAGE_KEY_CHOICE_BOARD,
+      choiceBoardActivities || [],
+      ENCRYPTION_KEY
+    );
   } catch (e) {
-    console.warn('SaveActivities error:', e);
+    console.warn('SaveChoiceBoard error:', e);
   }
 };
 
-// Get regular activities
 export const GetChoiceBoard = async () => {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY_CHOICE_BOARD);
-    return raw ? JSON.parse(raw) : [];
+    const data = await Get_Encrypted_AsyncStorage(
+      'object',
+      STORAGE_KEY_CHOICE_BOARD,
+      ENCRYPTION_KEY
+    );
+    return data || [];
   } catch (e) {
-    console.warn('GetActivities error:', e);
+    console.warn('GetChoiceBoard error:', e);
     return [];
   }
 };
 
-
 // -------------------- Clear all data --------------------
 export const clearData = async () => {
   try {
-    await AsyncStorage.clear();
+    await Set_Encrypted_AsyncStorage('object', STORAGE_KEY_ACTIVITIES, [], ENCRYPTION_KEY);
+    await Set_Encrypted_AsyncStorage('object', STORAGE_KEY_CATEGORIES, [], ENCRYPTION_KEY);
+    await Set_Encrypted_AsyncStorage('object', STORAGE_KEY_CHOICE_BOARD, [], ENCRYPTION_KEY);
     console.log('All data cleared');
   } catch (e) {
     console.warn('clearData error:', e);
