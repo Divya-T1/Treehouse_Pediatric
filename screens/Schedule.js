@@ -1,6 +1,7 @@
 // screens/Schedule.js
 import React, { useEffect, useState, useCallback} from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Alert, Platform } from 'react-native';
 import {
   SafeAreaView,
   StyleSheet,
@@ -71,51 +72,126 @@ export default function Schedule() {
     };
     setActivities(updatedActivities);
   };
+  const moveUp = (index) => {
+  if (index === 0) return;
 
-  const renderItem = ({ item, index }) => {
+  const updated = [...activities];
 
-    const src = {uri: typeof(item.icon) === "string" ? item.icon : item.icon.uri};
-    
-    return (
-      <View style={styles.row}>
-        <Text style={styles.label}>Activity {index + 1}: {item.name}</Text>
-        <View style={styles.iconAndTextInput}>
-          <View style={styles.iconCircle}>
-            {src ? (
-              <Image source={src} style={styles.iconImage} />
-            ) : (
-              <Text style={styles.fallback}>?</Text>
-            )}
-          </View>
-          
-          <TextInput
-            multiline     // Allow multiple lines
-            style={styles.textBox}
-            value={item.notes || ''}  // Controlled value
-            onChangeText={(text) => handleNoteChange(index, text)}
-          />
-          
-        </View>
-      </View>
+  const temp = updated[index - 1];
+  updated[index - 1] = updated[index];
+  updated[index] = temp;
+
+  setActivities(updated);
+};
+
+const moveDown = (index) => {
+  if (index === activities.length - 1) return;
+
+  const updated = [...activities];
+
+  const temp = updated[index + 1];
+  updated[index + 1] = updated[index];
+  updated[index] = temp;
+
+  setActivities(updated);
+};
+
+const deleteActivity = (index) => {
+  if (Platform.OS === 'web') {
+    const confirmDelete = window.confirm("Are you sure you want to delete this activity?");
+    if (confirmDelete) {
+      const updated = [...activities];
+      updated.splice(index, 1);
+      setActivities(updated);
+    }
+  } else {
+    Alert.alert(
+      "Delete Activity",
+      "Are you sure?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            const updated = [...activities];
+            updated.splice(index, 1);
+            setActivities(updated);
+          }
+        }
+      ]
     );
+  }
+};
+
+ const renderItem = ({ item, index }) => {
+
+  const src = {
+    uri: typeof item.icon === "string"
+      ? item.icon
+      : item.icon?.uri
   };
+
+  return (
+    <View style={styles.row}>
+
+      <Text style={styles.label}>
+        Activity {index + 1}: {item.name}
+      </Text>
+
+      <View style={styles.iconAndTextInput}>
+
+        <View style={styles.iconCircle}>
+          {src ? (
+            <Image source={src} style={styles.iconImage} />
+          ) : (
+            <Text style={styles.fallback}>?</Text>
+          )}
+        </View>
+
+        <TextInput
+          multiline
+          style={styles.textBox}
+          value={item.notes || ''}
+          onChangeText={(text) => handleNoteChange(index, text)}
+        />
+        <View style={styles.moveButtons}>
+          <TouchableOpacity onPress={() => moveUp(index)}>
+          <Text style={styles.moveText}>↑</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => moveDown(index)}>
+          <Text style={styles.moveText}>↓</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => deleteActivity(index)}>
+          <Text style={styles.deleteText}>🗑️</Text>
+          </TouchableOpacity>
+        </View>
+
+       
+        
+       
+
+      </View>
+
+    </View>
+  );
+};
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Schedule</Text>
-
       <FlatList
-        data={activities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No activities selected yet. Pick some on ADL, Fine Motor, etc.
-          </Text>
-        }
-        contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
-        style={{ width: '100%' }}
-      />
+    data={activities}
+    keyExtractor={(it, idx) => `${it}-${idx}`}
+    renderItem={renderItem}
+    ListEmptyComponent={
+      <Text style={styles.empty}>
+        No activities selected yet. Pick some on ADL, Fine Motor, etc.
+      </Text>
+    }
+    contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
+    style={{ width: '100%' }}
+  />
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -131,6 +207,16 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingTop: 12,
   },
+  moveButtons: {
+  flexDirection: "row",
+  gap: 20,
+  marginTop: 10,
+},
+
+moveText: {
+  fontSize: 22,
+  fontWeight: "bold",
+},
   title: {
     fontSize: 22,
     fontWeight: '700',
@@ -203,4 +289,3 @@ const styles = StyleSheet.create({
     fontSize: '20px',
   }
 });
-
