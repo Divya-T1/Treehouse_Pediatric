@@ -11,19 +11,28 @@ import {
   Modal,
   TextInput,
   Button,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+import {
+  useBottomNavScrollPadding,
+  bottomNavScrollStyles,
+} from './scrollWithBottomNav.js';
 import {
   SaveActivities,
   GetActivities,
   GetCustomCategories,
   AddActivityToCategory,
-  AddCategory
+  AddCategory,
+  RemoveActivityFromCategory,
+  GetChoiceBoard,
+  SaveChoiceBoard
 } from '../ActivitiesSaver.js';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ToyScreen() {
+  const scrollBottomPad = useBottomNavScrollPadding();
   const categoryName = "Toys";
 
   // static image requires
@@ -133,6 +142,53 @@ export default function ToyScreen() {
     }
   };
 
+  const activityUriMatches = (item, uri) => {
+    if (!item || !uri) return false;
+    if (item.filePath === uri || item.id === uri) return true;
+    const icon = typeof item.icon === 'string' ? item.icon : item.icon?.uri;
+    return icon === uri;
+  };
+
+  const performDeleteCustom = async (act) => {
+    const uri = act.icon;
+    try {
+      const updatedCats = await RemoveActivityFromCategory(categoryName, uri);
+      const cat = updatedCats.find(c => c.categoryName === categoryName);
+      setCustomActivities(cat?.activities || []);
+
+      const saved = await GetActivities();
+      const nextSaved = saved.filter(s => s.filePath !== uri);
+      await SaveActivities(nextSaved);
+      setSelectedActivities(nextSaved.map(item => item.filePath));
+
+      const choice = await GetChoiceBoard();
+      const nextChoice = (choice || []).filter(c => !activityUriMatches(c, uri));
+      await SaveChoiceBoard(nextChoice);
+    } catch (err) {
+      Alert.alert('Error', 'Could not delete this activity.');
+    }
+  };
+
+  const deleteCustomActivity = (act) => {
+    const run = () => performDeleteCustom(act);
+
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('Delete this activity? It will be removed from your schedule and choice board if saved there.')) {
+        run();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Delete activity',
+      'Remove this custom activity? It will also be removed from your schedule and choice board if saved there.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: run }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Image source={logo} />
@@ -141,7 +197,16 @@ export default function ToyScreen() {
         <Text style={styles.addButtonText}>+ Add Activity</Text>
       </TouchableOpacity>
 
-      <ScrollView>
+      <View style={bottomNavScrollStyles.wrap}>
+        <ScrollView
+          style={bottomNavScrollStyles.scroll}
+          contentContainerStyle={[
+            bottomNavScrollStyles.content,
+            { paddingBottom: scrollBottomPad },
+          ]}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.grid}>
 
           {/* Built-in activities */}
@@ -217,16 +282,26 @@ export default function ToyScreen() {
 
           {/* Custom activities */}
           {customActivities.map((act, index) => (
-            <TouchableOpacity key={index} activeOpacity={0.6} onPress={() => toggleSelection(act.icon)}>
-              <View style={[styles.circle1, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
-                <Image source={{ uri: act.icon }} style={styles.circleImage} />
-              </View>
-              <Text style={styles.activityText}>{act.name}</Text>
-            </TouchableOpacity>
+            <View key={`custom-${act.icon}-${index}`} style={styles.customActivityWrap}>
+              <TouchableOpacity activeOpacity={0.6} onPress={() => toggleSelection(act.icon)}>
+                <View style={[styles.circle1, selectedActivities.includes(act.icon) && styles.selectedCircle]}>
+                  <Image source={{ uri: act.icon }} style={styles.circleImage} />
+                </View>
+                <Text style={styles.activityText}>{act.name}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteBtn}
+                onPress={() => deleteCustomActivity(act)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.deleteBtnText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           ))}
 
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -282,6 +357,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: 300,
+    maxWidth: '100%',
+    paddingHorizontal: 8,
   },
 
   circle1: {
@@ -305,6 +382,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
     color: '#333',
+  },
+
+  customActivityWrap: {
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  deleteBtn: {
+    marginTop: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  deleteBtnText: {
+    color: '#c00',
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   modalBackground: {

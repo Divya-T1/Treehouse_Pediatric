@@ -14,12 +14,17 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
+import {
+  useBottomNavScrollPadding,
+  bottomNavScrollStyles,
+} from './scrollWithBottomNav.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
 import {createPDF} from '../PDFSaver.js';
 
 
 export default function Schedule() {
+  const scrollBottomPad = useBottomNavScrollPadding();
   const [activities, setActivities] = useState([]);
 
   const navigation = useNavigation();
@@ -180,18 +185,25 @@ const deleteActivity = (index) => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Schedule</Text>
-      <FlatList
-    data={activities}
-    keyExtractor={(it, idx) => `${it}-${idx}`}
-    renderItem={renderItem}
-    ListEmptyComponent={
-      <Text style={styles.empty}>
-        No activities selected yet. Pick some on ADL, Fine Motor, etc.
-      </Text>
-    }
-    contentContainerStyle={activities.length === 0 && { flex: 1, justifyContent: 'center' }}
-    style={{ width: '100%' }}
-  />
+      <View style={bottomNavScrollStyles.wrap}>
+        <FlatList
+          data={activities}
+          keyExtractor={(it, idx) => `${it}-${idx}`}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              No activities selected yet. Pick some on ADL, Fine Motor, etc.
+            </Text>
+          }
+          contentContainerStyle={[
+            activities.length === 0 && { flex: 1, justifyContent: 'center' },
+            { paddingBottom: scrollBottomPad },
+          ]}
+          style={bottomNavScrollStyles.scroll}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        />
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />

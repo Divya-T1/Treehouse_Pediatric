@@ -15,6 +15,10 @@ import {
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
 import {
+  useBottomNavScrollPadding,
+  bottomNavScrollStyles,
+} from './scrollWithBottomNav.js';
+import {
   SaveActivities,
   GetActivities,
   GetCustomCategories,
@@ -24,6 +28,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ToysAndActScreen() {
+  const scrollBottomPad = useBottomNavScrollPadding();
   const categoryName = "Fun Activities";
 
   // static image requires
@@ -151,7 +156,16 @@ export default function ToysAndActScreen() {
         <Text style={styles.addButtonText}>+ Add Activity</Text>
       </TouchableOpacity>
 
-      <ScrollView>
+      <View style={bottomNavScrollStyles.wrap}>
+        <ScrollView
+          style={bottomNavScrollStyles.scroll}
+          contentContainerStyle={[
+            bottomNavScrollStyles.content,
+            { paddingBottom: scrollBottomPad },
+          ]}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.grid}>
 
           {/* Built-in items */}
@@ -175,7 +189,8 @@ export default function ToysAndActScreen() {
           ))}
 
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -229,6 +244,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: 300,
+    maxWidth: '100%',
+    paddingHorizontal: 8,
   },
 
   circle: {

@@ -13,22 +13,48 @@ import {
   StyleSheet,
   StatusBar,
   Alert,
+  Platform,
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+import {
+  useBottomNavScrollPadding,
+  bottomNavScrollStyles,
+} from './scrollWithBottomNav.js';
+import { useNavigation } from '@react-navigation/native';
 
 import {
   GetCustomCategories,
-  SaveCustomCategories,    // ⭐ ADDED: Needed for persistence
-  AddCategory,
-  AddActivityToCategory,
+  SaveCustomCategories,
   GetActivities,
   SaveActivities,
+  RemoveActivityFromCategory,
+  RemoveCustomCategory,
+  GetChoiceBoard,
+  SaveChoiceBoard,
 } from '../ActivitiesSaver.js';
 
 import * as ImagePicker from 'expo-image-picker';
 
+function getActivityIconUri(item) {
+  if (!item) return null;
+  if (typeof item.icon === 'string') return item.icon;
+  if (item.icon?.uri) return item.icon.uri;
+  return item.filePath || item.id || null;
+}
+
+function urisFromCategoryActivities(acts) {
+  return (acts || [])
+    .map((a) => getActivityIconUri(a))
+    .filter(Boolean);
+}
+
 export default function CategoryScreen({ route }) {
-  const { categoryName } = route.params;
+  const scrollBottomPad = useBottomNavScrollPadding();
+  const navigation = useNavigation();
+  const categoryName =
+    typeof route.params?.categoryName === 'string'
+      ? route.params.categoryName.trim()
+      : '';
 
   const [activities, setActivities] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,10 +64,18 @@ export default function CategoryScreen({ route }) {
 
   // Load activities for this category
   useEffect(() => {
+    if (!categoryName) {
+      Alert.alert('Missing category', 'No category was specified.', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+      return;
+    }
     (async () => {
       try {
         const custom = await GetCustomCategories();
-        const cat = custom?.find(c => c.categoryName === categoryName);
+        const cat = custom?.find(
+          (c) => (c.categoryName || '').trim() === categoryName
+        );
         
         if (!cat) {
         Alert.alert(
@@ -63,14 +97,16 @@ export default function CategoryScreen({ route }) {
         setActivities([]);
       }
     })();
-  }, [categoryName]);
+  }, [categoryName, navigation]);
 
   // Load selected activities
   useEffect(() => {
     (async () => {
       try {
         const saved = await GetActivities();
-        setSelectedActivities(saved.map(item => item.icon) || []);
+        setSelectedActivities(
+          (saved || []).map(item => getActivityIconUri(item)).filter(Boolean)
+        );
       } catch (err) {
         console.log('load selected activities error', err);
         setSelectedActivities([]);
@@ -103,8 +139,7 @@ export default function CategoryScreen({ route }) {
         : [...prev, act];
 
       await SaveActivities(next);
-      const filePaths = next.map(item => typeof(item.icon) === "string" ? item.icon : item.icon.uri);
-      setSelectedActivities(filePaths);
+      setSelectedActivities(next.map(item => getActivityIconUri(item)).filter(Boolean));
     } catch (err) {
       console.log('toggleSelection error', err);
     }
@@ -144,7 +179,9 @@ export default function CategoryScreen({ route }) {
       if (!Array.isArray(allCategories)) allCategories = [];
 
       // --- Find this category ---
-      let thisCat = allCategories.find(c => c.categoryName === categoryName);
+      let thisCat = allCategories.find(
+        (c) => (c.categoryName || '').trim() === categoryName
+      );
 
       //creates a new category!!! We don't want these!!! vvvvv
 
@@ -180,10 +217,144 @@ export default function CategoryScreen({ route }) {
     }
   };
 
+  const scheduleItemMatchesUri = (item, uri) => {
+    if (!item || !uri) return false;
+    if (item.filePath === uri || item.id === uri) return true;
+    return getActivityIconUri(item) === uri;
+  };
+
+  const choiceItemMatchesUri = (item, uri) => {
+    if (!item || !uri) return false;
+    if (item.filePath === uri || item.id === uri) return true;
+    return getActivityIconUri(item) === uri;
+  };
+
+  const performDelete = async (act) => {
+    const iconUri = typeof act.icon === 'string' ? act.icon : act.icon?.uri;
+    if (!iconUri) return;
+
+    try {
+      const updatedCats = await RemoveActivityFromCategory(categoryName, iconUri);
+      const cat = updatedCats.find(
+        (c) => (c.categoryName || '').trim() === categoryName
+      );
+      setActivities(cat?.activities ? [...cat.activities] : []);
+
+      const saved = await GetActivities();
+      const nextSaved = saved.filter(s => !scheduleItemMatchesUri(s, iconUri));
+      await SaveActivities(nextSaved);
+      setSelectedActivities(nextSaved.map(item => getActivityIconUri(item)).filter(Boolean));
+
+      const choice = await GetChoiceBoard();
+      const nextChoice = (choice || []).filter(c => !choiceItemMatchesUri(c, iconUri));
+      await SaveChoiceBoard(nextChoice);
+    } catch (err) {
+      console.log('delete activity error', err);
+      Alert.alert('Error', 'Could not delete this activity.');
+    }
+  };
+
+  const deleteActivity = (act) => {
+    const run = () => performDelete(act);
+
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('Delete this activity? It will be removed from your schedule and choice board if saved there.')) {
+        run();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Delete activity',
+      'Remove this activity? It will also be removed from your schedule and choice board if saved there.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: run },
+      ]
+    );
+  };
+
+  const performDeleteCategory = async () => {
+    if (!categoryName) {
+      Alert.alert('Error', 'Cannot delete: missing category name.');
+      return;
+    }
+    try {
+      const custom = await GetCustomCategories();
+      const cat = custom?.find(
+        (c) => (c.categoryName || '').trim() === categoryName
+      );
+      const uriSet = new Set(urisFromCategoryActivities(cat?.activities));
+
+      const removed = await RemoveCustomCategory(categoryName);
+      if (!removed) {
+        Alert.alert(
+          'Could not delete',
+          'This category was not found in storage. Try going back to Home and opening it again.'
+        );
+        return;
+      }
+
+      const saved = await GetActivities();
+      const nextSaved = saved.filter((s) => {
+        const u = getActivityIconUri(s);
+        if (u && uriSet.has(u)) return false;
+        if (s.filePath && uriSet.has(s.filePath)) return false;
+        if (s.id && uriSet.has(s.id)) return false;
+        return true;
+      });
+      await SaveActivities(nextSaved);
+
+      const choice = await GetChoiceBoard();
+      const nextChoice = (choice || []).filter((c) => {
+        const u = getActivityIconUri(c);
+        if (u && uriSet.has(u)) return false;
+        if (c.filePath && uriSet.has(c.filePath)) return false;
+        if (c.id && uriSet.has(c.id)) return false;
+        return true;
+      });
+      await SaveChoiceBoard(nextChoice);
+
+      navigation.goBack();
+    } catch (err) {
+      console.log('delete category error', err);
+      Alert.alert('Error', 'Could not delete this category.');
+    }
+  };
+
+  const deleteEntireCategory = () => {
+    const run = () => performDeleteCategory();
+
+    if (Platform.OS === 'web') {
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm(
+          `Delete the category "${categoryName}" and all of its activities? This cannot be undone. Activities will be removed from your schedule and choice board if saved there.`
+        )
+      ) {
+        run();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Delete category',
+      `Delete "${categoryName}" and all of its activities? This cannot be undone. Activities will be removed from your schedule and choice board if saved there.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete category', style: 'destructive', onPress: run },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.addButtonText}>+ Add Activity</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.deleteCategoryBtn} onPress={deleteEntireCategory}>
+        <Text style={styles.deleteCategoryBtnText}>Delete entire category</Text>
       </TouchableOpacity>
 
       <View style={styles.divider} />
@@ -209,21 +380,40 @@ export default function CategoryScreen({ route }) {
       </Modal>
 
       {/* Activities Grid */}
-      <ScrollView>
+      <View style={bottomNavScrollStyles.wrap}>
+        <ScrollView
+          style={bottomNavScrollStyles.scroll}
+          contentContainerStyle={[
+            bottomNavScrollStyles.content,
+            { paddingBottom: scrollBottomPad },
+          ]}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.grid}>
           {activities.map((act, i) => {
             const iconUri = typeof(act.icon) === "string" ? act.icon : act.icon.uri;
             return (
-              <TouchableOpacity key={i} onPress={() => toggleSelection(act)}>
-                <View style={[styles.circleCustom, selectedActivities.includes(iconUri) && styles.selectedCircle]}>
-                  <Image source={{ uri: iconUri }} style={styles.circleImage} />
-                </View>
-                <Text style={styles.activityText}>{act.name}</Text>
-              </TouchableOpacity>
+              <View key={`${iconUri}-${i}`} style={styles.activityRow}>
+                <TouchableOpacity onPress={() => toggleSelection(act)}>
+                  <View style={[styles.circleCustom, selectedActivities.includes(iconUri) && styles.selectedCircle]}>
+                    <Image source={{ uri: iconUri }} style={styles.circleImage} />
+                  </View>
+                  <Text style={styles.activityText}>{act.name}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteBtn}
+                  onPress={() => deleteActivity(act)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.deleteBtnText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
             );
           })}
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -234,7 +424,17 @@ export default function CategoryScreen({ route }) {
 // ------------------- Styles -------------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', width: '100%' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: 300 },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+    width: 300,
+    maxWidth: '100%',
+    paddingHorizontal: 8,
+  },
+  activityRow: { alignItems: 'center', marginBottom: 4 },
+  deleteBtn: { marginTop: 4, paddingVertical: 4, paddingHorizontal: 10 },
+  deleteBtnText: { color: '#c00', fontSize: 14, fontWeight: '600' },
 
   circleCustom: {
     width: 100,
@@ -261,6 +461,19 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
+
+  deleteCategoryBtn: {
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignSelf: 'center',
+  },
+  deleteCategoryBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#b00020',
+    textDecorationLine: 'underline',
+  },
 
   divider: { height: 1, backgroundColor: '#333', width: '90%', alignSelf: 'center', marginVertical: 10 },
 

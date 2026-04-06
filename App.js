@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   ScrollView,
@@ -12,7 +12,8 @@ import {
   Button,
   StyleSheet,
 } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -44,8 +45,14 @@ import ChoiceBoard from './screens/ChoiceBoard.js';
 
 const Stack = createNativeStackNavigator();
 
+// Bottom bar is absolutely positioned (~56px); extra padding so grid scrolls fully above it.
+const HOME_NAV_CLEARANCE = 56;
+
 function Homescreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const currentAppState = useAppState();
+  const categoryListBottomPad =
+    HOME_NAV_CLEARANCE + insets.bottom + 20;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -108,6 +115,30 @@ function Homescreen({ navigation }) {
       }
     })();
   }, []);
+
+  // Reload from storage when returning to Home (e.g. after deleting a custom category)
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      (async () => {
+        try {
+          const cats = await GetCustomCategories();
+          if (alive) setCustomCategories(Array.isArray(cats) ? cats : []);
+        } catch (e) {
+          if (alive) setCustomCategories([]);
+        }
+        try {
+          const saved = await GetActivities();
+          if (alive) setScheduleActivities(Array.isArray(saved) ? saved : []);
+        } catch (e) {
+          if (alive) setScheduleActivities([]);
+        }
+      })();
+      return () => {
+        alive = false;
+      };
+    }, [])
+  );
 
   // Search both built-in and custom activities
   useEffect(() => {
@@ -459,10 +490,19 @@ const toggleScheduleActivity = async activity => {
         </View>
       </Modal>
 
-      {/* Category grid */}
+      {/* Category grid — flex + bottom padding so last row clears the fixed bottom nav */}
       {searchResults.length === 0 && (
-        <ScrollView>
-          <View style={styles.grid}>
+        <View style={styles.categoryScrollWrap}>
+          <ScrollView
+            style={styles.categoryScroll}
+            contentContainerStyle={[
+              styles.categoryScrollContent,
+              { paddingBottom: categoryListBottomPad },
+            ]}
+            showsVerticalScrollIndicator
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.grid}>
 
             {/*
             {originalCategories.map((item, i) => {
@@ -529,8 +569,9 @@ const toggleScheduleActivity = async activity => {
                 </TouchableOpacity>
               );
             })}
-          </View>
-        </ScrollView>
+            </View>
+          </ScrollView>
+        </View>
       )}
 
       <StatusBar style="auto" />
@@ -543,6 +584,7 @@ const toggleScheduleActivity = async activity => {
 // Stack and App
 export default function App() {
   return (
+    <SafeAreaProvider>
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Group>
@@ -562,6 +604,12 @@ export default function App() {
           <Stack.Screen
             name="CustomCategory"
             component={CategoryScreen}
+            options={({ route }) => ({
+              title:
+                typeof route.params?.categoryName === 'string'
+                  ? route.params.categoryName
+                  : 'Category',
+            })}
           />
           <Stack.Screen name = "ChoiceBoard" 
           component={ChoiceBoard}
@@ -572,6 +620,7 @@ export default function App() {
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
@@ -616,11 +665,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
+  categoryScrollWrap: {
+    flex: 1,
+    width: '100%',
+    minHeight: 0,
+  },
+  categoryScroll: {
+    flex: 1,
+    width: '100%',
+  },
+  categoryScrollContent: {
+    alignItems: 'center',
+    paddingTop: 4,
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: 300,
+    maxWidth: '100%',
+    paddingHorizontal: 8,
   },
   circle: {
     width: 100,

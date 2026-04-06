@@ -84,6 +84,55 @@ export const AddActivityToCategory = async (categoryName, activity) => {
   return categories;
 };
 
+const activityIconUri = (a) => {
+  if (!a) return null;
+  if (typeof a.icon === 'string') return a.icon;
+  if (a.icon?.uri) return a.icon.uri;
+  if (typeof a.id === 'string') return a.id;
+  return null;
+};
+
+// Remove one custom activity from a category by its icon URI (matches stored `icon` / `id`)
+export const RemoveActivityFromCategory = async (categoryName, iconUri) => {
+  const target = typeof categoryName === 'string' ? categoryName.trim() : '';
+  const categories = await GetCustomCategories();
+  if (!target) {
+    return categories;
+  }
+  const catIndex = categories.findIndex(
+    (c) => (c.categoryName || '').trim() === target
+  );
+
+  if (catIndex === -1) {
+    return categories;
+  }
+
+  categories[catIndex].activities = (categories[catIndex].activities || []).filter(
+    a => activityIconUri(a) !== iconUri
+  );
+
+  await SaveCustomCategories(categories);
+  return categories;
+};
+
+// Remove an entire custom category by name. Returns the removed category object or null.
+export const RemoveCustomCategory = async (categoryName) => {
+  const target = typeof categoryName === 'string' ? categoryName.trim() : '';
+  if (!target) {
+    return null;
+  }
+  const categories = await GetCustomCategories();
+  const removed = categories.find(
+    (c) => (c.categoryName || '').trim() === target
+  );
+  if (!removed) {
+    return null;
+  }
+  const next = categories.filter((c) => (c.categoryName || '').trim() !== target);
+  await SaveCustomCategories(next);
+  return removed;
+};
+
 // -------------------- Choice Board Activities --------------------
 
 // Save regular activities

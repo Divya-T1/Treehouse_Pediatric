@@ -7,6 +7,10 @@ import {
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
 import {
+  useBottomNavScrollPadding,
+  bottomNavScrollStyles,
+} from './scrollWithBottomNav.js';
+import {
   SaveActivities,
   GetActivities,
   GetCustomCategories,
@@ -16,6 +20,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 
 export default function RoomSpacesScreen() {
+  const scrollBottomPad = useBottomNavScrollPadding();
+
   // CATEGORY NAME (exact)
   const categoryName = "RoomSpaces";
 
@@ -189,7 +195,16 @@ export default function RoomSpacesScreen() {
         <Text style={styles.addButtonText}>+ Add Activity</Text>
       </TouchableOpacity>
 
-      <ScrollView>
+      <View style={bottomNavScrollStyles.wrap}>
+        <ScrollView
+          style={bottomNavScrollStyles.scroll}
+          contentContainerStyle={[
+            bottomNavScrollStyles.content,
+            { paddingBottom: scrollBottomPad },
+          ]}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.grid}>
 
           {/* built-in activities */}
@@ -221,7 +236,8 @@ export default function RoomSpacesScreen() {
           ))}
 
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -271,6 +287,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: 300,
+    maxWidth: '100%',
+    paddingHorizontal: 8,
   },
 
   circle: {

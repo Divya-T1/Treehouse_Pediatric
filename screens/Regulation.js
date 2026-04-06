@@ -6,6 +6,10 @@ import {
   Modal, TextInput, Button, Alert
 } from 'react-native';
 import BottomNavBar from './NavigationOptions.js';
+import {
+  useBottomNavScrollPadding,
+  bottomNavScrollStyles,
+} from './scrollWithBottomNav.js';
 
 import {
   SaveActivities,
@@ -18,6 +22,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 
 export default function Regulation() {
+  const scrollBottomPad = useBottomNavScrollPadding();
 
   // CATEGORY NAME for saving custom entries
   const categoryName = "Regulation";
@@ -176,7 +181,16 @@ export default function Regulation() {
         <Text style={styles.addButtonText}>+ Add Activity</Text>
       </TouchableOpacity>
 
-      <ScrollView>
+      <View style={bottomNavScrollStyles.wrap}>
+        <ScrollView
+          style={bottomNavScrollStyles.scroll}
+          contentContainerStyle={[
+            bottomNavScrollStyles.content,
+            { paddingBottom: scrollBottomPad },
+          ]}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.grid}>
 
           {/* Built-in activities */}
@@ -214,7 +228,8 @@ export default function Regulation() {
           ))}
 
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -278,6 +293,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: 300,
+    maxWidth: '100%',
+    paddingHorizontal: 8,
   },
 
   circle1: {
