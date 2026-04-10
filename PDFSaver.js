@@ -179,7 +179,7 @@ const createPDF = async () => {
     }
   }
 
-  doc.save("activity_schedule.pdf");
+  await sharePDF(doc, "activity_schedule.pdf");
 };
 
 const createChoiceBoardPDF = async () => {
@@ -261,7 +261,35 @@ const createChoiceBoardPDF = async () => {
     }
   }
 
-  doc.save("choice_board.pdf");
+  await sharePDF(doc, "choice_board.pdf");
+};
+
+const sharePDF = async (doc, filename) => {
+  try {
+    // 1. Generate the PDF as an ArrayBuffer (Blob)
+    const pdfBlob = doc.output('blob');
+    
+    // 2. Create a File object from the Blob
+    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+    // 3. Check if the browser supports sharing files
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Activity Schedule',
+        text: 'Check out my activity schedule!',
+      });
+      console.log('Success');
+    } else {
+      console.error('Error sharing PDF:');
+      // Fallback for browsers that don't support file sharing (like older desktop)
+      doc.save(filename);
+    }
+  } catch (error) {
+    console.error('Error sharing PDF:', error);
+    // Final fallback: attempt a standard save if share fails/is cancelled
+    doc.save(filename);
+  }
 };
 
 export { createPDF, createChoiceBoardPDF };

@@ -13,6 +13,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { Analytics } from '@vercel/analytics/react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -70,7 +71,7 @@ function Homescreen({ navigation }) {
   ];
 
   useEffect(() => {
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener('pagehide', () => {
       clearActivities();
     });
   },[]);
@@ -521,6 +522,7 @@ export default function App() {
           </Stack.Group>
         </Stack.Navigator>
       </NavigationContainer>
+      <Analytics />
     </SafeAreaProvider>
   );
 }
