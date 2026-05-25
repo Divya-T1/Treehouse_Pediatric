@@ -1,5 +1,5 @@
 // ActivitiesSaver.js
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from './storage';
 import { CameraType } from 'expo-image-picker';
 
 const STORAGE_KEY_ACTIVITIES = 'SavedActivities';

@@ -16,7 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
-import {createChoiceBoardPDF} from '../PDFSaver.js';
+import {createChoiceBoardPDF} from '../PDFSaver';
 import { GetChoiceBoard, SaveChoiceBoard } from '../ActivitiesSaver.js';
 
 
@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     marginBottom: 8,
+    color: '#000',
   },
   row: {
     width: 100,
@@ -195,8 +196,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,        // push icon downward
+    marginBottom: 8,
     textAlign: 'center',
+    color: '#000',
   },
   iconCircle: {
     width: 70,

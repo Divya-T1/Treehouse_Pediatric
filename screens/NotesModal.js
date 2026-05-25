@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../NotesSaver.js';
 import { clearData } from '../ActivitiesSaver.js';
-import {createPDF} from '../PDFSaver.js';
+import {createPDF} from '../PDFSaver';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;

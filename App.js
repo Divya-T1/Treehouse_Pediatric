@@ -11,6 +11,7 @@ import {
   TextInput,
   Button,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { Analytics } from '@vercel/analytics/react';
@@ -18,14 +19,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 
-import GrossMotorScreen from './screens/GrossMotorScreen';
-import ToyAndActScreen from './screens/ToysAndActScreen';
-import ToyScreen from './screens/ToyScreen';
-import FineMotorScreen from './screens/FineMotorScreen';
-import RoomSpacesScreen from './screens/RoomSpacesScreen';
-import Regulation from './screens/Regulation';
-import SensoryScreen from './screens/SensoryScreen';
-import ADLScreen from './screens/ADLscreen.js';
 import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
@@ -59,21 +52,12 @@ function Homescreen({ navigation }) {
   const [scheduleActivities, setScheduleActivities] = useState([]);
   const [clearStorageModalVisible, setClearStorageModalVisible] = useState(false);
 
-  const originalCategories = [
-    { name: 'Gross Motor', icon: require('./Running.png'), screen: 'Gross Motor' },
-    { name: 'Fun Activities', icon: require('./TeddyBear.png'), screen: 'Toys And Activities' },
-    { name: 'Fine Motor', icon: require('./Arts.png'), screen: 'Fine Motor' },
-    { name: 'Room Spaces', icon: require('./Door.png'), screen: 'Room Spaces' },
-    { name: 'Sensory Screen', icon: require('./PlayDoh.png'), screen: 'SensoryScreen' },
-    { name: 'ADL', icon: require('./Brushing.png'), screen: 'ADLscreen' },
-    { name: 'Regulation', icon: require('./Headphones.png'), screen: 'Regulation' },
-    { name: 'Toys/Games', icon: require('./assets/toy.png'), screen: 'ToyScreen' },
-  ];
-
   useEffect(() => {
-    window.addEventListener('pagehide', () => {
-      clearActivities();
-    });
+    if (Platform.OS === 'web') {
+      window.addEventListener('pagehide', () => {
+        clearActivities();
+      });
+    }
   },[]);
 
   // helper: is an activity name selected?
@@ -412,35 +396,6 @@ function Homescreen({ navigation }) {
       {searchResults.length === 0 && (
         <ScrollView>
           <View style={styles.grid}>
-
-            {/*
-            {originalCategories.map((item, i) => {
-              const selected = isSelected(item.name);
-              const imgSource = getIconForName(item.name, item.icon);
-
-              return (
-                <TouchableOpacity
-                  key={i}
-                  activeOpacity={0.6}
-                  onPress={() => navigation.navigate(item.screen)}
-                >
-                  <View
-                    style={[
-                      styles.circle,
-                      selected && styles.selectedCircle,
-                    ]}
-                  >
-                    <Image
-                      source={imgSource}
-                      style={{ width: 80, height: 80, borderRadius: 40 }}
-                    />
-                  </View>
-                  <Text style={styles.activityText}>{item.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
-            */}
-
             {customCategories.map((item, i) => {
               const selected = isSelected(item.categoryName);
               // For custom categories you may or may not want to override icon from schedule;
@@ -522,7 +477,7 @@ export default function App() {
           </Stack.Group>
         </Stack.Navigator>
       </NavigationContainer>
-      <Analytics />
+      {Platform.OS === 'web' && <Analytics />}
     </SafeAreaProvider>
   );
 }

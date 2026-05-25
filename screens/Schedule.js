@@ -18,7 +18,7 @@ import { CurrentRenderContext, useFocusEffect } from '@react-navigation/native';
 import BottomNavBar from './NavigationOptions.js';
 import { GetActivities, SaveActivities } from '../ActivitiesSaver.js';
 import { useNavigation } from '@react-navigation/native';
-import {createPDF} from '../PDFSaver.js';
+import {createPDF} from '../PDFSaver';
 //remove custom catogories getting removed when all delete
 //add 4 choice board
 //Specific deletion
@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 8,
     marginTop: 8,
+    color: '#000',
   },
   row: {
     width: '90%',
@@ -188,8 +189,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,        // push icon downward
+    marginBottom: 8,
     textAlign: 'center',
+    color: '#000',
   },
   iconCircle: {
     width: 70,
