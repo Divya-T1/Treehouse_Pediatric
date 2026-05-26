@@ -46,7 +46,7 @@ const createPDF = async () => {
   const doc = new jsPDF();
 
   doc.setFontSize(18);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text("Activity Schedule", 105, 20, { align: 'center' });
 
   let yPos = 40;
@@ -55,7 +55,7 @@ const createPDF = async () => {
 
   if (activities.length === 0) {
     doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text("No activities selected yet.", 20, yPos);
   } else {
     for (let index = 0; index < activities.length; index++) {
@@ -67,7 +67,7 @@ const createPDF = async () => {
       }
 
       doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text(`Activity ${index + 1}: ${activity.name}`, 20, yPos);
       yPos += 10;
 
@@ -82,14 +82,14 @@ const createPDF = async () => {
         } catch (error) {
           console.warn(`Failed to load icon for activity ${index + 1}:`, error);
           doc.setFontSize(10);
-          doc.setFont(undefined, 'normal');
+          doc.setFont('helvetica', 'normal');
           doc.text('[Icon]', 30, yPos + 10);
         }
       }
 
       if (activity.notes && activity.notes.trim() !== '') {
         doc.setFontSize(11);
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         const splitNotes = doc.splitTextToSize(activity.notes, 135);
         doc.text(splitNotes, 55, yPos + 8);
         yPos += iconSize + Math.max(0, (splitNotes.length - 1) * 6);
@@ -109,14 +109,14 @@ const createChoiceBoardPDF = async () => {
   const doc = new jsPDF();
 
   doc.setFontSize(20);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text("Choice Board", 105, 20, { align: 'center' });
 
   const choiceBoardActivities = activities.slice(0, 3);
 
   if (choiceBoardActivities.length === 0) {
     doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text("No activities selected for choice board.", 105, 50, { align: 'center' });
   } else {
     const iconSize = 25;
@@ -141,21 +141,21 @@ const createChoiceBoardPDF = async () => {
         } catch (error) {
           console.warn(`Failed to load icon for choice board activity ${index + 1}:`, error);
           doc.setFontSize(10);
-          doc.setFont(undefined, 'normal');
+          doc.setFont('helvetica', 'normal');
           doc.text('[Icon]', xPos, yPos, { align: 'center' });
         }
       }
 
       if (activity.name) {
         doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         const splitName = doc.splitTextToSize(activity.name, spacing - 5);
         doc.text(splitName, xPos, yPos + circleRadius + 10, { align: 'center' });
       }
 
       if (activity.notes && activity.notes.trim() !== '') {
         doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         const splitNotes = doc.splitTextToSize(activity.notes, spacing - 5);
         doc.text(splitNotes, xPos, yPos + circleRadius + 20, { align: 'center' });
       }
