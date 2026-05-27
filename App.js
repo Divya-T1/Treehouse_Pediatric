@@ -23,6 +23,8 @@ import BottomNavBar from './screens/NavigationOptions.js';
 import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
 import CategoryScreen from './screens/CategoryScreen.js';
+import AuthScreen from './screens/AuthScreen.js';
+import { AuthProvider } from './AuthContext';
 
 import {
   AddCategory,
@@ -459,10 +461,12 @@ export default function App() {
   const fade = { animation: 'fade',  transitionSpec: transitionSpecification };
 
   return (
-    <SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Group>
+            <Stack.Screen name="Auth" component={AuthScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Home" component={Homescreen}  options={{animation: 'fade'}}/>
             <Stack.Screen name="Schedule" component={Schedule} options={{animation: 'fade'}}/>
             <Stack.Screen
@@ -479,6 +483,7 @@ export default function App() {
       </NavigationContainer>
       {Platform.OS === 'web' && <Analytics />}
     </SafeAreaProvider>
+      </AuthProvider>
   );
 }
 
