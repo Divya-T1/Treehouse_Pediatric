@@ -25,6 +25,7 @@ import NotesModal from './screens/NotesModal.js';
 import CategoryScreen from './screens/CategoryScreen.js';
 import AuthScreen from './screens/AuthScreen.js';
 import { AuthProvider, useAuth } from './AuthContext';
+import { supabase } from './supabase';
 
 import {
   AddCategory,
@@ -446,8 +447,29 @@ function Homescreen({ navigation }) {
 }
 
 // Stack and App
+const INACTIVITY_MS = 30 * 60 * 1000;
+
 function RootNavigator() {
   const { session, loading } = useAuth();
+
+  useEffect(() => {
+    if (!session || Platform.OS !== 'web') return;
+
+    let timer;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => supabase.auth.signOut(), INACTIVITY_MS);
+    };
+
+    const events = ['mousemove', 'keydown', 'touchstart'];
+    events.forEach(e => window.addEventListener(e, reset));
+    reset();
+
+    return () => {
+      clearTimeout(timer);
+      events.forEach(e => window.removeEventListener(e, reset));
+    };
+  }, [session]);
 
   if (loading) return null;
 
