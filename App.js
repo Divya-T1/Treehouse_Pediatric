@@ -24,7 +24,7 @@ import Schedule from './screens/Schedule.js';
 import NotesModal from './screens/NotesModal.js';
 import CategoryScreen from './screens/CategoryScreen.js';
 import AuthScreen from './screens/AuthScreen.js';
-import { AuthProvider } from './AuthContext';
+import { AuthProvider, useAuth } from './AuthContext';
 
 import {
   AddCategory,
@@ -446,44 +446,42 @@ function Homescreen({ navigation }) {
 }
 
 // Stack and App
+function RootNavigator() {
+  const { session, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (!session) return <AuthScreen />;
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Group>
+          <Stack.Screen name="Home" component={Homescreen} options={{animation: 'fade'}}/>
+          <Stack.Screen name="Schedule" component={Schedule} options={{animation: 'fade'}}/>
+          <Stack.Screen
+            name="CustomCategory"
+            component={CategoryScreen}
+            options={{animation: 'slide_from_right'}}
+          />
+          <Stack.Screen name="ChoiceBoard" component={ChoiceBoard} options={{animation: 'fade'}}/>
+        </Stack.Group>
+        <Stack.Group screenOptions={{ presentation: 'modal'}}>
+          <Stack.Screen name="Notes" component={NotesModal} />
+        </Stack.Group>
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
 export default function App() {
-
-  const transitionSpecification = {
-    open: {
-      animation: 'timing',  
-      config: { duration: 100 }, // Duration for opening in ms
-    },
-    close: {
-      animation: 'timing',
-      config: { duration: 100 }, // Duration for closing in ms
-    },
-  };
-  const fade = { animation: 'fade',  transitionSpec: transitionSpecification };
-
   return (
     <AuthProvider>
       <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Group>
-            <Stack.Screen name="Auth" component={AuthScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Home" component={Homescreen}  options={{animation: 'fade'}}/>
-            <Stack.Screen name="Schedule" component={Schedule} options={{animation: 'fade'}}/>
-            <Stack.Screen
-              name="CustomCategory"
-              component={CategoryScreen}
-              options={{animation: 'slide_from_right'}}
-            />
-            <Stack.Screen name = "ChoiceBoard" component={ChoiceBoard} options={{animation: 'fade'}}/>
-          </Stack.Group>
-          <Stack.Group screenOptions={{ presentation: 'modal'}}>
-            <Stack.Screen name="Notes" component={NotesModal} />
-          </Stack.Group>
-        </Stack.Navigator>
-      </NavigationContainer>
-      {Platform.OS === 'web' && <Analytics />}
-    </SafeAreaProvider>
-      </AuthProvider>
+        <RootNavigator />
+        {Platform.OS === 'web' && <Analytics />}
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
 
