@@ -45,6 +45,7 @@ const Stack = createNativeStackNavigator();
 
 function Homescreen({ navigation }) {
   const currentAppState = useAppState();
+  const { signOut } = useAuth();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -255,12 +256,20 @@ function Homescreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Image source={require('./Logo.png')} />
-        <TouchableOpacity
-          style={styles.clearStorageButton}
-          onPress={() => setClearStorageModalVisible(true)}
-        >
-          <Text style={styles.clearStorageButtonText}>Clear</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={signOut}
+          >
+            <Text style={styles.signOutButtonText}>Sign Out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.clearStorageButton}
+            onPress={() => setClearStorageModalVisible(true)}
+          >
+            <Text style={styles.clearStorageButtonText}>Clear</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search bar */}
@@ -522,6 +531,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 10,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  signOutButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  signOutButtonText: {
+    color: '#333',
+    fontSize: 14,
+    fontWeight: '600',
   },
   clearStorageButton: {
     backgroundColor: '#ff6b6b',
