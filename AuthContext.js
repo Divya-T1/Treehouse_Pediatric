@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import { syncFromCloud } from './cloudSync';
+import { clearData } from './ActivitiesSaver';
 
 const AuthContext = createContext(null);
 
@@ -17,7 +19,19 @@ export function AuthProvider({ children }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (_event === 'SIGNED_IN') {
+        setLoading(true);
+        try {
+          if (session?.user?.id) await syncFromCloud(session.user.id);
+        } catch (e) {
+          console.warn('Cloud sync error:', e);
+        } finally {
+          setLoading(false);
+        }
+      } else if (_event === 'SIGNED_OUT') {
+        clearData().catch(e => console.warn('clearData error:', e));
+      }
       setSession(session);
       setUser(session?.user ?? null);
     });

@@ -1,6 +1,19 @@
 // ActivitiesSaver.js
 import AsyncStorage from './storage';
 import { CameraType } from 'expo-image-picker';
+import { supabase } from './supabase';
+import { pushActivities, pushCategories, pushChoiceBoard } from './cloudSync';
+
+const getUserId = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user?.id ?? null;
+};
+
+const cloudPush = (pushFn, data) => {
+  getUserId().then(id => {
+    if (id) pushFn(id, data).catch(e => console.warn('cloud push error:', e));
+  }).catch(() => {});
+};
 
 const STORAGE_KEY_ACTIVITIES = 'SavedActivities';
 const STORAGE_KEY_CATEGORIES = 'CustomCategories';
@@ -15,6 +28,7 @@ export const SaveActivities = async (activitiesArray) => {
   } catch (e) {
     console.warn('SaveActivities error:', e);
   }
+  cloudPush(pushActivities, activitiesArray || []);
 };
 
 // Get regular activities
@@ -48,6 +62,7 @@ export const SaveCustomCategories = async (categoriesArray) => {
   } catch (e) {
     console.warn('SaveCustomCategories error:', e);
   }
+  cloudPush(pushCategories, categoriesArray || []);
 };
 
 // Add a new category (prevents duplicates)
@@ -87,13 +102,14 @@ export const AddActivityToCategory = async (categoryName, activity) => {
 
 // -------------------- Choice Board Activities --------------------
 
-// Save regular activities
+// Save choice board activities
 export const SaveChoiceBoard = async (choiceBoardActivities) => {
   try {
     await AsyncStorage.setItem(STORAGE_KEY_CHOICE_BOARD, JSON.stringify(choiceBoardActivities || []));
   } catch (e) {
-    console.warn('SaveActivities error:', e);
+    console.warn('SaveChoiceBoard error:', e);
   }
+  cloudPush(pushChoiceBoard, choiceBoardActivities || []);
 };
 
 // Get regular activities
