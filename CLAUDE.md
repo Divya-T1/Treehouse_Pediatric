@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Treehouse Pediatric is a React Native application built with Expo for pediatric occupational therapy activity planning. The app helps therapists create visual schedules and choice boards for children by selecting from categorized activities (Gross Motor, Fine Motor, ADL, Sensory, etc.).
+Treehouse Pediatric is a React Native application built with Expo for pediatric therapy activity planning. The app helps therapists create visual schedules and choice boards for children by selecting from categorized activities (ADL, Fine Motor, Gross Motor, Sensory, etc.). Therapists can also create custom categories and activities with their own photos.
 
 ## Development Commands
 
@@ -18,103 +18,194 @@ Treehouse Pediatric is a React Native application built with Expo for pediatric 
 
 ### Navigation Structure
 The app uses React Navigation with a native stack navigator (`@react-navigation/native-stack`). Main entry point is `App.js` which defines:
-- **Homescreen**: Grid of 8 activity category buttons
-- **Activity Screens**: Individual screens for each category (GrossMotorScreen, FineMotorScreen, ADLScreen, etc.)
-- **Schedule**: Displays selected activities with notes in sequential order
-- **ChoiceBoard**: Visual choice board with up to 3 selected activities
-- **NotesModal**: Modal for adding notes (presentation: 'modal')
+- **Home** (`Homescreen` in App.js): Grid of category buttons + search bar + "Add Category" button
+- **CustomCategory**: Generic `CategoryScreen.js` — handles both built-in and custom categories
+- **Schedule**: Displays selected activities with inline notes and print/save buttons
+- **ChoiceBoard**: Separate choice board with up to 3 selected activities
+- **Notes**: Modal for adding notes (presentation: 'modal')
 
-All screens are registered in App.js:143-186.
+All screens are registered in `App.js` (Stack.Navigator, lines ~464–479). The old individual activity screens (`ADLscreen.js`, `FineMotorScreen.js`, `GrossMotorScreen.js`, etc.) still exist in `/screens/` but are **no longer registered in the navigator** — they are dead code. Use `CategoryScreen.js` as the reference for how screens work.
 
-### Activity Selection Pattern
-Each activity screen (e.g., ADLScreen.js) follows this pattern:
-1. Uses static `require()` for images (React Native bundler requirement)
-2. Stores activity IDs as relative path strings (e.g., '../assets/ADL/button.png')
-3. Loads saved activities from AsyncStorage on mount via `GetActivities()`
-4. Toggles selection by calling `toggleSelection()` which updates AsyncStorage
-5. Selection state determines visual styling (selected activities have different background color)
-
-### Data Persistence (ActivitiesSaver.js)
-Activities are stored in AsyncStorage under key 'SavedActivities' as an array of objects:
+### Built-in Activities Registry (activities.js)
+All built-in categories and activities are defined in `activities.js` as `DEFAULT_ACTIVITIES`. Each entry has:
 ```javascript
-[
-  { filePath: '../assets/ADL/button.png', notes: 'practice for 5 min' },
-  { filePath: '../assets/FineMotorPictures/cutting.png', notes: '' }
-]
+{
+  categoryName: 'ADL',
+  icon: require('./Brushing.png'),     // category icon shown on Homescreen
+  activities: [
+    { id: '../assets/ADL/button.png', name: 'Buttons', icon: require('./assets/ADL/button.png') },
+    ...
+  ]
+}
 ```
 
-Key functions:
-- `SaveActivities(array)` - Overwrites entire array
-- `GetActivities()` - Returns full array or []
-- `clearData()` - Clears all AsyncStorage (called on window.beforeunload in App.js:33-40)
+On app load, `App.js` calls `AddCategory()` for each `DEFAULT_ACTIVITIES` entry to seed them into storage (prevents duplicates via name check). Built-in categories are treated the same as custom ones after seeding.
 
-### Icon Registry Pattern
-Schedule.js and ChoiceBoard.js maintain a large ICONS object (lines 21-97) that maps activity ID strings to static require() calls. This is necessary because React Native cannot use dynamic require() paths.
+### Activity Data Model
+Activities stored in storage are objects with this shape:
+```javascript
+{
+  id: string,          // unique ID — for built-ins this is the asset path string, for custom it's the base64/URI icon
+  name: string,        // display name
+  icon: require(...) | string,  // static require result (built-in) or URI/base64 string (custom)
+  category: string,    // category name
+  notes: string,       // therapist notes
+}
+```
 
-**IMPORTANT**: When adding new activity icons, you must:
-1. Add the static require() to the ICONS object in both Schedule.js and ChoiceBoard.js
-2. Use the same string key as the activity ID used in the activity screen
+### Custom Category System
+Therapists can create custom categories with a name and a photo (picked from device library):
+- `Homescreen` in `App.js`: "Add Category" button opens a modal → calls `AddCategory(name, icon)` → stored in `CustomCategories` key
+- `CategoryScreen.js`: "Add Activity" button opens a modal → calls `SaveCustomCategories()` directly after pushing to the category's activities array
+- Images use base64 data URIs on web, file URIs on native
+
+### Data Persistence (ActivitiesSaver.js)
+Storage is platform-specific — `ActivitiesSaver.js` imports from `./storage`, which resolves to:
+- `storage.web.js` → uses **localforage** (IndexedDB, avoids localStorage size limits)
+- `storage.native.js` → re-exports `@react-native-async-storage/async-storage`
+
+Storage keys and their contents:
+
+| Key | Content |
+|-----|---------|
+| `'SavedActivities'` | `Activity[]` — current schedule |
+| `'CustomCategories'` | `Category[]` — all categories (built-in + custom) |
+| `'ChoiceBoard'` | `Activity[]` — choice board selection (max 3) |
+
+Key functions exported from `ActivitiesSaver.js`:
+- `SaveActivities(array)` / `GetActivities()` — schedule CRUD
+- `SaveCustomCategories(array)` / `GetCustomCategories()` — full category list CRUD
+- `AddCategory(name, icon, activities?)` — adds category if name not already present (no-op if duplicate)
+- `AddActivityToCategory(categoryName, activity)` — appends activity to existing category
+- `SaveChoiceBoard(array)` / `GetChoiceBoard()` — choice board CRUD
+- `clearData()` — clears all storage
+- `clearActivities()` — clears storage then restores custom categories (called on web `pagehide`)
+
+### CategoryScreen.js (Generic Activity Screen)
+`screens/CategoryScreen.js` handles all categories uniformly:
+1. Loads category activities from `GetCustomCategories()` by matching `categoryName` from route params
+2. Loads current selection via `GetActivities()` — tracks selected IDs in `selectedActivities` state
+3. `toggleSelection(act)` adds/removes from `SavedActivities`
+4. Users can add new activities via a modal (picks image → stores base64/URI)
+5. Selected activities have `backgroundColor: 'rgb(195, 229, 236)'` vs normal `'rgb(211,211,211)'`
+
+### Schedule.js
+- Loads and refreshes activities from `GetActivities()` via `useFocusEffect`
+- Renders a `FlatList` with inline `TextInput` for notes per activity
+- Header has Save and Print buttons; Print calls `createPDF()` from `PDFSaver`
+- Icons rendered as: `typeof item.icon === "string" ? { uri: item.icon } : item.icon`
+
+### ChoiceBoard.js
+- Maintains two lists: `activities` (all schedule activities) and `choiceBoardActivities` (up to 3 selected)
+- Both loaded on mount and refreshed on focus via `useFocusEffect`
+- `toggleSelection()` enforces 3-item max — shows `Alert` if exceeded
+- Header has Save and Print buttons; Print calls `createChoiceBoardPDF()`
+- Uses a horizontal `FlatList` to display the selected choice board items
+
+### PDF Export (platform-specific)
+`PDFSaver.js` is a fallback stub. Metro resolves the platform-specific file first:
+- `PDFSaver.web.js` — full implementation using **jsPDF v4.2.1**, renders icons as base64 images, shares via `navigator.share` or falls back to `doc.save()`
+- `PDFSaver.native.js` — native implementation (expo-print / expo-sharing)
+
+Exports: `createPDF()` (Schedule) and `createChoiceBoardPDF()` (ChoiceBoard).
 
 ### Bottom Navigation (NavigationOptions.js)
 Persistent bottom navigation bar rendered on all screens with:
-- Back button (navigation.goBack())
-- Home button (navigate to 'Home')
-- Schedule button (navigate to 'Schedule')
-- Choice Board button (navigate to 'ChoiceBoard')
+- Back button (`navigation.goBack()`)
+- Home button (navigate to `'Home'`)
+- Schedule button (navigate to `'Schedule'`)
+- Choice Board button (navigate to `'ChoiceBoard'`)
 
 The bar is positioned absolutely at `bottom: 20` with white background.
 
-**CRITICAL - Bottom Padding Issue**: Because the navigation bar is positioned absolutely, it overlays screen content. All screens with scrollable content (ScrollView or FlatList) MUST include bottom padding to prevent content from being cut off by the nav bar.
-
-**Solution**: Add `contentContainerStyle={{ paddingBottom: 100 }}` to ScrollView or FlatList components.
-
-Example for ScrollView:
+**CRITICAL - Bottom Padding**: The nav bar overlays screen content. All screens with scrollable content (ScrollView or FlatList) MUST include bottom padding:
 ```javascript
+// ScrollView
 <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-  {/* content */}
-</ScrollView>
+
+// FlatList
+<FlatList contentContainerStyle={data.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 100 } : { paddingBottom: 100 }} />
 ```
 
-Example for FlatList (when content can vary):
-```javascript
-<FlatList
-  contentContainerStyle={data.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 100 } : { paddingBottom: 100 }}
-/>
-```
+### Homescreen Search
+The Homescreen has a search bar that filters across all activities in `customCategories` (which includes built-ins after seeding). Tapping a search result navigates to the `'CustomCategory'` screen for that activity's category.
 
-### Choice Board Functionality
-ChoiceBoard.js enforces a 3-activity maximum for the choice board display:
-- Users tap activity icons to toggle selection
-- `toggleSelection()` prevents adding more than 3 items (ChoiceBoard.js:121-134)
-- Selected items are displayed in a horizontal FlatList at top of screen
-- Visual feedback: selected items have backgroundColor 'rgb(211,211,211)' vs normal 'rgb(218, 188, 188)'
+### Authentication (AuthContext.js, AuthScreen.js, supabase.js)
+- `@supabase/supabase-js` handles auth. `AuthContext.js` exposes `session`, `user`, `loading`, `signIn`, `signUp`, `signOut` via `useAuth()`.
+- `RootNavigator` (inside `App.js`) gates on `loading` and `session`: shows nothing while loading, `AuthScreen` when logged out, the main stack when logged in.
+- On `SIGNED_IN`: `AuthContext` sets `loading=true`, calls `syncFromCloud()`, then releases — this blocks navigation until the user's cloud data is written to local storage.
+- On `SIGNED_OUT`: `clearData()` wipes local storage so no data leaks to the next user.
+- Auth tokens are persisted via AsyncStorage (native) or Supabase's default localStorage (web).
 
-### PDF Export (PDFSaver.js)
-Uses jsPDF library to create simple text PDFs. Currently basic implementation with text only at (10, 10) position. The createPDF function is called from Schedule.js header buttons.
+### Cloud Sync (cloudSync.js)
+All Supabase data operations live in `cloudSync.js`. The app's `Get*` functions always read from local storage (fast, no network); `Save*` functions write to local storage first then fire a background push to Supabase.
+
+**Supabase table**: `user_data` — one row per user, RLS-enforced.
+
+| Column | Type | Content |
+|--------|------|---------|
+| `user_id` | uuid PK | references `auth.users` |
+| `saved_activities` | jsonb | current schedule |
+| `custom_categories` | jsonb | custom-only data (see below) |
+| `choice_board` | jsonb | choice board selection |
+| `updated_at` | timestamptz | last write |
+
+**Built-in category icon problem**: Built-in category icons are `require()` results — not JSON-serializable for Supabase. `pushCategories` handles this by:
+- Fully custom categories (string icon) → stored as-is
+- Built-in categories with user-added activities → stored as `{ categoryName, icon: '__builtin__', activities: [custom activities only] }`
+- Unmodified built-in categories → skipped (re-seeded from `DEFAULT_ACTIVITIES` on launch)
+
+`syncFromCloud` reverses this on sign-in: it rebuilds the full category list in `DEFAULT_ACTIVITIES` order, merging `__builtin__` entries back with their correct icons and default activities, then appending fully custom categories. This ensures `AddCategory` seeding is always a no-op and display order is never scrambled.
+
+**Known limitation**: Changes made while offline and not yet pushed to Supabase will be lost if the user signs out before regaining connectivity.
+
+### Analytics
+- `@vercel/analytics` is rendered on web only (`Platform.OS === 'web'`)
+- `useAppState.js` — custom hook for tracking app foreground/background state
 
 ## File Organization
 
-- `/screens/` - All screen components (activity categories, Schedule, ChoiceBoard, NotesModal)
-- `/assets/` - Organized by category (ADL/, FineMotorPictures/, Regulation/, RoomSpacesPictures/, Sensory/, TOYS/)
-- Root level - App.js, ActivitiesSaver.js, PDFSaver.js, Logo.png
+```
+/screens/
+  CategoryScreen.js      ← generic category screen (active)
+  Schedule.js            ← schedule screen (active)
+  ChoiceBoard.js         ← choice board screen (active)
+  NotesModal.js          ← notes modal (active)
+  NavigationOptions.js   ← bottom nav bar (active)
+  ADLscreen.js           ← dead code (not in navigator)
+  FineMotorScreen.js     ← dead code
+  GrossMotorScreen.js    ← dead code
+  Regulation.js          ← dead code
+  RoomSpacesScreen.js    ← dead code
+  SensoryScreen.js       ← dead code
+  ToyScreen.js           ← dead code
+  ToysAndActScreen.js    ← dead code
 
-## Known Issues
-
-**ADLScreen.js**: This file is currently broken and should not be modified. Use other screen files as reference instead (e.g., ToysAndActScreen.js, FineMotorScreen.js).
+/assets/                 ← organized by category (ADL/, FineMotorPictures/, etc.)
+activities.js            ← DEFAULT_ACTIVITIES registry (all built-in categories + activities)
+ActivitiesSaver.js       ← storage API (local read/write + fires background cloud push on every save)
+cloudSync.js             ← Supabase data operations (pushActivities/Categories/ChoiceBoard, syncFromCloud)
+storage.web.js           ← localforage adapter (IndexedDB)
+storage.native.js        ← AsyncStorage adapter
+AuthContext.js           ← Supabase auth provider (session, signIn, signUp, signOut, cloud sync on SIGNED_IN)
+supabase.js              ← Supabase client (platform-aware auth storage config)
+PDFSaver.js              ← fallback stub
+PDFSaver.web.js          ← jsPDF web implementation
+PDFSaver.native.js       ← native PDF implementation
+useAppState.js           ← app state hook
+App.js                   ← root component, Homescreen, RootNavigator, stack navigator
+```
 
 ## Key Technical Constraints
 
-1. **React Native Bundler**: Cannot use dynamic require() for images. All image imports must be static `require()` calls known at build time.
+1. **React Native Bundler**: Cannot use dynamic `require()` for images. All built-in image imports must be static `require()` calls. Custom/user images use URI or base64 strings instead.
 
-2. **AsyncStorage Keys**: All AsyncStorage operations use string keys. The saved activities structure is `{ filePath: string, notes: string }[]`.
+2. **No ICONS registry**: Schedule.js and ChoiceBoard.js do NOT maintain a separate icon lookup map. Icons are stored directly on each activity object. Render pattern: `typeof item.icon === "string" ? { uri: item.icon } : item.icon`.
 
-3. **Icon Path Consistency**: Activity IDs (file paths) must exactly match between:
-   - Activity screen definitions (e.g., ADLScreen.js:22-28)
-   - ICONS registry in Schedule.js and ChoiceBoard.js
-   - Saved data in AsyncStorage
+3. **Adding new built-in activities**: Add entries to `activities.js` only. No changes needed in Schedule.js or ChoiceBoard.js.
 
-4. **Web-Specific Code**: App.js uses window.addEventListener('beforeunload') which only works on web platform (App.js:33-40).
+4. **Category seeding**: Built-in categories are seeded into `CustomCategories` storage on app launch via `AddCategory()`. `AddCategory` is a no-op if the category name already exists, so it is safe to call on every launch. After `syncFromCloud` runs on sign-in, all built-ins are already in local storage in the correct order, so seeding is always a no-op at that point.
 
-## Current Branch Context
+5. **Web session cleanup**: `clearActivities()` is called on the web `pagehide` event (App.js), which clears the schedule but preserves custom categories.
 
-Working on `choice_board` branch (main branch: `master`). Recent commits show work on choice board functionality with 3-activity limit and scrollable icon selector.
+6. **Storage size**: Web storage uses IndexedDB via localforage to avoid the ~5MB localStorage limit (important for base64 image data from custom activities).
