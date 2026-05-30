@@ -19,12 +19,13 @@ import { useNavigation } from '@react-navigation/native';
 
 import {
   GetCustomCategories,
-  SaveCustomCategories,    // ⭐ ADDED: Needed for persistence
+  SaveCustomCategories,
   AddCategory,
   AddActivityToCategory,
   GetActivities,
   SaveActivities,
 } from '../ActivitiesSaver.js';
+import { useShare } from '../ShareContext';
 
 import * as ImagePicker from 'expo-image-picker';
 
@@ -38,6 +39,7 @@ export default function CategoryScreen({ route }) {
   const [selectedActivities, setSelectedActivities] = useState([]);
 
   const navigation = useNavigation();
+  const { isShareMode, toggleShareSelection, isSelectedForShare } = useShare();
 
   // Load activities for this category
   useEffect(() => {
@@ -226,15 +228,52 @@ export default function CategoryScreen({ route }) {
         </View>
       </Modal>
 
+      {/* Share mode banner */}
+      {isShareMode && (
+        <View style={styles.shareBanner}>
+          <Text style={styles.shareBannerText}>
+            Tap custom activities to select for sharing. Built-in activities cannot be shared.
+          </Text>
+        </View>
+      )}
+
       {/* Activities Grid */}
       <ScrollView>
         <View style={styles.grid}>
           {activities.map((act, i) => {
-            const imgSource = typeof(act.icon) === "string" ? { uri: act.icon } : act.icon;
+            const imgSource = typeof act.icon === 'string' ? { uri: act.icon } : act.icon;
+            const isCustom = typeof act.icon === 'string';
+            const isScheduleSelected = selectedActivities.includes(act.id);
+            const isShareSelected = isShareMode && isCustom && isSelectedForShare(act.id);
+
+            const handlePress = () => {
+              if (isShareMode) {
+                if (isCustom) toggleShareSelection({ ...act, category: categoryName });
+                // built-in activities are non-interactive in share mode
+              } else {
+                toggleSelection(act);
+              }
+            };
+
             return (
-              <TouchableOpacity key={i} onPress={() => toggleSelection(act)}>
-                <View style={[styles.circleCustom, selectedActivities.includes(act.id) && styles.selectedCircle]}>
-                  <Image source={imgSource} style={styles.circleImage} />
+              <TouchableOpacity
+                key={i}
+                onPress={handlePress}
+                activeOpacity={isShareMode && !isCustom ? 1 : 0.7}
+              >
+                <View>
+                  <View style={[
+                    styles.circleCustom,
+                    isScheduleSelected && styles.selectedCircle,
+                    isShareMode && !isCustom && styles.dimmedCircle,
+                  ]}>
+                    <Image source={imgSource} style={styles.circleImage} />
+                  </View>
+                  {isShareSelected && (
+                    <View style={styles.shareCheckmark}>
+                      <Text style={styles.shareCheckmarkText}>✓</Text>
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.activityText}>{act.name}</Text>
               </TouchableOpacity>
@@ -274,6 +313,41 @@ const styles = StyleSheet.create({
 
   circleImage: { width: 60, height: 60, resizeMode: 'contain' },
   selectedCircle: { backgroundColor: 'rgb(195, 229, 236)' },
+  dimmedCircle: { opacity: 0.4 },
+  shareCheckmark: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#27ae60',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  shareCheckmarkText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 16,
+  },
+  shareBanner: {
+    backgroundColor: '#e8f4fd',
+    borderWidth: 1,
+    borderColor: '#4a90d9',
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginHorizontal: 20,
+    marginBottom: 8,
+  },
+  shareBannerText: {
+    color: '#2c5f8a',
+    fontSize: 13,
+    textAlign: 'center',
+  },
 
   activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },
 

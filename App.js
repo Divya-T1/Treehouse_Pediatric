@@ -12,6 +12,9 @@ import {
   Button,
   StyleSheet,
   Platform,
+  Share,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { Analytics } from '@vercel/analytics/react';
@@ -25,11 +28,14 @@ import NotesModal from './screens/NotesModal.js';
 import CategoryScreen from './screens/CategoryScreen.js';
 import AuthScreen from './screens/AuthScreen.js';
 import { AuthProvider, useAuth } from './AuthContext';
+import { ShareProvider, useShare } from './ShareContext';
+import { createShare, importShare } from './cloudShare';
 import { supabase } from './supabase';
 
 import {
   AddCategory,
   GetCustomCategories,
+  SaveCustomCategories,
   GetActivities,
   SaveActivities,
   clearData,
@@ -45,7 +51,8 @@ const Stack = createNativeStackNavigator();
 
 function Homescreen({ navigation }) {
   const currentAppState = useAppState();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const { isShareMode, shareSelections, enterShareMode, exitShareMode } = useShare();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -55,6 +62,20 @@ function Homescreen({ navigation }) {
   const [searchResults, setSearchResults] = useState([]);
   const [scheduleActivities, setScheduleActivities] = useState([]);
   const [clearStorageModalVisible, setClearStorageModalVisible] = useState(false);
+
+  // Share mode state
+  const [isCreatingShare, setIsCreatingShare] = useState(false);
+  const [shareCodeModalVisible, setShareCodeModalVisible] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  // Import state
+  const [importModalVisible, setImportModalVisible] = useState(false);
+  const [importCode, setImportCode] = useState('');
+  const [importPreview, setImportPreview] = useState(null);
+  const [importError, setImportError] = useState('');
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -252,23 +273,178 @@ function Homescreen({ navigation }) {
   };
 
 
+  const handleShareConfirm = async () => {
+    if (shareSelections.length === 0) return;
+    setIsCreatingShare(true);
+    try {
+      const payload = shareSelections.map(act => ({
+        id: act.id,
+        name: act.name,
+        icon: act.icon,
+        category: act.category || '',
+      }));
+      const code = await createShare(user.id, payload);
+      exitShareMode();
+      setGeneratedCode(code);
+      setShareCodeModalVisible(true);
+    } catch (e) {
+      const msg = e.message === 'payload_too_large'
+        ? 'Too many activities selected. Please select fewer and try again.'
+        : 'Could not create share code. Check your connection and try again.';
+      Alert.alert('Error', msg);
+    } finally {
+      setIsCreatingShare(false);
+    }
+  };
+
+  const handleCopyCode = async () => {
+    if (Platform.OS === 'web') {
+      try {
+        await navigator.clipboard.writeText(generatedCode);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (e) {
+        console.log('Clipboard error:', e);
+      }
+    } else {
+      try {
+        await Share.share({ message: `Treehouse share code: ${generatedCode}` });
+      } catch (e) {
+        console.log('Share error:', e);
+      }
+    }
+  };
+
+  const handleImportLookup = async () => {
+    if (!importCode.trim()) return;
+    setIsLookingUp(true);
+    setImportError('');
+    setImportPreview(null);
+    try {
+      const result = await importShare(importCode.trim());
+      if (!result) {
+        setImportError('Code not found or expired. Check it and try again.');
+      } else {
+        setImportPreview(result);
+      }
+    } catch (e) {
+      setImportError('Failed to look up code. Check your connection and try again.');
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
+  const handleImportConfirm = async () => {
+    if (!importPreview) return;
+    setIsImporting(true);
+    try {
+      const incoming = importPreview.data;
+      let allCategories = await GetCustomCategories();
+      if (!Array.isArray(allCategories)) allCategories = [];
+
+      // Group incoming activities by their source category
+      const byCategory = {};
+      for (const act of incoming) {
+        const catName = act.category || 'Imported Activities';
+        if (!byCategory[catName]) byCategory[catName] = [];
+        byCategory[catName].push(act);
+      }
+
+      for (const [catName, acts] of Object.entries(byCategory)) {
+        const existing = allCategories.find(c => c.categoryName === catName);
+        if (existing) {
+          for (const act of acts) {
+            if (!existing.activities.find(a => a.id === act.id)) {
+              existing.activities.push(act);
+            }
+          }
+        } else {
+          allCategories.push({
+            categoryName: catName,
+            icon: acts[0].icon,
+            activities: acts,
+          });
+        }
+      }
+
+      await SaveCustomCategories(allCategories);
+      setCustomCategories(allCategories);
+
+      setImportModalVisible(false);
+      setImportCode('');
+      setImportPreview(null);
+      setImportError('');
+      Alert.alert(
+        'Imported',
+        `${incoming.length} activit${incoming.length === 1 ? 'y' : 'ies'} added to your app.`
+      );
+    } catch (e) {
+      console.log('Import error:', e);
+      setImportError('Failed to import. Please try again.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const closeImportModal = () => {
+    setImportModalVisible(false);
+    setImportCode('');
+    setImportPreview(null);
+    setImportError('');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Image source={require('./Logo.png')} />
         <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.signOutButton}
-            onPress={signOut}
-          >
-            <Text style={styles.signOutButtonText}>Sign Out</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.clearStorageButton}
-            onPress={() => setClearStorageModalVisible(true)}
-          >
-            <Text style={styles.clearStorageButtonText}>Clear</Text>
-          </TouchableOpacity>
+          {isShareMode ? (
+            <>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={exitShareMode}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.shareConfirmButton,
+                  (shareSelections.length === 0 || isCreatingShare) && styles.disabledButton,
+                ]}
+                onPress={handleShareConfirm}
+                disabled={shareSelections.length === 0 || isCreatingShare}
+              >
+                {isCreatingShare ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.shareConfirmButtonText}>
+                    Share{shareSelections.length > 0 ? ` (${shareSelections.length})` : ''}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={enterShareMode}
+              >
+                <Text style={styles.shareButtonText}>Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.signOutButton}
+                onPress={signOut}
+              >
+                <Text style={styles.signOutButtonText}>Sign Out</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.clearStorageButton}
+                onPress={() => setClearStorageModalVisible(true)}
+              >
+                <Text style={styles.clearStorageButtonText}>Clear</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
 
@@ -313,14 +489,33 @@ function Homescreen({ navigation }) {
         </ScrollView>
       )}
 
-      {/* Add category */}
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.addButtonText}>+ Add Category</Text>
-      </TouchableOpacity>
-      
+      {/* Share mode banner */}
+      {isShareMode && (
+        <View style={styles.shareBanner}>
+          <Text style={styles.shareBannerText}>
+            Navigate into a category and tap custom activities to select them for sharing.
+          </Text>
+        </View>
+      )}
+
+      {/* Add category + Import code buttons */}
+      {!isShareMode && (
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.addButtonText}>+ Add Category</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.importButton}
+            onPress={() => setImportModalVisible(true)}
+          >
+            <Text style={styles.importButtonText}>Import Code</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.divider} />
 
       {/* Category modal */}
@@ -399,6 +594,88 @@ function Homescreen({ navigation }) {
                 color="#ff6b6b"
                 onPress={handleClearStorage}
               />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Share code result modal */}
+      <Modal visible={shareCodeModalVisible} transparent animationType="fade">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.shareCodeTitle}>Share Code</Text>
+            <Text style={styles.shareCodeValue}>{generatedCode}</Text>
+            <Text style={styles.shareCodeExpiry}>Expires in 24 hours</Text>
+            <TouchableOpacity style={styles.copyButton} onPress={handleCopyCode}>
+              <Text style={styles.copyButtonText}>
+                {copied ? 'Copied!' : Platform.OS === 'web' ? 'Copy to Clipboard' : 'Share / Copy'}
+              </Text>
+            </TouchableOpacity>
+            <Text style={styles.shareCodeWarning}>
+              Write this down — it won't be shown again.
+            </Text>
+            <Button
+              title="Done"
+              onPress={() => { setShareCodeModalVisible(false); setGeneratedCode(''); setCopied(false); }}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Import code modal */}
+      <Modal visible={importModalVisible} transparent animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={{ fontWeight: '600', fontSize: 16, marginBottom: 8 }}>Import from Code</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={importCode}
+              onChangeText={text => { setImportCode(text.toUpperCase()); setImportPreview(null); setImportError(''); }}
+              placeholder="Enter 8-character code"
+              autoCapitalize="characters"
+              maxLength={8}
+              editable={!importPreview}
+            />
+            {importError ? (
+              <Text style={styles.importError}>{importError}</Text>
+            ) : null}
+            {importPreview ? (
+              <View>
+                <Text style={{ fontWeight: '600', marginTop: 10, marginBottom: 6 }}>
+                  {importPreview.data.length} activit{importPreview.data.length === 1 ? 'y' : 'ies'} to import:
+                </Text>
+                <ScrollView style={{ maxHeight: 180 }}>
+                  {importPreview.data.map((act, i) => (
+                    <View key={i} style={styles.importPreviewRow}>
+                      <Image source={{ uri: act.icon }} style={styles.importPreviewIcon} />
+                      <View>
+                        <Text style={{ fontWeight: '600' }}>{act.name}</Text>
+                        {act.category ? (
+                          <Text style={{ fontSize: 12, color: '#666' }}>{act.category}</Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+                <View style={{ marginTop: 10 }}>
+                  {isImporting ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <Button title="Import" onPress={handleImportConfirm} />
+                  )}
+                </View>
+              </View>
+            ) : (
+              <View style={{ marginTop: 8 }}>
+                {isLookingUp ? (
+                  <ActivityIndicator />
+                ) : (
+                  <Button title="Look Up" onPress={handleImportLookup} disabled={!importCode.trim()} />
+                )}
+              </View>
+            )}
+            <View style={{ marginTop: 8 }}>
+              <Button title="Cancel" color="red" onPress={closeImportModal} />
             </View>
           </View>
         </View>
@@ -485,6 +762,7 @@ function RootNavigator() {
   if (!session) return <AuthScreen />;
 
   return (
+    <ShareProvider>
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Group>
@@ -502,6 +780,7 @@ function RootNavigator() {
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
+    </ShareProvider>
   );
 }
 
@@ -605,15 +884,137 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  shareButton: {
+    backgroundColor: '#4a90d9',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+  },
+  shareButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  shareConfirmButton: {
+    backgroundColor: '#4a90d9',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  shareConfirmButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  disabledButton: {
+    backgroundColor: '#a0bcd8',
+  },
+  shareBanner: {
+    backgroundColor: '#e8f4fd',
+    borderWidth: 1,
+    borderColor: '#4a90d9',
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginHorizontal: 20,
+    marginTop: 8,
+  },
+  shareBannerText: {
+    color: '#2c5f8a',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
   addButton: {
     backgroundColor: '#ccc',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    marginTop: 10,
     borderRadius: 6,
-    alignSelf: 'center',
   },
   addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
+  importButton: {
+    backgroundColor: '#4a90d9',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  importButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  shareCodeTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  shareCodeValue: {
+    fontSize: 34,
+    fontWeight: '900',
+    letterSpacing: 6,
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  shareCodeExpiry: {
+    fontSize: 13,
+    color: '#888',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  copyButton: {
+    backgroundColor: '#4a90d9',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  copyButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  shareCodeWarning: {
+    color: '#c0392b',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  importError: {
+    color: '#c0392b',
+    fontSize: 13,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  importPreviewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    gap: 10,
+  },
+  importPreviewIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#eee',
+  },
   divider: {
     height: 1,
     backgroundColor: '#333',
