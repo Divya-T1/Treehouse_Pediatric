@@ -62,6 +62,7 @@ function Homescreen({ navigation }) {
   const [searchResults, setSearchResults] = useState([]);
   const [scheduleActivities, setScheduleActivities] = useState([]);
   const [clearStorageModalVisible, setClearStorageModalVisible] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Share mode state
   const [isCreatingShare, setIsCreatingShare] = useState(false);
@@ -396,7 +397,7 @@ function Homescreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Image source={require('./Logo.png')} />
+        <Image source={require('./Logo.png')} style={styles.headerLogo} resizeMode="contain" />
         <View style={styles.headerButtons}>
           {isShareMode ? (
             <>
@@ -424,29 +425,62 @@ function Homescreen({ navigation }) {
               </TouchableOpacity>
             </>
           ) : (
-            <>
-              <TouchableOpacity
-                style={styles.shareButton}
-                onPress={enterShareMode}
-              >
-                <Text style={styles.shareButtonText}>Share</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.signOutButton}
-                onPress={signOut}
-              >
-                <Text style={styles.signOutButtonText}>Sign Out</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.clearStorageButton}
-                onPress={() => setClearStorageModalVisible(true)}
-              >
-                <Text style={styles.clearStorageButtonText}>Clear</Text>
-              </TouchableOpacity>
-            </>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setMenuOpen(v => !v)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.menuButtonText}>⋮</Text>
+            </TouchableOpacity>
           )}
         </View>
       </View>
+
+      {/* Dropdown backdrop — closes menu when tapping outside */}
+      {menuOpen && (
+        <TouchableOpacity
+          style={StyleSheet.absoluteFillObject}
+          onPress={() => setMenuOpen(false)}
+          activeOpacity={1}
+        />
+      )}
+
+      {/* Dropdown menu */}
+      {menuOpen && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => { setMenuOpen(false); enterShareMode(); }}
+          >
+            <Image source={require('./assets/dropdown/users.png')} style={styles.dropdownIcon} />
+            <Text style={styles.dropdownItemText}>Share Activities</Text>
+          </TouchableOpacity>
+          <View style={styles.dropdownDivider} />
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => { setMenuOpen(false); setImportModalVisible(true); }}
+          >
+            <Image source={require('./assets/dropdown/download.png')} style={styles.dropdownIcon} />
+            <Text style={styles.dropdownItemText}>Import from Code</Text>
+          </TouchableOpacity>
+          <View style={styles.dropdownDivider} />
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => { setMenuOpen(false); signOut(); }}
+          >
+            <Image source={require('./assets/dropdown/exit.png')} style={styles.dropdownIcon} />
+            <Text style={styles.dropdownItemText}>Sign Out</Text>
+          </TouchableOpacity>
+          <View style={styles.dropdownDivider} />
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => { setMenuOpen(false); setClearStorageModalVisible(true); }}
+          >
+            <Image source={require('./assets/dropdown/trash.png')} style={[styles.dropdownIcon, styles.dropdownIconDestructive]} />
+            <Text style={[styles.dropdownItemText, styles.dropdownItemDestructive]}>Clear All Data</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Search bar */}
       <TextInput
@@ -498,22 +532,14 @@ function Homescreen({ navigation }) {
         </View>
       )}
 
-      {/* Add category + Import code buttons */}
+      {/* Add category button */}
       {!isShareMode && (
-        <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.addButtonText}>+ Add Category</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.importButton}
-            onPress={() => setImportModalVisible(true)}
-          >
-            <Text style={styles.importButtonText}>Import Code</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.addButtonText}>+ Add Category</Text>
+        </TouchableOpacity>
       )}
 
       <View style={styles.divider} />
@@ -811,10 +837,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
   },
+  headerLogo: {
+    flexShrink: 1,
+    maxHeight: 60,
+  },
   headerButtons: {
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
+    flexShrink: 0,
   },
   signOutButton: {
     backgroundColor: '#ccc',
@@ -884,16 +915,58 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  shareButton: {
-    backgroundColor: '#4a90d9',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 6,
+  menuButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
-  shareButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  menuButtonText: {
+    fontSize: 26,
+    color: '#333',
+    lineHeight: 28,
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 72,
+    right: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+    zIndex: 100,
+    minWidth: 180,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 18,
+    gap: 12,
+  },
+  dropdownIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    opacity: 0.7,
+  },
+  dropdownIconDestructive: {
+    tintColor: '#c0392b',
+    opacity: 1,
+  },
+  dropdownItemText: {
+    fontSize: 15,
+    color: '#333',
+  },
+  dropdownItemDestructive: {
+    color: '#c0392b',
+  },
+  dropdownDivider: {
+    height: 1,
+    backgroundColor: '#eee',
   },
   cancelButton: {
     backgroundColor: '#ccc',
@@ -937,26 +1010,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
   },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 10,
-    alignSelf: 'center',
-  },
   addButton: {
     backgroundColor: '#ccc',
     paddingVertical: 10,
     paddingHorizontal: 20,
+    marginTop: 10,
     borderRadius: 6,
+    alignSelf: 'center',
   },
   addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
-  importButton: {
-    backgroundColor: '#4a90d9',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  importButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   shareCodeTitle: {
     fontSize: 18,
     fontWeight: '700',
