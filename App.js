@@ -181,10 +181,19 @@ function Homescreen({ navigation }) {
 
 
   const addCategory = async () => {
-    if (!newCatName || !newCatImage) return;
+    const trimmedName = newCatName.trim();
+    if (!trimmedName || !newCatImage) return;
+    if (trimmedName.length > 100) {
+      Alert.alert('Name too long', 'Category name must be 100 characters or fewer.');
+      return;
+    }
+    if (trimmedName.includes('<') || trimmedName.includes('>')) {
+      Alert.alert('Invalid name', 'Category name cannot contain < or >.');
+      return;
+    }
 
     try {
-      const updated = await AddCategory(newCatName, newCatImage);
+      const updated = await AddCategory(trimmedName, newCatImage);
       setCustomCategories(Array.isArray(updated) ? updated : []);
     } catch (e) {
       console.log('AddCategory error:', e);
@@ -342,6 +351,26 @@ function Homescreen({ navigation }) {
     setIsImporting(true);
     try {
       const incoming = importPreview.data;
+
+      // Validate each activity before importing
+      for (const act of incoming) {
+        if (typeof act.icon === 'string' && act.icon.startsWith('data:') && !act.icon.startsWith('data:image/')) {
+          setImportError('Import contains an invalid file type. Only images are allowed.');
+          setIsImporting(false);
+          return;
+        }
+        if (typeof act.name === 'string' && (act.name.length > 100 || act.name.includes('<') || act.name.includes('>'))) {
+          setImportError('Import contains an invalid activity name.');
+          setIsImporting(false);
+          return;
+        }
+        if (typeof act.category === 'string' && (act.category.length > 100 || act.category.includes('<') || act.category.includes('>'))) {
+          setImportError('Import contains an invalid category name.');
+          setIsImporting(false);
+          return;
+        }
+      }
+
       let allCategories = await GetCustomCategories();
       if (!Array.isArray(allCategories)) allCategories = [];
 
@@ -558,6 +587,7 @@ function Homescreen({ navigation }) {
               style={styles.modalInput}
               value={newCatName}
               onChangeText={setNewCatName}
+              maxLength={100}
             />
 
             <Text style={{ fontWeight: '600', marginTop: 10 }}>

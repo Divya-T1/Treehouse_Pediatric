@@ -151,12 +151,21 @@ export default function CategoryScreen({ route }) {
 
   // Add new activity
   const addActivity = async () => {
-    if (!newActName || !newActIcon) {
+    const trimmedName = newActName.trim();
+    if (!trimmedName || !newActIcon) {
       Alert.alert('Please provide both a name and an icon.');
       return;
     }
+    if (trimmedName.length > 100) {
+      Alert.alert('Name too long', 'Activity name must be 100 characters or fewer.');
+      return;
+    }
+    if (trimmedName.includes('<') || trimmedName.includes('>')) {
+      Alert.alert('Invalid name', 'Activity name cannot contain < or >.');
+      return;
+    }
 
-    const activity = { id: newActIcon, name: newActName.trim(), icon: newActIcon};
+    const activity = { id: newActIcon, name: trimmedName, icon: newActIcon };
 
     try {
       // --- Load all custom categories ---
@@ -213,7 +222,7 @@ export default function CategoryScreen({ route }) {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={{ fontWeight: '600' }}>Activity Name:</Text>
-            <TextInput style={styles.modalInput} value={newActName} onChangeText={setNewActName} />
+            <TextInput style={styles.modalInput} value={newActName} onChangeText={setNewActName} maxLength={100} />
 
             <Text style={{ fontWeight: '600', marginTop: 8 }}>Activity Icon:</Text>
             <Button title={newActIcon ? "Change Image" : "Pick Image"} onPress={pickImage} />
