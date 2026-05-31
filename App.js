@@ -69,6 +69,7 @@ function Homescreen({ navigation }) {
   const [shareCodeModalVisible, setShareCodeModalVisible] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
+  const [shareError, setShareError] = useState('');
 
   // Import state
   const [importModalVisible, setImportModalVisible] = useState(false);
@@ -289,10 +290,11 @@ function Homescreen({ navigation }) {
       setGeneratedCode(code);
       setShareCodeModalVisible(true);
     } catch (e) {
-      const msg = e.message === 'payload_too_large'
-        ? 'Too many activities selected. Please select fewer and try again.'
-        : 'Could not create share code. Check your connection and try again.';
-      Alert.alert('Error', msg);
+      setShareError(
+        e.message === 'payload_too_large'
+          ? 'Too many activities selected. Please deselect some and try again.'
+          : 'Could not create share code. Check your connection and try again.'
+      );
     } finally {
       setIsCreatingShare(false);
     }
@@ -403,7 +405,7 @@ function Homescreen({ navigation }) {
             <>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={exitShareMode}
+                onPress={() => { setShareError(''); exitShareMode(); }}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
@@ -450,7 +452,7 @@ function Homescreen({ navigation }) {
         <View style={styles.dropdown}>
           <TouchableOpacity
             style={styles.dropdownItem}
-            onPress={() => { setMenuOpen(false); enterShareMode(); }}
+            onPress={() => { setMenuOpen(false); setShareError(''); enterShareMode(); }}
           >
             <Image source={require('./assets/dropdown/users.png')} style={styles.dropdownIcon} />
             <Text style={styles.dropdownItemText}>Share Activities</Text>
@@ -529,6 +531,9 @@ function Homescreen({ navigation }) {
           <Text style={styles.shareBannerText}>
             Navigate into a category and tap custom activities to select them for sharing.
           </Text>
+          {shareError ? (
+            <Text style={styles.shareBannerError}>{shareError}</Text>
+          ) : null}
         </View>
       )}
 
@@ -1009,6 +1014,13 @@ const styles = StyleSheet.create({
     color: '#2c5f8a',
     fontSize: 13,
     textAlign: 'center',
+  },
+  shareBannerError: {
+    color: '#c0392b',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 6,
+    fontWeight: '600',
   },
   addButton: {
     backgroundColor: '#ccc',
