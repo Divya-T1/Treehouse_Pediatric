@@ -130,7 +130,7 @@ export default function CategoryScreen({ route }) {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.7,  // Reduce quality slightly to keep size manageable
+        quality: 0.3,  // Low quality is fine — icons display at 60–80px
         base64: true,  // Request base64 data
       });
 
