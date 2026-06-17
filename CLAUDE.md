@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Treehouse Pediatric is a React Native application built with Expo for pediatric therapy activity planning. The app helps therapists create visual schedules and choice boards for children by selecting from categorized activities (ADL, Fine Motor, Gross Motor, Sensory, etc.). Therapists can also create custom categories and activities with their own photos.
+Treehouse Pediatric is a React Native application built with Expo for pediatric therapy activity planning. The app helps therapists create visual schedules and choice boards for children by selecting from categorized activities (ADL, Fine Motor, Gross Motor, Sensory, etc.). Therapists can also create custom categories and activities with their own photos, and share custom activities with other therapists via share codes.
 
 ## Development Commands
 
@@ -18,13 +18,13 @@ Treehouse Pediatric is a React Native application built with Expo for pediatric 
 
 ### Navigation Structure
 The app uses React Navigation with a native stack navigator (`@react-navigation/native-stack`). Main entry point is `App.js` which defines:
-- **Home** (`Homescreen` in App.js): Grid of category buttons + search bar + "Add Category" button
+- **Home** (`Homescreen` in App.js): Grid of category buttons + search bar + "Add Category" button + `⋮` dropdown menu
 - **CustomCategory**: Generic `CategoryScreen.js` — handles both built-in and custom categories
 - **Schedule**: Displays selected activities with inline notes and print/save buttons
 - **ChoiceBoard**: Separate choice board with up to 3 selected activities
 - **Notes**: Modal for adding notes (presentation: 'modal')
 
-All screens are registered in `App.js` (Stack.Navigator, lines ~464–479). The old individual activity screens (`ADLscreen.js`, `FineMotorScreen.js`, `GrossMotorScreen.js`, etc.) still exist in `/screens/` but are **no longer registered in the navigator** — they are dead code. Use `CategoryScreen.js` as the reference for how screens work.
+All screens are registered in `App.js` (Stack.Navigator). The old individual activity screens (`ADLscreen.js`, `FineMotorScreen.js`, `GrossMotorScreen.js`, etc.) still exist in `/screens/` but are **no longer registered in the navigator** — they are dead code. Use `CategoryScreen.js` as the reference for how screens work.
 
 ### Built-in Activities Registry (activities.js)
 All built-in categories and activities are defined in `activities.js` as `DEFAULT_ACTIVITIES`. Each entry has:
@@ -86,8 +86,9 @@ Key functions exported from `ActivitiesSaver.js`:
 1. Loads category activities from `GetCustomCategories()` by matching `categoryName` from route params
 2. Loads current selection via `GetActivities()` — tracks selected IDs in `selectedActivities` state
 3. `toggleSelection(act)` adds/removes from `SavedActivities`
-4. Users can add new activities via a modal (picks image → stores base64/URI)
-5. Selected activities have `backgroundColor: 'rgb(195, 229, 236)'` vs normal `'rgb(211,211,211)'`
+4. In share mode (see below), tapping a custom activity toggles its share selection instead
+5. Users can add new activities via a modal (picks image → stores base64/URI)
+6. Selected activities have `backgroundColor: 'rgb(195, 229, 236)'` vs normal `'rgb(211,211,211)'`
 
 ### Schedule.js
 - Loads and refreshes activities from `GetActivities()` via `useFocusEffect`
@@ -127,6 +128,15 @@ The bar is positioned absolutely at `bottom: 20` with white background.
 <FlatList contentContainerStyle={data.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 100 } : { paddingBottom: 100 }} />
 ```
 
+### Homescreen Header & Dropdown Menu
+The Homescreen header contains the logo (left) and a `⋮` menu button (right). Tapping `⋮` opens a dropdown with:
+- **Share Activities** — enters share mode
+- **Import from Code** — opens the import modal
+- **Sign Out**
+- **Clear All Data** — destructive, shown in red
+
+In **share mode**, the `⋮` button is replaced by **Cancel** and **Share (N)** buttons. A blue banner appears on both the Homescreen and CategoryScreen explaining the mode. Errors from share creation (payload too large, network failure) appear as red text inside the banner — do **not** use `Alert.alert` for these, it is unreliable on web.
+
 ### Homescreen Search
 The Homescreen has a search bar that filters across all activities in `customCategories` (which includes built-ins after seeding). Tapping a search result navigates to the `'CustomCategory'` screen for that activity's category.
 
@@ -159,6 +169,40 @@ All Supabase data operations live in `cloudSync.js`. The app's `Get*` functions 
 
 **Known limitation**: Changes made while offline and not yet pushed to Supabase will be lost if the user signs out before regaining connectivity.
 
+### Activity Sharing (ShareContext.js, cloudShare.js)
+Therapists can share custom activities with each other via a one-time 8-character code.
+
+**ShareContext.js** provides share mode state to all screens via `useShare()`:
+- `isShareMode` — whether sharing mode is active
+- `shareSelections` — array of activities selected for sharing (persists across navigation)
+- `enterShareMode()` / `exitShareMode()` — toggle mode and clear selections
+- `toggleShareSelection(activity)` — add/remove an activity from the pending share
+- `isSelectedForShare(activityId)` — check if an activity is selected
+
+`ShareProvider` wraps the `NavigationContainer` inside `RootNavigator` so it is available to all screens when logged in.
+
+**cloudShare.js** handles the Supabase operations:
+- `createShare(userId, activities)` — inserts into `shared_items`, returns an 8-char code. Uses characters that avoid visual ambiguity (no `0`, `O`, `I`, `1`). Retries up to 5 times on code collision. Throws `'payload_too_large'` if the JSON payload exceeds 2MB.
+- `importShare(shareCode)` — fetches by code, enforces expiry server-side via `.gt('expires_at', now())`. Returns `null` if not found or expired.
+
+**Supabase table**: `shared_items` — requires `shared_items_migration.sql` to be run once in the Supabase SQL editor.
+
+| Column | Type | Content |
+|--------|------|---------|
+| `id` | uuid PK | auto-generated |
+| `share_code` | text UNIQUE | 8-char alphanumeric code |
+| `shared_by` | uuid | references `auth.users` |
+| `item_type` | text | `'activities'` |
+| `data` | jsonb | array of shared activity objects |
+| `created_at` | timestamptz | creation time |
+| `expires_at` | timestamptz | 24 hours after creation |
+
+RLS: authenticated users can SELECT any row (code is the access control), INSERT only their own rows, DELETE only their own rows.
+
+**Share flow in CategoryScreen**: In share mode, tapping a custom activity (string icon) calls `toggleShareSelection()` and shows a green checkmark badge on the activity circle. Built-in activities (non-string icon) are dimmed and non-interactive in share mode. The checkmark badge is positioned absolute top-right of the circle wrapper and is visually distinct from the blue schedule-selection background.
+
+**Import flow**: The recipient enters a code in the Import modal. Activities are grouped by their `category` field and merged into existing categories (deduped by `id`) or used to create new ones (using the first activity's icon as the category icon).
+
 ### Analytics
 - `@vercel/analytics` is rendered on web only (`Platform.OS === 'web'`)
 - `useAppState.js` — custom hook for tracking app foreground/background state
@@ -173,6 +217,7 @@ All Supabase data operations live in `cloudSync.js`. The app's `Get*` functions 
   NotesModal.js          ← notes modal (active)
   NavigationOptions.js   ← bottom nav bar (active)
   ADLscreen.js           ← dead code (not in navigator)
+  ADLScreen.js           ← broken/incomplete file, NOT the same as ADLscreen.js — skip when committing
   FineMotorScreen.js     ← dead code
   GrossMotorScreen.js    ← dead code
   Regulation.js          ← dead code
@@ -182,9 +227,14 @@ All Supabase data operations live in `cloudSync.js`. The app's `Get*` functions 
   ToysAndActScreen.js    ← dead code
 
 /assets/                 ← organized by category (ADL/, FineMotorPictures/, etc.)
+  dropdown/              ← icons for the ⋮ dropdown menu items
+
 activities.js            ← DEFAULT_ACTIVITIES registry (all built-in categories + activities)
 ActivitiesSaver.js       ← storage API (local read/write + fires background cloud push on every save)
 cloudSync.js             ← Supabase data operations (pushActivities/Categories/ChoiceBoard, syncFromCloud)
+cloudShare.js            ← Supabase sharing operations (createShare, importShare)
+ShareContext.js          ← share mode context (isShareMode, shareSelections, useShare hook)
+shared_items_migration.sql ← run once in Supabase SQL editor to create shared_items table + RLS
 storage.web.js           ← localforage adapter (IndexedDB)
 storage.native.js        ← AsyncStorage adapter
 AuthContext.js           ← Supabase auth provider (session, signIn, signUp, signOut, cloud sync on SIGNED_IN)
@@ -209,3 +259,7 @@ App.js                   ← root component, Homescreen, RootNavigator, stack na
 5. **Web session cleanup**: `clearActivities()` is called on the web `pagehide` event (App.js), which clears the schedule but preserves custom categories.
 
 6. **Storage size**: Web storage uses IndexedDB via localforage to avoid the ~5MB localStorage limit (important for base64 image data from custom activities).
+
+7. **Alert.alert is unreliable on web**: Do not use `Alert.alert` for errors that can occur on web (e.g. share creation failures). Use inline state to display errors in the UI instead.
+
+8. **Share mode only applies to custom activities**: Only activities with string icons (`typeof act.icon === 'string'`) can be selected for sharing. Built-in activities have `require()` icon results and are non-interactive in share mode.

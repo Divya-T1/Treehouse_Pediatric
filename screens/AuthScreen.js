@@ -126,6 +126,10 @@ export default function AuthScreen() {
             </Text>
           </Text>
         </TouchableOpacity>
+
+        <Text style={styles.disclaimer}>
+          This app stores data in the cloud and is not designed for patient records. Avoid including patient names, photos, or identifying details.
+        </Text>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -197,6 +201,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     textDecorationLine: 'underline',
+  },
+  disclaimer: {
+    marginTop: 32,
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   body: {
     fontSize: 16,

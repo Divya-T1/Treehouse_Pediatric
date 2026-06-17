@@ -140,7 +140,7 @@ export default function Schedule() {
           renderItem={renderItem}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              No activities selected yet. Pick some on ADL, Fine Motor, etc.
+              No activities selected yet. Please go to the Home Page to select activities for your schedule.
             </Text>
           }
           contentContainerStyle={activities.length === 0 ? { flex: 1, justifyContent: 'center', paddingBottom: 150 } : { paddingBottom: 150 }}
@@ -197,7 +197,9 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#E8CACA',
+    backgroundColor: '#D2E1D0',
+    borderWidth: 2,
+    borderColor: '#7A5E4C',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -229,17 +231,18 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   saveButton: {
-      backgroundColor: 'transparent', // transparent background
-      borderWidth: 1,
-      height: 30,
-      padding: 5,
-      borderColor: '#333', // optional border
+    backgroundColor: '#7A5E4C',
+    borderWidth: 1,
+    height: 30,
+    padding: 5,
+    borderColor: '#7A5E4C',
+    borderRadius: 6,
   },
   saveButtonText: {
-      color: '#333', // custom text color
-      textTransform: 'none', // keep lowercase
-      fontSize: 16,
-      textAlign: 'center',
+    color: '#fff',
+    textTransform: 'none',
+    fontSize: 16,
+    textAlign: 'center',
   },
   iconAndTextInput: {
       flex: 1,

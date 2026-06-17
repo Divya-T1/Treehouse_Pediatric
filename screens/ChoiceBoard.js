@@ -204,7 +204,9 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#E8CACA',
+    backgroundColor: '#D2E1D0',
+    borderWidth: 2,
+    borderColor: '#7A5E4C',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -237,17 +239,18 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   saveButton: {
-      backgroundColor: 'transparent', // transparent background
-      borderWidth: 1,
-      height: 30,
-      padding: 5,
-      borderColor: '#333', // optional border
+    backgroundColor: '#7A5E4C',
+    borderWidth: 1,
+    height: 30,
+    padding: 5,
+    borderColor: '#7A5E4C',
+    borderRadius: 6,
   },
   saveButtonText: {
-      color: '#333', // custom text color
-      textTransform: 'none', // keep lowercase
-      fontSize: 16,
-      textAlign: 'center',
+    color: '#fff',
+    textTransform: 'none',
+    fontSize: 16,
+    textAlign: 'center',
   },
   iconAndTextInput: {
       flexDirection: 'row',
@@ -267,13 +270,15 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 5,  // Reduced from 20 to 5 - less spacing between icons
-    marginVertical: 10,   // Reduced from 20 to 10
-    backgroundColor: 'rgb(211,211,211)',
+    marginHorizontal: 5,
+    marginVertical: 10,
+    backgroundColor: '#D3D3D3',
+    borderWidth: 2,
+    borderColor: '#7A5E4C',
     overflow: 'hidden'
   },
   selectedCircle: {
-    backgroundColor: 'rgb(218, 188, 188)',
+    backgroundColor: '#D2E1D0',
   },
 });
 
