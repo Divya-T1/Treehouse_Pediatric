@@ -28,6 +28,25 @@ import {
 import { useShare } from '../ShareContext';
 
 import * as ImagePicker from 'expo-image-picker';
+import { Platform } from 'react-native';
+
+// On web, ImagePicker ignores the quality param — the browser returns raw bytes.
+// This resizes to at most 400×400 and re-encodes at 0.4 quality via canvas.
+function compressForWeb(dataUri) {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const MAX = 400;
+      const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.4));
+    };
+    img.src = dataUri;
+  });
+}
 
 export default function CategoryScreen({ route }) {
   const { categoryName } = route.params;
@@ -136,8 +155,12 @@ export default function CategoryScreen({ route }) {
 
       if (!result.canceled && result.assets?.length > 0) {
         const asset = result.assets[0];
-        // On web, use base64 data URI; on mobile, use file URI
-        if (asset.base64) {
+        if (Platform.OS === 'web' && asset.base64) {
+          const mimeType = asset.mimeType || 'image/jpeg';
+          const dataUri = `data:${mimeType};base64,${asset.base64}`;
+          const compressed = await compressForWeb(dataUri);
+          setNewActIcon(compressed);
+        } else if (asset.base64) {
           const mimeType = asset.mimeType || 'image/jpeg';
           setNewActIcon(`data:${mimeType};base64,${asset.base64}`);
         } else {
@@ -323,7 +346,7 @@ const styles = StyleSheet.create({
   },
 
   circleImage: { width: 60, height: 60, resizeMode: 'contain' },
-  selectedCircle: { backgroundColor: '#B0C9A5', borderColor: '#7A5E4C' },
+  selectedCircle: { backgroundColor: '#7A9B76', borderColor: '#7A5E4C' },
   dimmedCircle: { opacity: 0.4 },
   shareCheckmark: {
     position: 'absolute',

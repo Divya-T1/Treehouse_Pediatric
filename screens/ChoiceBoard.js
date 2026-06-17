@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   selectedCircle: {
-    backgroundColor: '#D2E1D0',
+    backgroundColor: '#7A9B76',
   },
 });
 

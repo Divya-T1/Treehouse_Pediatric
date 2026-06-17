@@ -320,7 +320,7 @@ function Homescreen({ navigation }) {
       }
     } else {
       try {
-        await Share.share({ message: `Treehouse share code: ${generatedCode}` });
+        await Share.share({ message: generatedCode });
       } catch (e) {
         console.log('Share error:', e);
       }
@@ -943,7 +943,7 @@ const styles = StyleSheet.create({
     borderColor: '#7A5E4C',
   },
   selectedCircle: {
-    backgroundColor: '#B0C9A5',
+    backgroundColor: '#7A9B76',
     borderColor: '#7A5E4C',
   },
   imageButton: {
