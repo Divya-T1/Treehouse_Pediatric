@@ -745,6 +745,10 @@ function Homescreen({ navigation }) {
       {/* Category grid */}
       {searchResults.length === 0 && (
         <ScrollView>
+          <View style={{ width: '100%', alignItems: 'center' }}>
+          <Text style={{ fontSize: 16, fontWeight: '500', marginVertical: 10 }}>
+            Select a category to choose activities
+          </Text>
           <View style={styles.grid}>
             {customCategories.map((item, i) => {
               const selected = isSelected(item.categoryName);
@@ -783,6 +787,7 @@ function Homescreen({ navigation }) {
                 </TouchableOpacity>
               );
             })}
+          </View>
           </View>
         </ScrollView>
       )}
@@ -906,7 +911,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#7A5E4C',
     borderRadius: 6,
     margin: 10,
     paddingHorizontal: 8,
@@ -933,13 +938,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
+    backgroundColor: '#D2E1D0',
+    borderWidth: 2,
+    borderColor: '#7A5E4C',
   },
   selectedCircle: {
-    backgroundColor: 'rgb(195, 229, 236)',
+    backgroundColor: '#B0C9A5',
+    borderColor: '#7A5E4C',
   },
   imageButton: {
-    backgroundColor: '#333',
+    backgroundColor: '#7A9B76',
     padding: 8,
     borderRadius: 6,
     marginTop: 6,
@@ -1053,14 +1061,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   addButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#7A9B76',
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 10,
     borderRadius: 6,
     alignSelf: 'center',
   },
-  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
+  addButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   shareCodeTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -1121,7 +1129,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#333',
+    backgroundColor: '#A6C3A0',
     width: '90%',
     alignSelf: 'center',
     marginVertical: 10,
@@ -1140,7 +1148,7 @@ const styles = StyleSheet.create({
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#7A9B76',
     borderRadius: 6,
     marginVertical: 10,
     paddingHorizontal: 8,

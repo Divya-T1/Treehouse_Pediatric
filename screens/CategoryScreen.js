@@ -310,7 +310,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 20,
     marginVertical: 20,
-    backgroundColor: 'rgb(211,211,211)',
+    backgroundColor: '#D2E1D0',
+    borderWidth: 2,
+    borderColor: '#7A5E4C',
   },
 
   headerTitleText: {
@@ -321,7 +323,7 @@ const styles = StyleSheet.create({
   },
 
   circleImage: { width: 60, height: 60, resizeMode: 'contain' },
-  selectedCircle: { backgroundColor: 'rgb(195, 229, 236)' },
+  selectedCircle: { backgroundColor: '#B0C9A5', borderColor: '#7A5E4C' },
   dimmedCircle: { opacity: 0.4 },
   shareCheckmark: {
     position: 'absolute',
@@ -361,18 +363,18 @@ const styles = StyleSheet.create({
   activityText: { fontSize: 16, textAlign: 'center', fontWeight: '600', color: '#333' },
 
   addButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#7A9B76',
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 10,
     borderRadius: 6,
     alignSelf: 'center',
   },
-  addButtonText: { fontSize: 16, fontWeight: '600', color: '#333' },
+  addButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 
-  divider: { height: 1, backgroundColor: '#333', width: '90%', alignSelf: 'center', marginVertical: 10 },
+  divider: { height: 1, backgroundColor: '#A6C3A0', width: '90%', alignSelf: 'center', marginVertical: 10 },
 
   modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContainer: { backgroundColor: '#fff', padding: 20, borderRadius: 8, width: '80%' },
-  modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginVertical: 10, paddingHorizontal: 8, height: 40 },
+  modalInput: { borderWidth: 1, borderColor: '#7A9B76', borderRadius: 6, marginVertical: 10, paddingHorizontal: 8, height: 40 },
 });
