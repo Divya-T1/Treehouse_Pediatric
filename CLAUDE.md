@@ -217,6 +217,7 @@ RLS: authenticated users can SELECT any row (code is the access control), INSERT
   NotesModal.js          ← notes modal (active)
   NavigationOptions.js   ← bottom nav bar (active)
   ADLscreen.js           ← dead code (not in navigator)
+  ADLScreen.js           ← broken/incomplete file, NOT the same as ADLscreen.js — skip when committing
   FineMotorScreen.js     ← dead code
   GrossMotorScreen.js    ← dead code
   Regulation.js          ← dead code
