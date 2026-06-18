@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     position: 'absolute',
     top: 70,
+    width: '100%',
   },
   title: {
     fontSize: 22,
