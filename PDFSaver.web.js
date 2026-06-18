@@ -108,56 +108,70 @@ const createChoiceBoardPDF = async () => {
   const activities = await GetChoiceBoard();
   const doc = new jsPDF();
 
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text("Choice Board", 105, 20, { align: 'center' });
+  const iconSize = 25;
+  const circleRadius = 20;
+  const spacing = 60;
+  const startX = 105 - spacing; // centers 3 items at x=45, 105, 165
+  const rowYPositions = [70, 175]; // two rows on page 1
 
-  const choiceBoardActivities = activities.slice(0, 3);
+  const drawTitle = (text) => {
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(text, 105, 20, { align: 'center' });
+  };
 
-  if (choiceBoardActivities.length === 0) {
+  drawTitle("Choice Board");
+
+  if (activities.length === 0) {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     doc.text("No activities selected for choice board.", 105, 50, { align: 'center' });
   } else {
-    const iconSize = 25;
-    const circleRadius = 20;
-    const spacing = 60;
-    const startX = 105 - ((choiceBoardActivities.length - 1) * spacing / 2);
-    const yPos = 60;
+    for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+      const rowActivities = activities.slice(rowIndex * 3, rowIndex * 3 + 3);
+      if (rowActivities.length === 0) break;
 
-    for (let index = 0; index < choiceBoardActivities.length; index++) {
-      const activity = choiceBoardActivities[index];
-      const xPos = startX + (index * spacing);
+      if (rowIndex === 2) {
+        doc.addPage();
+        drawTitle("Choice Board (continued)");
+      }
 
-      doc.setFillColor(232, 202, 202);
-      doc.circle(xPos, yPos, circleRadius, 'F');
+      const yPos = rowIndex < 2 ? rowYPositions[rowIndex] : 70;
 
-      const iconSource = typeof activity.icon === 'string' ? activity.icon : activity.icon?.uri;
+      for (let i = 0; i < rowActivities.length; i++) {
+        const activity = rowActivities[i];
+        const xPos = startX + (i * spacing);
 
-      if (iconSource) {
-        try {
-          const base64Image = await loadImageAsBase64(iconSource);
-          doc.addImage(base64Image, 'PNG', xPos - (iconSize / 2), yPos - (iconSize / 2), iconSize, iconSize);
-        } catch (error) {
-          console.warn(`Failed to load icon for choice board activity ${index + 1}:`, error);
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          doc.text('[Icon]', xPos, yPos, { align: 'center' });
+        doc.setFillColor(232, 202, 202);
+        doc.circle(xPos, yPos, circleRadius, 'F');
+
+        const iconSource = typeof activity.icon === 'string' ? activity.icon : activity.icon?.uri;
+
+        if (iconSource) {
+          try {
+            const base64Image = await loadImageAsBase64(iconSource);
+            doc.addImage(base64Image, 'PNG', xPos - (iconSize / 2), yPos - (iconSize / 2), iconSize, iconSize);
+          } catch (error) {
+            console.warn(`Failed to load icon for choice board activity:`, error);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text('[Icon]', xPos, yPos, { align: 'center' });
+          }
         }
-      }
 
-      if (activity.name) {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        const splitName = doc.splitTextToSize(activity.name, spacing - 5);
-        doc.text(splitName, xPos, yPos + circleRadius + 10, { align: 'center' });
-      }
+        if (activity.name) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          const splitName = doc.splitTextToSize(activity.name, spacing - 5);
+          doc.text(splitName, xPos, yPos + circleRadius + 10, { align: 'center' });
+        }
 
-      if (activity.notes && activity.notes.trim() !== '') {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        const splitNotes = doc.splitTextToSize(activity.notes, spacing - 5);
-        doc.text(splitNotes, xPos, yPos + circleRadius + 20, { align: 'center' });
+        if (activity.notes && activity.notes.trim() !== '') {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          const splitNotes = doc.splitTextToSize(activity.notes, spacing - 5);
+          doc.text(splitNotes, xPos, yPos + circleRadius + 20, { align: 'center' });
+        }
       }
     }
   }

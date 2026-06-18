@@ -36,8 +36,8 @@ export default function ChoiceBoard() {
       ? prev.filter(item => item.id !== id)
       : [...prev, act];
 
-    if(next.length > 3){
-      createMax3Alert();
+    if(next.length > 9){
+      createMax9Alert();
       return;
     }
 
@@ -45,10 +45,10 @@ export default function ChoiceBoard() {
   };
 
 
-  const createMax3Alert = () => {
+  const createMax9Alert = () => {
     Alert.alert(
       "Maximum Selection Reached",
-      "You can only select up to 3 activities.",
+      "You can only select up to 9 activities.",
       [{ text: "OK" }]
     );
   };

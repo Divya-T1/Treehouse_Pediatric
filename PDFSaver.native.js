@@ -100,7 +100,7 @@ const createPDF = async () => {
 
 const createChoiceBoardPDF = async () => {
   try {
-    const activities = (await GetChoiceBoard()).slice(0, 3);
+    const activities = await GetChoiceBoard();
 
     const base64Images = await Promise.all(
       activities.map(activity => getImageAsBase64(activity.icon))
@@ -110,7 +110,8 @@ const createChoiceBoardPDF = async () => {
       <!DOCTYPE html><html><head><meta charset="utf-8"><style>
         body { font-family: -apple-system, sans-serif; padding: 20px; color: #333; }
         h1 { text-align: center; color: #2c3e50; font-size: 24px; margin-bottom: 40px; }
-        .board { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+        .board-row { display: flex; justify-content: center; gap: 30px; margin-bottom: 50px; }
+        .page-break { page-break-before: always; padding-top: 20px; }
         .item { text-align: center; width: 120px; }
         .icon { width: 100px; height: 100px; margin: 0 auto 10px; position: relative; }
         .icon svg { position: absolute; top: 0; left: 0; }
@@ -128,21 +129,28 @@ const createChoiceBoardPDF = async () => {
     if (activities.length === 0) {
       html += `<p class="empty">No activities selected for choice board.</p>`;
     } else {
-      html += `<div class="board">`;
-      activities.forEach((activity, index) => {
-        const img = base64Images[index];
-        html += `
-          <div class="item">
-            <div class="icon">
-              <svg width="100" height="100"><circle cx="50" cy="50" r="50" fill="#E8CACA"/></svg>
-              ${img ? `<img src="${img}" />` : ''}
+      for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+        const rowActivities = activities.slice(rowIndex * 3, rowIndex * 3 + 3);
+        if (rowActivities.length === 0) break;
+
+        const pageBreakClass = rowIndex === 2 ? ' page-break' : '';
+        html += `<div class="board-row${pageBreakClass}">`;
+        rowActivities.forEach((activity, i) => {
+          const idx = rowIndex * 3 + i;
+          const img = base64Images[idx];
+          html += `
+            <div class="item">
+              <div class="icon">
+                <svg width="100" height="100"><circle cx="50" cy="50" r="50" fill="#E8CACA"/></svg>
+                ${img ? `<img src="${img}" />` : ''}
+              </div>
+              <div class="name">${activity.name || 'Unnamed Activity'}</div>
+              ${activity.notes?.trim() ? `<div class="notes">${activity.notes}</div>` : ''}
             </div>
-            <div class="name">${activity.name || 'Unnamed Activity'}</div>
-            ${activity.notes?.trim() ? `<div class="notes">${activity.notes}</div>` : ''}
-          </div>
-        `;
-      });
-      html += `</div>`;
+          `;
+        });
+        html += `</div>`;
+      }
     }
 
     html += `</body></html>`;
