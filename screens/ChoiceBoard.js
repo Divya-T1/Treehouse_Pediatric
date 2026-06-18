@@ -96,6 +96,22 @@ export default function ChoiceBoard() {
     }, [])
   );
 
+  const renderGridItem = ({ item }) => {
+    const src = typeof item.icon === 'string' ? { uri: item.icon } : item.icon;
+    return (
+      <TouchableOpacity style={styles.gridItem} activeOpacity={0.6} onPress={() => toggleSelection(item)}>
+        <View style={styles.normalCircle}>
+          {src ? (
+            <Image source={src} style={styles.iconImage} />
+          ) : (
+            <Text style={styles.fallback}>?</Text>
+          )}
+        </View>
+        <Text style={styles.gridLabel} numberOfLines={2}>{item.name}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   const renderItem = ({ item, index }) => {
 
     const src = typeof(item.icon) === "string" ? {uri: item.icon} : item.icon;
@@ -105,7 +121,7 @@ export default function ChoiceBoard() {
         <Text style={styles.label}>{item.name}</Text>
         <View style={[styles.iconAndTextInput]}>
           <View style={styles.iconCircle}>
-            
+
             <TouchableOpacity activeOpacity={0.6} onPress={() => {toggleSelection(item)}}>
                 <View style={[styles.normalCircle, choiceBoardActivities.find(act => act.id === item.id) && styles.selectedCircle]}>
                     {src ? (
@@ -122,35 +138,36 @@ export default function ChoiceBoard() {
   };
 
   return (
-    <SafeAreaView style={styles.container} >
+    <SafeAreaView style={styles.container}>
 
-      <FlatList
-        data={choiceBoardActivities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
-        renderItem={renderItem}
-        contentContainerStyle={
-          choiceBoardActivities.length === 0
-            ? { flex: 1, justifyContent: 'center' }
-            : { paddingRight: 20 }  // Add padding at the end
-        }
-        style={styles.MainFlatListStyle}
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-      />
+      <View style={styles.gridSection}>
+        <Text style={styles.sectionLabel}>
+          Choice Board ({choiceBoardActivities.length}/9)
+        </Text>
+        <FlatList
+          data={choiceBoardActivities}
+          keyExtractor={(it, idx) => `cb-${it.id}-${idx}`}
+          renderItem={renderGridItem}
+          numColumns={3}
+          contentContainerStyle={styles.gridContent}
+          ListEmptyComponent={
+            <Text style={styles.empty}>Tap activities below to add them</Text>
+          }
+        />
+      </View>
 
-      <FlatList
-        data={activities}
-        keyExtractor={(it, idx) => `${it}-${idx}`}
-        renderItem={renderItem}
-        contentContainerStyle={
-          activities.length === 0
-            ? { flex: 1, justifyContent: 'center' }
-            : { paddingRight: 20, marginBottom: 100}  // Add padding at the end so last item is reachable
-        }
-        style={styles.FlatListStyle}
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}  // Optional: cleaner look
-      />
+      <View style={styles.pickerSection}>
+        <Text style={styles.sectionLabel}>Schedule Activities</Text>
+        <FlatList
+          data={activities}
+          keyExtractor={(it, idx) => `all-${it.id}-${idx}`}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingRight: 20 }}
+          style={styles.FlatListStyle}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
 
       <StatusBar style="auto" />
       <BottomNavBar />
@@ -162,22 +179,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
     width: '100%',
     paddingTop: 12,
   },
+  gridSection: {
+    flex: 1,
+    paddingHorizontal: 8,
+    maxWidth: 480,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  pickerSection: {
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    paddingTop: 8,
+    marginBottom: 100,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
+  gridContent: {
+    paddingBottom: 8,
+  },
+  gridItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  gridLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#000',
+    marginTop: 4,
+  },
   FlatListStyle: {
     width: '100%',
-    position: 'absolute',
-    bottom: 40,
-    borderWidth:1,
-    borderColor:'fffff',
-  },
-  MainFlatListStyle: {
-    display: 'flex',
-    position: 'absolute',
-    top: 70,
-    width: '100%',
+    height: 160,
   },
   title: {
     fontSize: 22,
