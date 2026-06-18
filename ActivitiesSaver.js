@@ -3,6 +3,19 @@ import AsyncStorage from './storage';
 import { CameraType } from 'expo-image-picker';
 import { supabase } from './supabase';
 import { pushActivities, pushCategories, pushChoiceBoard } from './cloudSync';
+import { DEFAULT_ACTIVITIES } from './activities';
+
+const BUILTIN_ICONS = {};
+for (const cat of DEFAULT_ACTIVITIES) {
+  for (const act of cat.activities) {
+    BUILTIN_ICONS[act.id] = act.icon;
+  }
+}
+
+const resolveIcons = (activities) =>
+  (activities || []).map(act =>
+    BUILTIN_ICONS[act.id] !== undefined ? { ...act, icon: BUILTIN_ICONS[act.id] } : act
+  );
 
 const getUserId = async () => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -35,7 +48,7 @@ export const SaveActivities = async (activitiesArray) => {
 export const GetActivities = async () => {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY_ACTIVITIES);
-    return raw ? JSON.parse(raw) : [];
+    return resolveIcons(raw ? JSON.parse(raw) : []);
   } catch (e) {
     console.warn('GetActivities error:', e);
     return [];
@@ -112,13 +125,12 @@ export const SaveChoiceBoard = async (choiceBoardActivities) => {
   cloudPush(pushChoiceBoard, choiceBoardActivities || []);
 };
 
-// Get regular activities
 export const GetChoiceBoard = async () => {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY_CHOICE_BOARD);
-    return raw ? JSON.parse(raw) : [];
+    return resolveIcons(raw ? JSON.parse(raw) : []);
   } catch (e) {
-    console.warn('GetActivities error:', e);
+    console.warn('GetChoiceBoard error:', e);
     return [];
   }
 };
