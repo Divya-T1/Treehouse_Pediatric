@@ -179,18 +179,31 @@ const createChoiceBoardPDF = async () => {
   await sharePDF(doc, "choice_board.pdf");
 };
 
-const sharePDF = async (doc, filename) => {
-  try {
-    const pdfBlob = doc.output('blob');
-    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+const isMobile = () => {
+  if (navigator.userAgentData?.mobile !== undefined) return navigator.userAgentData.mobile;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Activity Schedule' });
-    } else {
-      doc.save(filename);
+const sharePDF = async (doc, filename) => {
+  if (isMobile()) {
+    try {
+      const pdfBlob = doc.output('blob');
+      const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Activity Schedule' });
+        return;
+      }
+    } catch (error) {
+      console.error('Error sharing PDF:', error);
     }
-  } catch (error) {
-    console.error('Error sharing PDF:', error);
+  }
+
+  // Desktop: open in new tab with print dialog
+  doc.autoPrint();
+  const pdfUrl = doc.output('bloburl');
+  const newTab = window.open(pdfUrl, '_blank');
+  if (!newTab) {
+    // Popup blocked — fall back to download
     doc.save(filename);
   }
 };
